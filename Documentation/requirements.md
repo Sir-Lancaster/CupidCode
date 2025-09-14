@@ -2,41 +2,41 @@
 
 ## Summary
 
+## Requirements
 
-
-## Functional Requirements
-
-Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
-
-- Integrate shared calendar sync for couples. (S)
-- Suggest anniversary/birthday plans from saved preferences. (S)
-
-## Nonfunctional Requirements
+### Functional Requirements
 
 Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
-- Enforce role‑based data segregation for couples so spouse‑only artifacts (surprise gifts, private notes) remain hidden until revealed. (C)
-- Provide per‑partner privacy and consent controls for shared features (who can see/edit plans, gifts, and timeline). (C)
-- Record change history for shared features (who edited joint preferences or calendar sync) to provide an audit trail. (C)
+- Integrate shared calendar sync for couples. **(S)**
+- Suggest anniversary/birthday plans from saved preferences. **(S)**
 
-## Business Requirements
-
-Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
-
-- Support married users as an adjacent audience (without changing core goals). (S)
-- Support subscription billing (tiers for singles/married users). (S)
-
-## User Requirements
+### Nonfunctional Requirements
 
 Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
-- Provide a relationship timeline of past date nights and milestones. (S)
-- Provide shared calendar sync for couples. (S)
-- Suggest gifts based on spouse preferences and past data. (S)
-- Support joint profile preferences for couples. (S)
-- Suggest family‑inclusive activities when desired. (C)
+- Enforce role‑based data segregation for couples so spouse‑only artifacts (surprise gifts, private notes) remain hidden until revealed. **(C)**
+- Provide per‑partner privacy and consent controls for shared features (who can see/edit plans, gifts, and timeline). **(C)**
+- Record change history for shared features (who edited joint preferences or calendar sync) to provide an audit trail. **(C)**
 
-# User Stories (Married-Only) — Grouped by Persona
+### Business Requirements
+
+Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
+
+- Support married users as an adjacent audience (without changing core goals). **(S)**
+- Support subscription billing (tiers for singles/married users). **(S)**
+
+### User Requirements
+
+Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
+
+- Provide a relationship timeline of past date nights and milestones. **(S)**
+- Provide shared calendar sync for couples. **(S)**
+- Suggest gifts based on spouse preferences and past data. **(S)**
+- Support joint profile preferences for couples. **(S)**
+- Suggest family‑inclusive activities when desired. **(C)**
+
+## User Stories (Married-Only) — Grouped by Persona
 
 ### Married User / Couple
 
@@ -64,13 +64,13 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 - As a Company, I want to support married-couple experiences so that we grow our audience without changing the product’s core goals.
 - As a Company, I want a couples-tier subscription option so that households can access shared features at fair pricing.
 
-# Overall MoSCoW (Consolidated — Married-Only, Deduped)
+## Overall MoSCoW (Consolidated — Married-Only, Deduped)
 
-## Must
+### Must
 
 - (none)
 
-## Should
+### Should
 
 - Integrate shared calendar sync for couples.
   _From categories: Functional, User_
@@ -87,7 +87,7 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 - Support subscription billing (tiers for singles/married users).
   _From categories: Business_
 
-## Could
+### Could
 
 - Enforce role‑based data segregation for couples so spouse‑only artifacts (surprise gifts, private notes) remain hidden until revealed.
   _From categories: Nonfunctional_
@@ -98,7 +98,7 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 - Suggest family‑inclusive activities when desired.
   _From categories: User_
 
-## Won't
+### Won't
 
 - (none)
 
