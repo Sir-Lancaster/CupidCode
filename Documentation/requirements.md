@@ -20,16 +20,16 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   - Add error messages when invalid input options are provided. **(M)**
   - Clarify instructions for running software to reduce confusion. **(M)**
   - Include software dependency information and installation instructions in the documentation. **(S)**
-  - Improve contrast for readability. **(C)**
-  - Ensure compatability with screen readers. **(C)**
-  - Comply with general accessibility practives **(C)**
+  - Improve contrast for readability. **(M)**
+  - Ensure compatability with screen readers. **(M)**
+  - Comply with general accessibility practives **(S)**
 
 4. **Rebranding**
   - Re-generate the images for the app **(M)**
   - Dynamically allocate space depending on the screen size of the user. **(S)**
   - Change the color schemes **(C)**
   - Improve consistency in the app. for example the navigation menu is nested in a hamburger menu when a user is logged in, but not when you are not logged in. **(C)**
-  - Change the layout of the pages, center the buttons, change the shapes to be more inline with the theme of the application. **(W)**
+  - Change the layout of the pages, center the buttons, change the shapes to be more inline with the theme of the application. **(C)**
 
 ### User Stories
 - As a user, I want the app to dynamically adjust its layout to my screen size so that I can comfortably use it on any device.
