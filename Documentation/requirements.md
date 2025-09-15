@@ -2,6 +2,44 @@
 
 ## Summary
 
+### Problem Statement
+
+Dating presents unique challenges for many individuals, especially those who identify as “nerds” or socially anxious. Preparing for and navigating a date often feels overwhelming, and many lack accessible support systems to guide them. Cupid Code was designed as a solution: an AI-assisted dating platform that provides personalized advice, real-time interventions, and on-demand Cupid gig workers to help “save” dates with items or services when things go wrong.
+
+Our team inherited Cupid Code in a partially completed state. The previous team established the foundation of the application with core components like authentication, user roles, and a visual manager dashboard. However, much of the platform’s critical functionality — especially those tied to the money system and AI — remains incomplete or non-functional. Many must-have requirements identified in the original RSD were either partially implemented or left unfinished, which prevents the platform from operating as intended.
+
+In summary, we were provided a project that demonstrates the conceptual framework of Cupid Code but falls short of delivering a usable MVP. Authentication works, roles are defined, and Cupids can sign up, but daters cannot fund their accounts, Cupids cannot withdraw earnings, and the AI fails to provide meaningful assistance. This leaves the system more of a prototype shell than a functional product.
+
+### Solution Statement
+
+The previous team established important foundations we can build on. Below is a concise accounting of the system as we received it, grouped by completion level.
+
+#### Completed
+- Authentication (username/password): working sign-in/sign-up.
+- Cupid sign-up portal: gig workers can register.
+- Microphone permission integration: device mic access is available in the app.
+- Documentation/manuals present: user and manager manuals exist in the repository.
+- Browser-based web app: site accessible on mobile and desktop browsers.
+
+#### Partially Implemented
+- Dater profiles: interests and goals present; communication preferences still to add.
+- Manager dashboard: user interface exists; current stats appear placeholder and not wired to live data.
+- Scheduling: daters can schedule dates; Cupid busy/peak-time logic not verified.
+- Order and gig placement UI: gigs/orders can be created, but no real payment flow occurs yet.
+- AI listening: microphone capture path exists; guidance and responses remain limited.
+
+#### Incomplete
+- Funds pipeline: daters cannot add funds; budgets can be set on gigs but do not deduct from a user balance.
+- Cupid payments and payouts: Cupids may be shown a share (for example, 10 percent) but no actual transfer or deduction occurs; no withdraw/transfer flow exists.
+- Subscriptions: monthly tiers ($10/$15) not implemented.
+- Free tier: limited-budget intervention not implemented, as it depends on subscriptions and funds.
+- AI interventions and automated purchases: no meaningful real-time coaching or purchase execution (flowers, food, tickets) yet.
+- Notifications: real-time notifications (and email/SMS fallbacks) not present.
+- Single Sign-On (SSO): Google, GitHub, and similar options not implemented.
+- Ratings and feedback tied to gigs: not activated because money and gig completion are not flowing.
+- Cupid availability toggle (on/off duty): not present.
+- Revenue and analytics: revenue model cannot function without subscriptions and payouts; dashboard metrics are not tied to transactions.
+
 ## Requirements
 
 ### Functional Requirements
