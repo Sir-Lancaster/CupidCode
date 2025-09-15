@@ -8,8 +8,23 @@
 
 Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
+- Notifications and suggestions outside of the app through email, text, etc. **(M)**
+- Automatic real time feedback from agentic AI **(M)** 
+- Webpage accessible on computer and phone **(M)**
+- Database access for AI to remember things about the user **(M)**
+- Connection to Stripe and PayPal payment processing APIs **(M)**
+- Date planning interface **(S)**
+- Date planning capability for AI **(S)**
+- Date plan editing capability for user **(S)**
 - Integrate shared calendar sync for couples. **(S)**
 - Suggest anniversary/birthday plans from saved preferences. **(S)**
+- Integrate a weather API so the agentic AI can plan appropriate activities and give relevant suggestions **(C)**
+- AI capability to give feedback after a date **(C)**
+- AI capability to set goals for the user based on their date history **(C)**
+- AI capability to make predictions about the user to create a more complete profile and make more accurate suggestions **(C)**
+- Integrate dating app APIs (e.g. Tinder) to find dates for the user **(C)**
+- Integrate location services for real-time updates on the location of Cupids **(C)**
+- Microtransactions **(W)**
 
 ### Nonfunctional Requirements
 
@@ -68,7 +83,16 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
 ### Must
 
-- (none)
+- Notifications and suggestions outside of the app through email, text, etc.
+  _From categories: Functional_
+- Automatic real time feedback from agentic AI
+  _From categories: Functional_
+- Webpage accessible on computer and phone
+  _From categories: Functional_
+- Database access for AI to remember things about the user
+  _From categories: Functional_
+- Connection to Stripe and PayPal payment processing APIs
+  _From categories: Functional_
 
 ### Should
 
@@ -86,6 +110,12 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   _From categories: Business_
 - Support subscription billing (tiers for singles/married users).
   _From categories: Business_
+- Date planning interface.
+  _From categories: Functional_
+- Date planning capability for AI.
+  _From categories: Functional_
+- Date plan editing capability for user.
+  _From categories: Functional_
 
 ### Could
 
@@ -97,9 +127,22 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   _From categories: Nonfunctional_
 - Suggest family‑inclusive activities when desired.
   _From categories: User_
+- Integrate a weather API so the agentic AI can plan appropriate activities and give relevant suggestions
+  _From categories: Functional_
+- AI capability to give feedback after a date
+  _From categories: Functional_
+- AI capability to set goals for the user based on their date history
+  _From categories: Functional_
+- AI capability to make predictions about the user to create a more complete profile and make more accurate suggestions
+  _From categories: Functional_
+- Integrate dating app APIs (e.g. Tinder) to find dates for the user
+  _From categories: Functional_
+- Integrate location services for real-time updates on the location of Cupids
+  _From categories: Functional_
 
 ### Won't
 
-- (none)
+- Microtransactions
+  _From categories: Functional_
 
 ## Use Case Diagrams
