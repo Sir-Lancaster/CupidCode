@@ -55,11 +55,34 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
 Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
-- Provide a relationship timeline of past date nights and milestones. **(S)**
-- Provide shared calendar sync for couples. **(S)**
-- Suggest gifts based on spouse preferences and past data. **(S)**
-- Support joint profile preferences for couples. **(S)**
-- Suggest family‑inclusive activities when desired. **(C)**
+1. **General End-users**
+  - Interact with a sleek, contemporary user interface. **(M)**
+  - Adjust account settings using a variety of managerial tools. **(M)**
+  - Link more than one payment method to finance services. **(M)**
+  - Utilize an organized task management system. **(M)**
+  - Switch easily between application roles. **(S)**
+  - Opt to use a mobile application for portability and ease. **(C)**
+
+2. **Dating End-users**
+  - Receive push alerts to receive real-time assistance. **(M)**
+  - Engage in meaningful dialogue with an AI chatbot. **(M)**
+  - Allow AI chatbot to listen during dates. **(M)**
+  - Swipe on potential matches by linking an external dating service. **(S)**
+  - Work with a fully integrated match-finder that offers all standard dating app support (i.e. messaging). **(C)**
+
+3. **Cupid End-users**
+  - Have several gig management tools to organize gigs. **(M)**
+  - Update a connected dater's software in real time. **(M)**
+  - Access a variety of third-party services to assist dater. **(M)**
+  - Ability to message the dater with updates, pointers, etc. **(S)**
+  - Navigate using a Google Maps API or similar. **(C)**
+
+4. **Married/Coupled End-users**
+  - Provide a relationship timeline of past date nights and milestones. **(S)**
+  - Provide shared calendar sync for couples. **(S)**
+  - Suggest gifts based on spouse preferences and past data. **(S)**
+  - Support joint profile preferences for couples. **(S)**
+  - Suggest family‑inclusive activities when desired. **(C)**
 
 ## User Stories 
 
@@ -75,7 +98,16 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 - As a user, I want my address to remain encrypted only where necessary so that my privacy is protected without interfering with features like calendar and gigs.
 - As a user, I want the app to reflect a fresh brand identity with updated colors, images, and layout so that it feels modern and engaging.
 - As a user, I want customizable navigation elements instead of generic hamburger menus so that I can tailor the interface to my preferences.
+- As a user, I want to interact with a stylish, modern-looking user interface so I can easily and confidently use Cupid Code.
+- As a user, I want to have multiple account management tools so I can properly atune my account settings ad hoc.
+- As a user, I want to have the option to connect multiple payment options so I can seamlessly finance Cupid Code's services.
+- As a user, I want to have a structured task management system so I can straightforwardly tend to my responsibilities.
 
+### Dater
+
+- As a dater, I want to recieve push notifications so I can get real time support on my dates.
+- As a dater, I want to have meaningful conversation with an AI chatbot so I can fall back on a dynamic and nuanced support system.
+- As a dater, I want my AI chatbot to optionally listen on my date so I can immersively make smart dating decisions.
 
 ### Married User / Couple
 
@@ -92,7 +124,9 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
 ### Cupid
 
-- (none)
+* As a cupid, I want to have multiple gig management solutions so I can systemically govern my gigs.
+* As a cupid, I want to directly connect to a dater's Cupid Code experience and reactively update their software.
+* As a cupid, I want to have multiple third-party services available to me so I can effectively serve my dater.
 
 ### Manager
 
@@ -107,7 +141,26 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
 ### Must
 
-- (none)
+- General users can interact with a sleek, contemporary user interface.
+  _From categories: User_
+- General users can adjust account settings using a variety of managerial tools.
+  _From categories: User_
+- General users can link more than one payment method to finance services.
+  _From categories: User_
+- General users can utilize an organized task management system.
+  _From categories: User_
+- Daters can receive push alerts to receive real-time assistance.
+  _From categories: User_
+- Daters can engage in meaningful dialogue with an AI chatbot.
+  _From categories: User_
+- Daters can allow AI chatbot to listen during dates.
+  _From categories: User_
+- Cupids can have several gig management tools to organize gigs.
+  _From categories: User_
+- Cupids can update a connected dater's software in real time.
+  _From categories: User_
+- Cupids can access a variety of third-party services to assist dater.
+  _From categories: User_
 
 ### Should
 
@@ -125,6 +178,12 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   _From categories: Business_
 - Support subscription billing (tiers for singles/married users).
   _From categories: Business_
+- General users can switch easily between application roles.
+  _From categories: User_
+- Swipe on potential matches by linking an external dating service.
+  _From categories: User_
+- Ability to message the dater with updates, pointers, etc.
+  _From categories: User_
 
 ### Could
 
@@ -136,10 +195,16 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   _From categories: Nonfunctional_
 - Suggest family‑inclusive activities when desired.
   _From categories: User_
+- General users can opt to use a mobile application for portability and ease.
+  _From categories: User_
+- Daters can work with a fully integrated match-finder that offers all standard dating app support (i.e. messaging).
+  _From categories: User_
+- Cupids can navigate using a Google Maps API or similar.
+  _From categories: User_
 
 ### Won't
 
-- (none)
+- (To be updated as development progresses)
 
 ## Use Case Diagrams
 
