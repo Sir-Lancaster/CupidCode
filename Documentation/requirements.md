@@ -46,8 +46,23 @@ The previous team established important foundations we can build on. Below is a 
 
 Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
+- Notifications and suggestions outside of the app through email, text, etc. **(M)**
+- Automatic real time feedback from agentic AI **(M)** 
+- Webpage accessible on computer and phone **(M)**
+- Database access for AI to remember things about the user **(M)**
+- Connection to Stripe and PayPal payment processing APIs **(M)**
+- Date planning interface **(S)**
+- Date planning capability for AI **(S)**
+- Date plan editing capability for user **(S)**
 - Integrate shared calendar sync for couples. **(S)**
 - Suggest anniversary/birthday plans from saved preferences. **(S)**
+- Integrate a weather API so the agentic AI can plan appropriate activities and give relevant suggestions **(C)**
+- AI capability to give feedback after a date **(C)**
+- AI capability to set goals for the user based on their date history **(C)**
+- AI capability to make predictions about the user to create a more complete profile and make more accurate suggestions **(C)**
+- Integrate dating app APIs (e.g. Tinder) to find dates for the user **(C)**
+- Integrate location services for real-time updates on the location of Cupids **(C)**
+- Microtransactions **(W)**
 
 
 ### Nonfunctional Requirements
@@ -185,12 +200,25 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 - As a user, I want to have multiple account management tools so I can properly atune my account settings ad hoc.
 - As a user, I want to have the option to connect multiple payment options so I can seamlessly finance Cupid Code's services.
 - As a user, I want to have a structured task management system so I can straightforwardly tend to my responsibilities.
+- As a user, I want to receive notifications and suggestions via email or text so that I don't have to be in the app to get helpful information.
+- As a user, I want to get instant feedback from the AI so that I can improve my dating interactions in real time.
+- As a user, I want to access the app on both my computer and my phone so that I can use it wherever I am.
+- As a user, I want the AI to remember my preferences and past interactions so that it can provide more personalized and relevant suggestions over time.
+- As a user, I want to be able to pay for services using Stripe or PayPal so that I have a convenient way to make purchases.
+- As a user, I want to use an interface to plan my dates so that I can easily organize my activities.
+- As a user, I want the AI to suggest and plan dates for me so that I don't have to do all the work myself.
+- As a user, I want to be able to edit the date plans the AI creates so that I can make adjustments to suit my needs.
+- As a user, I want the AI to know the weather forecast so that it can suggest date activities that are appropriate for the weather.
+- As a user, I want the AI to help me reflect on my dates after they happen so that I can learn and improve for the future.
+- As a user, I want the AI to make predictions about me so that it can build a more complete profile and provide more accurate suggestions.
+- As a user, I want the app to connect with popular dating apps like Tinder so that I can find potential dates without leaving the app.
 
 ### Dater
 
 - As a dater, I want to recieve push notifications so I can get real time support on my dates.
 - As a dater, I want to have meaningful conversation with an AI chatbot so I can fall back on a dynamic and nuanced support system.
 - As a dater, I want my AI chatbot to optionally listen on my date so I can immersively make smart dating decisions.
+
 
 ### Married User / Couple
 
@@ -263,6 +291,16 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
 ### Must
 
+- Notifications and suggestions outside of the app through email, text, etc.
+  _From categories: Functional_
+- Automatic real time feedback from agentic AI
+  _From categories: Functional_
+- Webpage accessible on computer and phone
+  _From categories: Functional_
+- Database access for AI to remember things about the user
+  _From categories: Functional_
+- Connection to Stripe and PayPal payment processing APIs
+  _From categories: Functional_
 - General users can interact with a sleek, contemporary user interface.
   _From categories: User_
 - General users can adjust account settings using a variety of managerial tools.
@@ -300,6 +338,7 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 - Maintain well-documented code to enable efficient bug fixes. 
   _From categories: Buisness_
 
+
 ### Should
 
 - Integrate shared calendar sync for couples.
@@ -316,6 +355,12 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   _From categories: Business_
 - Support subscription billing (tiers for singles/married users).
   _From categories: Business_
+- Date planning interface.
+  _From categories: Functional_
+- Date planning capability for AI.
+  _From categories: Functional_
+- Date plan editing capability for user.
+  _From categories: Functional_
 - General users can switch easily between application roles.
   _From categories: User_
 - Swipe on potential matches by linking an external dating service.
@@ -371,6 +416,23 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   _From categories: Nonfunctional_
 - Suggest family‑inclusive activities when desired.
   _From categories: User_
+- Integrate a weather API so the agentic AI can plan appropriate activities and give relevant suggestions
+  _From categories: Functional_
+- AI capability to give feedback after a date
+  _From categories: Functional_
+- AI capability to set goals for the user based on their date history
+  _From categories: Functional_
+- AI capability to make predictions about the user to create a more complete profile and make more accurate suggestions
+  _From categories: Functional_
+- Integrate dating app APIs (e.g. Tinder) to find dates for the user
+  _From categories: Functional_
+- Integrate location services for real-time updates on the location of Cupids
+  _From categories: Functional_
+
+### Won't
+
+- Microtransactions
+  _From categories: Functional_
 - General users can opt to use a mobile application for portability and ease.
   _From categories: User_
 - Daters can work with a fully integrated match-finder that offers all standard dating app support (i.e. messaging).
