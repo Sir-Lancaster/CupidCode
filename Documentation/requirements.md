@@ -86,8 +86,53 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
 Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
-- Support married users as an adjacent audience (without changing core goals). **(S)**
-- Support subscription billing (tiers for singles/married users). **(S)**
+1. **Value**
+  - Provide messaging functionality (text, chat) for users to interact with each other. **(M)**
+  - Allow users to discover and connect with new people. **(M)**
+  - Send push notifications to increase engagement and retention. **(M)**
+  - Provide personalized recommendations to create a tailored user experience. **(S)**
+  - Offer an intuitive and easy-to-use interface to reduce user frustration. **(S)**
+  - Maximize user satisfaction and retention through engaging features. **(S)**
+  - Include measures to detect and eliminate spam accounts. **(S)**
+  - Provide location-based matching to connect users with other nearby users. **(S)**
+  - Support married users as an adjacent audience (without changing core goals). **(S)**
+  - Support multiple languages to enable global accessibility. **(C)**
+  - Provide text-to-speech functionality to support visually impaired users. **(C)**
+  - Include subscriptions and in-app purchases as monetization options. **(W)**
+
+2. **Compliance**
+  - Restrict access to users aged 18 years and older. **(M)**
+  - Protect user data against unauthorized access and leakage. **(M)**
+  - Include a published privacy policy explaining data use. **(M)**
+  - Provide users the ability to delete their accounts permanently. **(M)**
+  - Verify email addresses and phone numbers during account creation. **(S)**
+  - Log login attempts for security auditing. **(S)**
+  - Provide opt-out options for marketing communications in compliance with anti-spam laws. **(S)**
+  - Include terms of service that prohibit harmful content. **(S)**
+  - Protect user location data to prevent misuse or stalking. **(S)**
+  - Include accessibility options (e.g., braille) for visually impaired users. **(W)**
+  
+3. **Reporting**
+  - Generate daily active user reports to measure engagement. **(S)**
+  - Generate safety reports on flagged users to monitor risks. **(S)**
+  - Track and report customer support tickets to identify common issues. **(S)**
+  - Provide a help ticket management system for bug tracking and resolution. **(S)**
+  - Generate growth reports on new signups per month. **(S)**
+  - Provide retention curve reports to evaluate long-term engagement. **(C)**
+  - Provide demographic reports on the user base. **(C)**
+  - Log feature usage reports to prioritize specific feature improvements. **(C)**
+
+4. **Stakeholders**
+  - Maintain well-documented code to enable efficient bug fixes. **(M)**
+  - Support a monetization method to maximize profitability. **(M)**
+  - Support inclusive access to diverse user groups. **(S)**
+  - Generate risk reports to address compliance and safety concerns. **(S)**
+  - Provide cost analysis reports to optimize infrastructure spending. **(S)**
+  - Calculate and report customer lifetime value metrics. **(S)**
+  - Support subscription billing (tiers for singles/married users). **(S)**
+  - Provide revenue dashboards to track financial performance in real time. **(C)**
+  - Identify and report top-performing features that drive engagement. **(C)**
+
 
 ### User Requirements
 
@@ -172,8 +217,47 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
 ### Business/Company
 
+- As a dating app, we want to offer a space for couples to interact, talk, and text.
+- As a dating app, we want to offer a way to meet new people
+- As a dating app, we want to provide access to multiple languages, so a larger populous can comfortably use the app.
+- As a dating app, we want to provide a unique experience tailored to the user.
+- As a dating app, we want subscriptions and in-app purchases to increase revenue 
+- As a dating app, we want to provide an wasy to use and easy to understand interface as to not frustrate the users.
+- As a dating app, we want to satisfy the user and keep retention.
+- As a dating app, we want to provide a text to speech option to accomodate the visually impaired.
+- As a dating app, we want to eliminate spam accounts and keep content authentic.
+- As a dating app, we want to push notifications to the user and keep retention.
+- As a dating app, we want to match users with people who live nearby.
 - As a Company, I want to support married-couple experiences so that we grow our audience without changing the product’s core goals.
 - As a Company, I want a couples-tier subscription option so that households can access shared features at fair pricing.
+- As the company, we want daily active user reports so that we can measure engagement.
+- As the company, we want safety reports on flagged users so that we can monitor risks.
+- As the company, we want customer support tickets tracked so that we can identify common issues.
+- As the company, we want demographic reports so that we can see who is using the app.
+- As the company, we want feature usage reports so that we can prioritize improvements.
+- As the company, we want growth reports (new signups per month) so that we can track expansion.
+- As the company, we want retention curve reports so that we can understand long-term engagement.
+- As the company, we want an effective help ticket system so users' experiences can be repaired and bugs can be fixed.
+- As a company in the USA, we should limit who can use the app to persons 18 years and older
+- As a company in the USA, we should protect user data from leakage.
+- As a company in the USA, we should provide a privacy policy so users can understand how we use their data.
+- As a company in the USA, we should provide a terms of service guideline so users know that harmful content is prohibited.
+- As a company in the USA, we should offer a way to delete an account.
+- As a company in the USA, we should verify user email/phone numbers to authenticate accounts.
+- As a company in the USA, we should log login attempts so that suspicious activity can be audited.
+- As a company in the USA, we should provide opt-out options for marketing emails so that we comply with anti-spam laws.
+- As a company in the USA, we should offer a braille option for the blind.
+- As a company in the USA, we should protect a user's location to prevent stalking.
+- As a buisness, we want revenue dashboards so that we can track financial performance in real time.
+- As a buisness, we want risk reports so that we can address compliance or safety concerns early.
+- As a buisness, we want cost analysis so that we can optimize infrastructure spending.
+- As a buisness, we want customer lifetime value reports so that we can maximize long-term profitability.
+- As a buisness, we want to identify top-performing features so that we know what drives value.
+- As a buisness, we want a way for users to spend money so that we earn a profit.
+- As a buisness, we want well documented code so that bugs can be fixed quickly and restore user satisfaction.
+- As a buisness, we want to provide access to as many groups of people as possible.
+
+
 
 ## Overall MoSCoW
 
@@ -184,7 +268,7 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 - General users can adjust account settings using a variety of managerial tools.
   _From categories: User_
 - General users can link more than one payment method to finance services.
-  _From categories: User_
+  _From categories: User, Buisness_
 - General users can utilize an organized task management system.
   _From categories: User_
 - Daters can receive push alerts to receive real-time assistance.
@@ -199,6 +283,22 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   _From categories: User_
 - Cupids can access a variety of third-party services to assist dater.
   _From categories: User_
+- Provide messaging functionality (text, chat) for users to interact with each other.
+  _From categories: Buisness_
+- Allow users to discover and connect with new people. 
+  _From categories: Buisness_
+- Send push notifications to increase engagement and retention. 
+  _From categories: Buisness_
+- Restrict access to users aged 18 years and older. 
+  _From categories: Buisness_
+- Protect user data against unauthorized access and leakage. 
+  _From categories: Buisness_
+- Include a published privacy policy explaining data use. 
+  _From categories: Buisness_
+- Provide users the ability to delete their accounts permanently. 
+  _From categories: Buisness_
+- Maintain well-documented code to enable efficient bug fixes. 
+  _From categories: Buisness_
 
 ### Should
 
@@ -222,6 +322,44 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   _From categories: User_
 - Ability to message the dater with updates, pointers, etc.
   _From categories: User_
+- Provide personalized recommendations to create a tailored user experience. 
+  _From categories: Buisness_
+- Offer an intuitive and easy-to-use interface to reduce user frustration. 
+  _From categories: Buisness_
+- Maximize user satisfaction and retention through engaging features. 
+  _From categories: Buisness_
+- Include measures to detect and eliminate spam accounts. 
+  _From categories: Buisness_
+- Provide location-based matching to connect users with other nearby users. 
+  _From categories: Buisness_
+- Verify email addresses and phone numbers during account creation. 
+  _From categories: Buisness_
+- Log login attempts for security auditing. 
+  _From categories: Buisness_
+- Provide opt-out options for marketing communications in compliance with anti-spam laws.
+  _From categories: Buisness_
+- Include terms of service that prohibit harmful content.
+  _From categories: Buisness_
+- Protect user location data to prevent misuse or stalking. 
+  _From categories: Buisness_
+- Generate daily active user reports to measure engagement. 
+  _From categories: Buisness_
+- Generate safety reports on flagged users to monitor risks. 
+  _From categories: Buisness_
+- Track and report customer support tickets to identify common issues. 
+  _From categories: Buisness_
+- Provide a help ticket management system for bug tracking and resolution. 
+  _From categories: Buisness_
+- Generate growth reports on new signups per month. 
+  _From categories: Buisness_
+- Support inclusive access to diverse user groups. 
+  _From categories: Buisness_
+- Generate risk reports to address compliance and safety concerns. 
+  _From categories: Buisness_
+- Provide cost analysis reports to optimize infrastructure spending. 
+  _From categories: Buisness_
+- Calculate and report customer lifetime value metrics. 
+  _From categories: Buisness_
 
 ### Could
 
@@ -239,10 +377,26 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   _From categories: User_
 - Cupids can navigate using a Google Maps API or similar.
   _From categories: User_
+- Support multiple languages to enable global accessibility. 
+  _From categories: Buisness_
+- Provide text-to-speech functionality to support visually impaired users. 
+  _From categories: Buisness_
+- Provide retention curve reports to evaluate long-term engagement. 
+  _From categories: Buisness_
+- Provide demographic reports on the user base. 
+  _From categories: Buisness_
+- Log feature usage reports to prioritize specific feature improvements.
+  _From categories: Buisness_
+- Provide revenue dashboards to track financial performance in real time. 
+  _From categories: Buisness_
+- Identify and report top-performing features that drive engagement. 
+  _From categories: Buisness_
 
 ### Won't
-
-- (To be updated as development progresses)
+- Include subscriptions and in-app purchases as monetization options. 
+  _From categories: Buisness_
+- Include accessibility options (e.g., braille) for visually impaired users. 
+  _From categories: Buisness_
 
 ## Use Case Diagrams
 
