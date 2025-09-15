@@ -51,7 +51,22 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 - Support joint profile preferences for couples. **(S)**
 - Suggest family‑inclusive activities when desired. **(C)**
 
-## User Stories (Married-Only) — Grouped by Persona
+## User Stories
+
+### User
+
+- As a user, I want to receive notifications and suggestions via email or text so that I don't have to be in the app to get helpful information.
+- As a user, I want to get instant feedback from the AI so that I can improve my dating interactions in real time.
+- As a user, I want to access the app on both my computer and my phone so that I can use it wherever I am.
+- As a user, I want the AI to remember my preferences and past interactions so that it can provide more personalized and relevant suggestions over time.
+- As a user, I want to be able to pay for services using Stripe or PayPal so that I have a convenient way to make purchases.
+- As a user, I want to use an interface to plan my dates so that I can easily organize my activities.
+- As a user, I want the AI to suggest and plan dates for me so that I don't have to do all the work myself.
+- As a user, I want to be able to edit the date plans the AI creates so that I can make adjustments to suit my needs.
+- As a user, I want the AI to know the weather forecast so that it can suggest date activities that are appropriate for the weather.
+- As a user, I want the AI to help me reflect on my dates after they happen so that I can learn and improve for the future.
+- As a user, I want the AI to make predictions about me so that it can build a more complete profile and provide more accurate suggestions.
+- As a user, I want the app to connect with popular dating apps like Tinder so that I can find potential dates without leaving the app.
 
 ### Married User / Couple
 
@@ -79,7 +94,7 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 - As a Company, I want to support married-couple experiences so that we grow our audience without changing the product’s core goals.
 - As a Company, I want a couples-tier subscription option so that households can access shared features at fair pricing.
 
-## Overall MoSCoW (Consolidated — Married-Only, Deduped)
+## Overall MoSCoW
 
 ### Must
 
