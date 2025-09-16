@@ -1,4 +1,10 @@
-# Requirements Specification 
+# CS3450  Requirements Specification Team 6 
+
+Sep 15, 2025
+
+Sprint Leader: Zac Cunningham 
+
+Sprint followers: Carter Johnson, Dallin Tew, Greg Steele, Kayden Lancaster
 
 ## Summary
 
