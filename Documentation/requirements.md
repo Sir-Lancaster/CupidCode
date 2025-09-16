@@ -462,3 +462,10 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
 ## Use Case Diagrams
 
+### Diagram 1 - Dater Interactions 
+
+![Use Case Diagram 1](./images/Diagram_1.jpeg)
+
+### Diagram 2 - Accounts, Security & Compliance 
+
+![Use Case Diagram 2](./images/Diagram_2.jpeg)
