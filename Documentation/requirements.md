@@ -48,23 +48,34 @@ In summary, the previous team delivered a strong foundation with authentication,
 
 Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
-- Notifications and suggestions outside of the app through email, text, etc. **(M)**
-- Automatic real time feedback from agentic AI **(M)** 
-- Webpage accessible on computer and phone **(M)**
-- Database access for AI to remember things about the user **(M)**
-- Connection to Stripe and PayPal payment processing APIs **(M)**
-- Date planning interface **(S)**
-- Date planning capability for AI **(S)**
-- Date plan editing capability for user **(S)**
-- Integrate shared calendar sync for couples. **(S)**
-- Suggest anniversary/birthday plans from saved preferences. **(S)**
-- Integrate a weather API so the agentic AI can plan appropriate activities and give relevant suggestions **(C)**
-- AI capability to give feedback after a date **(C)**
-- AI capability to set goals for the user based on their date history **(C)**
-- AI capability to make predictions about the user to create a more complete profile and make more accurate suggestions **(C)**
-- Integrate dating app APIs (e.g. Tinder) to find dates for the user **(C)**
-- Integrate location services for real-time updates on the location of Cupids **(C)**
-- Microtransactions **(W)**
+1. **Notifications & Feedback**
+  - Notifications and suggestions outside of the app through email, text, etc. **(M)**
+  - Automatic real time feedback from agentic AI **(M)** 
+
+2. **Core Platform Functionality**
+  - Webpage accessible on computer and phone **(M)**
+  - Database access for AI to remember things about the user **(M)**
+  - Connection to Stripe and PayPal payment processing APIs **(M)**
+
+3. **Date Planning**
+  - Date planning interface **(S)**
+  - Date planning capability for AI **(S)**
+  - Date plan editing capability for user **(S)**
+  - Integrate shared calendar sync for couples. **(S)**
+  - Suggest anniversary/birthday plans from saved preferences. **(S)**
+
+4. **AI-Enhanced Features**
+  - Integrate a weather API so the agentic AI can plan appropriate activities and give relevant suggestions **(C)**
+  - AI capability to give feedback after a date **(C)**
+  - AI capability to set goals for the user based on their date history **(C)**
+  - AI capability to make predictions about the user to create a more complete profile and make more accurate suggestions **(C)**
+
+5. **Integrations & External Services** 
+  - Integrate dating app APIs (e.g. Tinder) to find dates for the user **(C)**
+  - Integrate location services for real-time updates on the location of Cupids **(C)**
+
+6. **Exclusions**
+  - Microtransactions **(W)**
 
 
 ### Nonfunctional Requirements
