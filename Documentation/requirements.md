@@ -40,6 +40,8 @@ The previous team established important foundations we can build on. Below is a 
 - Cupid availability toggle (on/off duty): not present.
 - Revenue and analytics: revenue model cannot function without subscriptions and payouts; dashboard metrics are not tied to transactions.
 
+In summary, the previous team delivered a strong foundation with authentication, role management, and a functioning web interface, but left much of the critical functionality—such as payments, notifications, and AI-driven features—unfinished. Their work provides a clear framework for our team to build upon, and we view the gaps not as setbacks but as opportunities to deliver the new requirements for 2026. With rebranding, cloud deployment, agentic AI, and enhanced security, our team is positioned to turn Cupid Code from a prototype into a usable, engaging product.
+
 ## Requirements
 
 ### Functional Requirements
@@ -70,6 +72,7 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
 1. **Performance**
+  - Deploy app to the cloud using Azure.
   - Connect to the AI API for the listen and chat features. **(C)**
   - Record change history for shared features (who edited joint preferences or calendar sync) to provide an audit trail. **(C)**
 
@@ -91,8 +94,8 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
 4. **Rebranding**
   - Re-generate the images for the app **(M)**
+  - Change the color schemes **(M)**
   - Dynamically allocate space depending on the screen size of the user. **(S)**
-  - Change the color schemes **(C)**
   - Improve consistency in the app. for example the navigation menu is nested in a hamburger menu when a user is logged in, but not when you are not logged in. **(C)**
   - Change the layout of the pages, center the buttons, change the shapes to be more inline with the theme of the application. **(C)**
 
@@ -144,7 +147,7 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   - Generate risk reports to address compliance and safety concerns. **(S)**
   - Provide cost analysis reports to optimize infrastructure spending. **(S)**
   - Calculate and report customer lifetime value metrics. **(S)**
-  - Support subscription billing (tiers for singles/married users). **(S)**
+  - Support subscription billing (tiers for singles/married users). **(W)**
   - Provide revenue dashboards to track financial performance in real time. **(C)**
   - Identify and report top-performing features that drive engagement. **(C)**
 
@@ -241,7 +244,11 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
 ### Manager
 
-- (none)
+- As a manager, I want to view revenue and cost analysis dashboards so that I can monitor financial performance and optimize spending.
+- As a manager, I want to generate compliance and risk reports so that I can ensure the system meets legal and safety requirements.
+- As a manager, I want to track daily active users and engagement so that I can evaluate growth and retention.
+- As a manager, I want to oversee customer support tickets and flagged-user safety reports so that I can resolve issues and maintain trust.
+- As a manager, I want well-documented code and audit trails so that I can assign fixes and ensure accountability.
 
 ### Business/Company
 
@@ -249,7 +256,6 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 - As a dating app, we want to offer a way to meet new people
 - As a dating app, we want to provide access to multiple languages, so a larger populous can comfortably use the app.
 - As a dating app, we want to provide a unique experience tailored to the user.
-- As a dating app, we want subscriptions and in-app purchases to increase revenue 
 - As a dating app, we want to provide an wasy to use and easy to understand interface as to not frustrate the users.
 - As a dating app, we want to satisfy the user and keep retention.
 - As a dating app, we want to provide a text to speech option to accomodate the visually impaired.
@@ -257,7 +263,6 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 - As a dating app, we want to push notifications to the user and keep retention.
 - As a dating app, we want to match users with people who live nearby.
 - As a Company, I want to support married-couple experiences so that we grow our audience without changing the product’s core goals.
-- As a Company, I want a couples-tier subscription option so that households can access shared features at fair pricing.
 - As the company, we want daily active user reports so that we can measure engagement.
 - As the company, we want safety reports on flagged users so that we can monitor risks.
 - As the company, we want customer support tickets tracked so that we can identify common issues.
@@ -301,8 +306,10 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   _From categories: Functional_
 - Connection to Stripe and PayPal payment processing APIs
   _From categories: Functional_
+  - Change the color schemes **(M)**
+  _From categories: Nonfuctional_
 - General users can interact with a sleek, contemporary user interface.
-  _From categories: User_
+  _From categories: User, and Nonfunctional_
 - General users can adjust account settings using a variety of managerial tools.
   _From categories: User_
 - General users can link more than one payment method to finance services.
@@ -330,13 +337,15 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 - Restrict access to users aged 18 years and older. 
   _From categories: Buisness_
 - Protect user data against unauthorized access and leakage. 
-  _From categories: Buisness_
+  _From categories: Buisness, and Nonfunctional_
 - Include a published privacy policy explaining data use. 
   _From categories: Buisness_
 - Provide users the ability to delete their accounts permanently. 
   _From categories: Buisness_
 - Maintain well-documented code to enable efficient bug fixes. 
   _From categories: Buisness_
+- Deploy app to the cloud using Azure.
+  _From cateogories: Nonfunctional 
 
 
 ### Should
@@ -352,8 +361,6 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 - Support joint profile preferences for couples.
   _From categories: User_
 - Support married users as an adjacent audience (without changing core goals).
-  _From categories: Business_
-- Support subscription billing (tiers for singles/married users).
   _From categories: Business_
 - Date planning interface.
   _From categories: Functional_
@@ -453,12 +460,12 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   _From categories: Buisness_
 - Identify and report top-performing features that drive engagement. 
   _From categories: Buisness_
-
-### Won't
 - Include subscriptions and in-app purchases as monetization options. 
   _From categories: Buisness_
 - Include accessibility options (e.g., braille) for visually impaired users. 
   _From categories: Buisness_
+- Support subscription billing (tiers for singles/married users).
+  _From categories: Business_  
 
 ## Use Case Diagrams
 
@@ -469,3 +476,4 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 ### Diagram 2 - Accounts, Security & Compliance 
 
 ![Use Case Diagram 2](./images/Diagram_2.jpeg)
+
