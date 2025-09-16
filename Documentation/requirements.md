@@ -48,6 +48,39 @@ The previous team established important foundations we can build on. Below is a 
 
 In summary, the previous team delivered a strong foundation with authentication, role management, and a functioning web interface, but left much of the critical functionality—such as payments, notifications, and AI-driven features—unfinished. Their work provides a clear framework for our team to build upon, and we view the gaps not as setbacks but as opportunities to deliver the new requirements for 2026. With rebranding, cloud deployment, agentic AI, and enhanced security, our team is positioned to turn Cupid Code from a prototype into a usable, engaging product.
 
+## Identification of User Classes
+
+The Cupid Code system will support several distinct user classes, each with different goals, responsibilities, and interactions. These classes are identified as follows:
+
+1. **General End-Users**  
+   - Everyday users of Cupid Code.  
+   - Focused on managing profiles, preferences, tasks, and payment options.  
+   - Interact with the user interface for account settings, notifications, and overall navigation.  
+
+2. **Dating End-Users (Daters)**  
+   - Users actively seeking dates.  
+   - Rely on AI-driven support (chatbot, real-time feedback, listening features).  
+   - Use matchmaking integrations, push notifications, and date-planning tools.  
+
+3. **Married / Coupled End-Users**  
+   - Users in long-term relationships.  
+   - Require shared calendars, joint profiles, gift suggestions, and family-inclusive planning.  
+   - Emphasize privacy and consent controls between partners.  
+
+4. **Cupid End-Users (Gig Workers)**  
+   - Service providers who assist daters during dates.  
+   - Use gig management tools, real-time communication with daters, and integration with third-party services (e.g., maps, delivery).  
+
+5. **Managers / Administrators**  
+   - Oversee the technical and operational aspects of Cupid Code.  
+   - Responsible for system monitoring, bug tracking, security auditing, and infrastructure cost analysis.  
+   - Ensure compliance with business and regulatory requirements.  
+
+6. **Business / Company Stakeholders**  
+   - Internal company users (executives, analysts, product owners).  
+   - Require access to monetization options, reports (engagement, retention, demographics, safety), and compliance documentation.  
+   - Make strategic decisions based on data insights and user satisfaction.  
+
 ## Requirements
 
 ### Functional Requirements
