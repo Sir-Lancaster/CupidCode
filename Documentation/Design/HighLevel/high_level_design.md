@@ -1,27 +1,27 @@
 # High-Level Design Document Template
 
-## 1. Introduction
+## 1. Introduction -- Kayden
 - **Purpose:** Briefly state the purpose of this document.
 - **Scope:** What is covered in this design? Reference the requirements document.
 - **Audience:** Who should read this document?
 
-## 2. System Overview
+## 2. System Overview -- Kayden
 - **System Description:** High-level summary of the system and its goals.
 - **Legacy System Overview:** (If applicable) What is inherited from previous development? What is new or changed?
 - **Architecture Diagram:** Insert a simple block diagram showing major components.
 
-## 3. Architecture
+## 3. Architecture -- Carter
 - **Chosen Architecture:** (e.g., client-server, microservices, monolith)
 - **Design Rationale:** Why was this architecture chosen?
 
-## 4. Major Components
+## 4. Major Components -- Dallin
 For each component:
 - **Name:**
 - **Responsibilities:**
 - **Technologies Used:**
 - **Internal Interfaces:** How does it communicate with other components?
 
-## 5. External Interfaces
+## 5. External Interfaces -- Dallin
 - **Third-Party APIs/Services:** List and describe each (e.g., Stripe, PayPal, notification services).
 - **Protocols/Data Formats:** (e.g., REST, WebSocket, JSON)
 
@@ -36,29 +36,24 @@ For each component:
 - **Types of Output:** (UI updates, notifications, reports)
 - **Expected Volume:** (If relevant)
 
-## 8. Security
+## 8. Security -- Carter
 - **Security at Each Layer:** (OS, application, network, data)
 - **Sensitive Data Handling:**
 - **Compliance Considerations:** (e.g., GDPR)
 
-## 9. Risks and Mitigation
+## 9. Risks and Mitigation -- Greg
 - **Key Risks:**
 - **Mitigation Strategies:**
 
-## 10. Data Design
+## 10. Data Design -- Greg
 - **Data Stored:**
 - **Data Structure:**
 - **Privacy and Retention:**
 
-## 11. Diagrams
+## 11. Diagrams -- All
 - **Architecture Diagram**
 - **Component Diagram**
 - **Sequence Diagram(s)**
 - **Use Case Diagram(s)**
-
-## 12. Future Considerations
-- **Maintainability:**
-- **Scalability:**
-- **Potential Extensions:**
 
 
