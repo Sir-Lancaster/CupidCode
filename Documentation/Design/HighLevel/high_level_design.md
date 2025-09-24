@@ -1,4 +1,4 @@
-# High-Level Design Document Template
+# High-Level Design Document
 
 ## 1. Introduction -- Kayden
 - **Purpose:** Briefly state the purpose of this document.
