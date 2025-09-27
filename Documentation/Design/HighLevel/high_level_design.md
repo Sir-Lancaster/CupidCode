@@ -14,7 +14,7 @@ Sprint Followers: Zac Cunningham, Greg Steele, Dallin Tew, Carter Johnson
   - [Input and Output](#7-input-and-output----zac)
   - [Security](#8-security----carter)
   - [Risks and Mitigations](#9-risks-and-mitigation----greg)
-  - [Data Design](#10-data-design----greg)
+  - [Data Design](#10-data-design)
   - [Diagrams](#11-diagrams----all)
 ## 1. Introduction
 **Purpose**  
