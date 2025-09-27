@@ -134,28 +134,35 @@ For each component:
 - **Protocols/Data Formats:** (e.g., REST, WebSocket, JSON)
 
 ## 6. User Interface Design -- Zac
-**UI/UX Principles**
+
+### UI/UX Principles
+
 - Cupid codes redesign aims to make users' experience frustration-free by simplifying the overall design.
 - Part of the redesign includes making the UI a mobile-first responsive design.                              
 - Navigation will adhere to the standard of 2 clicks to get anywhere from the home page.   
 - Cupid code aims to be accessible to all, which is why the color palettes were selected with color blindness in mind.
 
-**Rebranding and Color Schemes**
+### Rebranding and Color Schemes
+
 As part of the Rebranding for Cupid Code, our team has decided to lean into who our users are and focus the color scheme and logos around them.
 Our main users, the daters, are comprised of tech enthusiasts; for this reason, we have decided to give the app a more techy vibe and style the app around the terminal. 
+
 - The rebranding will feature a new logo designed to resemble intricate code elements.
 - Buttons that have graphics will also follow the new rebranding and look like code.
 - The color scheme we have selected is based on the look of a terminal.
-        - Dark background
-        - light green words
-        - minimal other colors
-- the colors we have selected in hex are (from right to left)
-        - #FB3640
-        - #1F487E
-        - #00CCFF
-        - #09A129
-        - #000000
+  - Dark background
+  - light green words
+  - minimal other colors
+- The colors we have selected in hex are (from right to left)
+  - #FB3640
+  - #1F487E
+  - #00CCFF
+  - #09A129   
+  - #000000
+
  **Insert Image Here** 
+
+### Accessibility
 
 - This color scheme aligns with our tech-driven vibe, ensuring the users feel right at home.
 - Accessibility is essential to our team, so we have compared our color scheme to the following color blindness types, and we have included an image of that comparison for each.
@@ -195,11 +202,14 @@ IMAGE GOES HERE
 - Most Color Blindnesses are compatible with our color scheme.
 - To ensure all can see and use our app efficiently, we will be adding an Accessibility mode.
 - The Accessibility mode will make the following changes.
-        - The black background (#000000) will change to a white background (#FFFFFF)
-        - The Green Text (#09A129) will be changed to Black (#000000)
-
-        IMAGE OF NEW COLOR PALETTE
+  - The black background (#000000) will change to a white background (#FFFFFF)
+  - The Green Text (#09A129) will be changed to Black (#000000)
 - Accessibility mode will be easily accessible from the home screen.
+- Below is the color Palette for the accessibility mode.
+  
+  IMAGE OF NEW COLOR PALETTE
+
+### Navigation Flow
 
 
 - **Navigation Flow:**
