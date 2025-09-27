@@ -202,9 +202,7 @@ IMAGE GOES HERE
 - Accessibility mode will be easily accessible from the home screen.
 
 
-- **Branding and Color Schemes:**
 - **Navigation Flow:**
-- **Accessibility Considerations:**
 - **Wireframes/Mockups:** (Insert or link to images)
 
 ## 7. Input and Output -- Zac
