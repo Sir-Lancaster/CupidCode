@@ -219,10 +219,206 @@ IMAGE GOES HERE
 - **Key Risks:**
 - **Mitigation Strategies:**
 
-## 10. Data Design -- Greg
-- **Data Stored:**
-- **Data Structure:**
-- **Privacy and Retention:**
+## 10. Data Design
+### 10.1 Scope & Goals
+Define the persistent data model that supports current MVP plus near‑term roadmap (AI coaching, gigs, notifications, payments groundwork) while enabling secure handling of PII (Personal Identifiable Information) and future analytics. Emphasis: clarity of entity boundaries, minimal PII, auditability, forward migration (SQLite→Postgres), and extensibility.
+
+### 10.2 Core Entities Overview
+| Entity | Purpose | Key Relationships |
+|--------|---------|------------------|
+| User | Auth identity + global role flags | 1–1 UserProfile; 0–1 DaterProfile; 0–1 CupidProfile |
+| UserProfile | General profile & demographics | FK user |
+| DaterProfile | Dater‑specific preferences/context | FK user |
+| CupidProfile | Cupid availability, rating meta | FK user |
+| Gig | Requested intervention / coaching task | FK requester (User); 0–1 GigAssignment |
+| GigAssignment | Links a Gig to a Cupid + status workflow | FK gig; FK cupid (User) |
+| AISession | Logical AI coaching session (chat or listen) | FK user; 1–M AIMessage |
+| AIMessage | Individual exchange (user or AI) | FK ai_session |
+| Notification | Outbound or in‑app notification record | FK user (recipient) |
+| Payment | High‑level payment intent / order meta | FK user (payer); 1–M Transaction |
+| Transaction | Ledger-style entry (charges, payouts) | FK payment (nullable for system credits) |
+| Subscription | (Future) recurring access model | FK user |
+| Feedback | Ratings/comments about Gig or AI session | FK user (author); optional FK gig / ai_session |
+| AuditLog | Immutable security/business critical events | FK user (actor, optional) |
+| FeatureFlag | Runtime controlled experiment/config | — |
+| KeyRotationEvent | Tracks encryption key versions | — |
+
+(Implementation can defer some entities until needed; still model them conceptually.)
+
+### 10.3 Entity Details (Selected MVP Focus)
+Provide deeper specs for those landing in MVP:
+
+1. User  
+  - Fields: id (UUID), username, email (unique), password_hash, roles (bitmask or enum list), is_active, created_at, last_login_at.  
+  - Notes: email optional for early dev? Decide; password hashing: Argon2id (time & memory cost documented).  
+
+2. UserProfile  
+  - Fields: id, user_id (FK), display_name, date_of_birth (PII), timezone, pronouns, created_at, updated_at.  
+  - Derived: age (computed, not stored).  
+  - Privacy: date_of_birth encrypted (AES-256-GCM) at application layer.  
+
+3. DaterProfile  
+  - Fields: id, user_id, goals (text), comfort_level (enum), interests (JSON array), boundaries (text), ai_persona_prefs (JSON), updated_at.  
+
+4. CupidProfile  
+  - Fields: id, user_id, bio, experience_years, availability_calendar_ref, avg_rating_cache, payout_account_token (external provider token, never raw credentials).  
+
+5. Gig  
+  - Fields: id, requester_user_id, title, description, status (requested|matched|in_progress|completed|cancelled), scheduled_for (datetime), created_at, updated_at.  
+  - Indexes: (requester_user_id, created_at), status.  
+
+6. GigAssignment  
+  - Fields: id, gig_id (unique), cupid_user_id, accepted_at, completed_at, cancelled_at, cancel_reason.  
+  - Constraint: 1–1 with Gig; gig.status kept consistent via service layer.  
+
+7. AISession  
+  - Fields: id, user_id, mode (chat|listen), started_at, ended_at, context_snapshot (JSON), model_version, cost_tokens_estimate.  
+
+8. AIMessage  
+  - Fields: id, ai_session_id, role (user|assistant|system), content (text), tokens_in, tokens_out, created_at.  
+  - Index: (ai_session_id, created_at).  
+
+9. Notification  
+  - Fields: id, user_id, channel (in_app|email|sms), template_key, payload (JSON), status (queued|sent|failed), sent_at, failure_reason.  
+
+10. Payment  
+  - Fields: id, user_id, provider (stripe|paypal|test), external_intent_id, amount_cents, currency, purpose (gig_fee|subscription|top_up|payout_reversal), status (initiated|succeeded|failed|refunded), created_at.  
+
+11. Transaction  
+  - Fields: id, payment_id (nullable), user_id (owner), direction (debit|credit), amount_cents, currency, balance_after_cents, type (fee|payout|charge|adjustment), created_at.  
+  - Invariant: Sum of transactions per user reflects virtual wallet balance; enforce with service-level locking.  
+
+12. Feedback  
+  - Fields: id, user_id, gig_id?, ai_session_id?, rating (1–5), comment, created_at.  
+
+13. AuditLog  
+  - Fields: id, actor_user_id?, event_type, object_type, object_id, metadata (JSON), created_at, ip_hash.  
+  - Immutability: No updates, only inserts; optionally partition by month.  
+
+### 10.5 Sensitive Data & Protection Plan
+| Field | Entity | Classification | Protection | Notes |
+|-------|--------|---------------|-----------|-------|
+| password_hash | User | Restricted | Argon2id | Cost factors documented |
+| email | User | Confidential | Stored plaintext + unique idx; optional SHA256(salt) for analytics matching | Redact in logs |
+| date_of_birth | UserProfile | PII | AES-256-GCM app-layer | Age gating derived |
+| payout_account_token | CupidProfile | Confidential | Opaque token from payment provider | No raw banking data |
+| ip_hash | AuditLog | Pseudonymized | SHA256(ip + rotating_salt) | Salt rotates yearly |
+| access_token_hash | (AuthToken) | Restricted | HMAC-SHA256 | Raw token only client-side |
+| refresh_token_hash | (AuthToken) | Restricted | HMAC-SHA256 | Rotation on use |
+| boundaries / goals | DaterProfile | Sensitive (behavioral) | At-rest DB encryption (optional future) | Consider field-level encryption |
+| content (AIMessage) | AIMessage | Potentially Sensitive | Retention-limited (≤90 days) | Anonymize older rows |
+| external_intent_id | Payment | Confidential | Plain, indexed | Not PAN |
+
+Encryption / Key Management:
+- Keys: Stored in Azure Key Vault (KMS) referenced via env variable indirection.
+- Key Versioning: key_version column or metadata stored in KeyRotationEvent.
+- Rotation Cadence: Annual for data keys; immediate on incident.
+- Logging: Exclude sensitive fields (structured logger denylist).
+
+### 10.6 Data Flow (High-Level)
+1. User registers → User + UserProfile rows persisted; AuditLog event.
+2. Dater starts AI session → AISession row, subsequent AIMessage rows stream in.
+3. Gig created → Gig row; on Cupid assignment create GigAssignment + Notification queue.
+4. Payment initiated → Payment (initiated) + external provider intent; success webhooks finalize status, create Transaction(s).
+5. Feedback submitted → Feedback row; may update CupidProfile.avg_rating_cache via async job.
+
+(Sequence diagrams will visualize 2, 3, 4 in Section 11.)
+
+### 10.7 Constraints & Integrity Rules
+- GigAssignment.gig_id unique (one active assignment).
+- Feedback must reference exactly one of (gig_id, ai_session_id), not both (CHECK constraint).
+- Transaction.amount_cents > 0; direction + sign enforced in service layer.
+- AuditLog immutable (no UPDATE/DELETE).
+- Soft deletion (if introduced) uses deleted_at; queries exclude by default.
+
+### 10.8 Indexing & Performance (Initial)
+| Table | Index | Rationale |
+|-------|-------|-----------|
+| User | (username), (email) | Auth lookups |
+| Gig | (status, scheduled_for) | Dashboard filtering |
+| GigAssignment | (cupid_user_id, accepted_at) | Cupid workload |
+| AIMessage | (ai_session_id, created_at) | Chronological retrieval |
+| Notification | (status, channel) | Queue processing |
+| Transaction | (user_id, created_at) | Balance & statements |
+| AuditLog | (event_type, created_at DESC) | Filtering audits |
+
+Review after real data to add composite or partial indexes (e.g., notifications where status=queued).
+
+### 10.9 SQLite → Postgres Migration Strategy
+Steps:
+1. Freeze schema changes (migration branch).
+2. Ensure all Django migrations deterministic & squashed if excessive.
+3. Add migration health script (checks constraints, null anomalies).
+4. Provision Postgres (dev/stage) with identical charset & timezone UTC.
+5. Dry run: migrate schema → load anonymized fixture data.
+6. Validate row counts, sample checksums (per table).
+7. Switch app config for staging; run integration tests (auth, AI stubs, gig lifecycle).
+8. Production cutover: maintenance window (if needed) → dump SQLite → transform (scripts) → load → run post‑load verification.
+Rollback: point-in-time snapshot (before switch) + revert env config.
+
+### 10.10 Retention & Deletion Policy (Draft)
+| Entity | Retention | Action on Delete Request | Rationale |
+|--------|-----------|--------------------------|-----------|
+| UserProfile (PII) | Active + 30 days grace | Hard delete after grace if no legal hold | Privacy |
+| DaterProfile | Active + 30 days | Hard delete | Minimal legacy value |
+| CupidProfile | Active + 1 year after inactivity | Anonymize payout_account_token | Accounting audit |
+| AISession / AIMessage | 90 days (content) | Anonymize earlier (remove free text, keep counts) | Reduce sensitive text footprint |
+| Gig / GigAssignment | 1 year | Anonymize requester & cupid (replace with surrogate) after 1 year | Operational analytics |
+| Payment / Transaction | 7 years | Retain; detach user by surrogate if account deleted | Financial compliance |
+| Feedback | 1 year | Anonymize user_id | Trend analytics |
+| AuditLog | 7 years | Retain (no PII beyond hashed IP) | Security & compliance |
+| Notification | 30 days | Hard delete | Low value after sent |
+
+Deletion Workflow:
+1. User submits deletion → queue job.
+2. Verify pending financial / compliance holds.
+3. Execute anonymization + deletions transactionally (with retry).
+4. Record AuditLog event (user_deleted).
+
+### 10.11 Backup & Restore
+- Engine: Postgres native base backup + WAL archiving.
+- Frequency: Full daily @ 02:00 UTC; WAL continuous.
+- Retention: 30 days full; WAL 7 days.
+- Encryption: Storage-level + server-side KMS.
+- RPO: ≤15 min. RTO: ≤60 min.
+- Quarterly restore drill: script executes automated restore & checksum compare per critical table sample.
+
+### 10.12 Data Quality & Observability
+Checks:
+- Pre-deploy migration validator (foreign key, null anomalies, enum values).
+- Post-migration counts & random row hash sampling.
+Metrics (exported via Prometheus):
+- db_slow_query_p95
+- ai_message_write_latency
+- transaction_balance_mismatch (gauge should stay 0)
+- notification_queue_depth
+Alerts:
+- Queue depth > 500 for 10m
+- Slow query p95 > 400ms sustained 30m
+
+### 10.13 Scaling Roadmap
+Phase 1: Single Postgres instance (primary).  
+Phase 2 Trigger: Read-heavy (AIMessage, AuditLog) > 70% read load → introduce read replica for reporting.  
+Phase 3 Trigger: AIMessage volume > 50M rows → partition by month or move cold partitions to cheaper storage.  
+Caching Targets (later): UserProfile (hot), FeatureFlags (global), Gig status board (per Cupid).  
+Potential Future: Move Notification and AuditLog to append-only event store (e.g., separate logical DB).
+
+### 10.14 Open Questions / Decisions Needed
+| Topic | Question | Owner | Due |
+|-------|----------|-------|-----|
+| Email hashing | Hash email for analytics or rely on deterministic lowercasing? | Data Lead | TBD |
+| Field-level encryption scope | Encrypt DaterProfile.behavioral fields now or defer? | Security | TBD |
+| Token model | Sessions only vs add refresh token rotation? | Auth | TBD |
+| Multi-tenancy | Any future white-label need? Impacts schema prefixing. | Product | TBD |
+
+### 10.15 Deliverables To Add (Artifacts)
+- er_diagram.png (C4-ish + ER overlay).
+- data_dictionary.md (expanded fields, types, constraints).
+- retention_matrix.md (table above formalized).
+- migration_playbook.md (step list).
+- encryption_key_policy.md (rotation, storage, incident response).
+
+(Section 11 will reference the ER and key sequence diagrams.)
 
 ## 11. Diagrams -- All
 - **Architecture Diagram**
