@@ -148,6 +148,10 @@ As part of the Rebranding for Cupid Code, our team has decided to lean into who 
 Our main users, the daters, are comprised of tech enthusiasts; for this reason, we have decided to give the app a more techy vibe and style the app around the terminal. 
 
 - The rebranding will feature a new logo designed to resemble intricate code elements.
+- Below is an example of what the new logo could look like.
+
+![Logo](images/Logodesign.jpg)
+
 - Buttons that have graphics will also follow the new rebranding and look like code.
 - The color scheme we have selected is based on the look of a terminal.
   - Dark background
@@ -160,7 +164,7 @@ Our main users, the daters, are comprised of tech enthusiasts; for this reason, 
   - #09A129   
   - #000000
 
- **Insert Image Here** 
+![color scheme](images/Default.png)
 
 ### Accessibility
 
@@ -169,35 +173,35 @@ Our main users, the daters, are comprised of tech enthusiasts; for this reason, 
 
 **Protanopia**
 
-IMAGE GOES HERE
+![Protanopia](images/Protanopia.png)
 
 **Deuteranopia** 
 
-IMAGE GOES HERE
+![Deuteranopia](images/Deuteranopia.png)
 
 **Tritanopia**
 
-IMAGE GOES HERE 
+![Tritanopia](images/Tritanopia.png)
 
 **Achromatopsia**
 
-IMAGE GOES HERE
+![Achromatopsia](images/Achromatopsia.png)
 
 **Protanomaly**
 
-IMAGE GOES HERE
+![Protanomaly](images/Protanomaly.png)
 
 **Deuteranomaly** 
 
-IMAGE GOES HERE
+![Deuteranomaly](images/Deuteranomaly.png)
 
 **Tritanomaly**
 
-IMAGE GOES HERE
+![Tritanomaly](images/Tritanomaly.png)
 
 **Achromatomaly**
 
-IMAGE GOES HERE
+![Achromatomaly](images/Achromatomaly.png)
 
 - Most Color Blindnesses are compatible with our color scheme.
 - To ensure all can see and use our app efficiently, we will be adding an Accessibility mode.
@@ -207,10 +211,111 @@ IMAGE GOES HERE
 - Accessibility mode will be easily accessible from the home screen.
 - Below is the color Palette for the accessibility mode.
   
-  IMAGE OF NEW COLOR PALETTE
+![Accessible.png](images/Accessible.png)
 
 ### Navigation Flow
+**Dater**
 
+As stated before, we aim to make the user's experience as simple as possible; therefore, we strive to follow the following navigation plan.
+Our home page is designed after the layout of the Canvas Mobile app.
+- All pages are accessible with just two clicks from the home page.
+- Pages:
+  0. sign up page 
+    - toggle for type of account (Cupid, or Dater) 
+    - simple page with input boxes for: 
+      - username 
+      - password 
+      - first name 
+      - last name 
+      - email 
+      - phone number 
+      - address 
+      - physical discription
+    - file upload button for a Profile picture
+    - dedicated card space for a preview of prfile picture 
+    - create account button 
+  1. login page 
+    - input boxes for:
+      - email
+      - password 
+    - button to sign in with
+  2. Home Page 
+    - top nav bar (This is on Every page)
+      - Logo center 
+      - hamburger button
+        - Accessible mode toggle 
+        - link to profile page
+        - link to payment page
+        - logout link
+    - main content card style 
+      - Card to link to AI page 
+      - Card to link to Plan a Date/ create a gig  page 
+      - Card to link to Rate Cupids/Order Status page 
+      - Card to link to Calendar 
+      - Upcoming Dates Preview
+        - 1-3 cards showing upcoming dates/events 
+    - bottom nav bar (This is on every page)
+      - link to Home page (disabled when on home page) 
+      - Link to AI page 
+      - Link to Payment page 
+      - Link to Profile page 
+      - Link to Notifications Page 
+  3. AI Page
+    - top nav bar (discussed previously)
+    - AI chat tab  
+      - chat history ( only avalible for current chat)
+      - input message box
+      - AI voice button ( changes UI to AI listening tab) 
+    - AI listening tab
+      - start listening button
+      - stop listening button 
+      - real time AI response box ( only will load after stop listening) 
+      - AI chat button ( changes UI to AI chat tab
+    - bottom nav bar (discussed previously)  
+  4. Plan a date/create gig page 
+    - top nav bar 
+    - input boxes for: 
+      - choose the day 
+      - where you are going 
+      - what you will be doing 
+      - max budget for gig
+    - button to add gig/create date 
+    - bottom nav bar 
+  5. Rate Cupid/ Order Status page 
+    - top nav bar  
+    - Unclaimed section 
+      - Cards for all unclaimed gigs 
+    - Claimed section 
+      = Cards for all claimed gigs 
+    - Completed Gigs section 
+      - Cards for all completed gigs 
+        - completed gigs cards will have a button to rate cupid 
+    - rate cupid popup 
+      - description input box
+      - hearts radios 
+      - send button 
+      - cancel button 
+    - bottom nav bar
+  6. calander page 
+    - top nav bar 
+    -upcoming dates section
+      - cards of upcoming dates ordered from closests to farthest
+        - date details 
+          - when
+          - where 
+          - what 
+          - budget 
+    - past dates section 
+      - cards of past dates ordered from closest to farthest.
+        - all card details are the same as the upcomming dates cards.
+    - bottom nav bar
+  7. Payment page 
+    
+
+**Cupid**
+
+
+**Manager**
 
 - **Navigation Flow:**
 - **Wireframes/Mockups:** (Insert or link to images)
