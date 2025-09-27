@@ -148,6 +148,10 @@ As part of the Rebranding for Cupid Code, our team has decided to lean into who 
 Our main users, the daters, are comprised of tech enthusiasts; for this reason, we have decided to give the app a more techy vibe and style the app around the terminal. 
 
 - The rebranding will feature a new logo designed to resemble intricate code elements.
+- Below is an example of what the new logo could look like.
+
+![Logo](images/Logodesign.jpg)
+
 - Buttons that have graphics will also follow the new rebranding and look like code.
 - The color scheme we have selected is based on the look of a terminal.
   - Dark background
@@ -160,7 +164,7 @@ Our main users, the daters, are comprised of tech enthusiasts; for this reason, 
   - #09A129   
   - #000000
 
- **Insert Image Here** 
+![color scheme](images/Default.png)
 
 ### Accessibility
 
@@ -169,35 +173,35 @@ Our main users, the daters, are comprised of tech enthusiasts; for this reason, 
 
 **Protanopia**
 
-IMAGE GOES HERE
+![Protanopia](images/Protanopia.png)
 
 **Deuteranopia** 
 
-IMAGE GOES HERE
+![Deuteranopia](images/Deuteranopia.png)
 
 **Tritanopia**
 
-IMAGE GOES HERE 
+![Tritanopia](images/Tritanopia.png)
 
 **Achromatopsia**
 
-IMAGE GOES HERE
+![Achromatopsia](images/Achromatopsia.png)
 
 **Protanomaly**
 
-IMAGE GOES HERE
+![Protanomaly](images/Protanomaly.png)
 
 **Deuteranomaly** 
 
-IMAGE GOES HERE
+![Deuteranomaly](images/Deuteranomaly.png)
 
 **Tritanomaly**
 
-IMAGE GOES HERE
+![Tritanomaly](images/Tritanomaly.png)
 
 **Achromatomaly**
 
-IMAGE GOES HERE
+![Achromatomaly](images/Achromatomaly.png)
 
 - Most Color Blindnesses are compatible with our color scheme.
 - To ensure all can see and use our app efficiently, we will be adding an Accessibility mode.
@@ -207,7 +211,7 @@ IMAGE GOES HERE
 - Accessibility mode will be easily accessible from the home screen.
 - Below is the color Palette for the accessibility mode.
   
-  IMAGE OF NEW COLOR PALETTE
+![Accessible.png](images/Accessible.png)
 
 ### Navigation Flow
 
