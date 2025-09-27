@@ -150,15 +150,15 @@ Our main users, the daters, are comprised of tech enthusiasts; for this reason, 
 - The rebranding will feature a new logo designed to resemble intricate code elements.
 - Buttons that have graphics will also follow the new rebranding and look like code.
 - The color scheme we have selected is based on the look of a terminal.
-  - Dark background
-  - light green words
-  - minimal other colors
-- the colors we have selected in hex are (from right to left)
+  - Dark background
+  - light green words
+  - minimal other colors
+- The colors we have selected in hex are (from right to left)
   - #FB3640
-  - #1F487E
-  - #00CCFF
-  - #09A129   
-  - #000000
+  - #1F487E
+  - #00CCFF
+  - #09A129   
+  - #000000
 
  **Insert Image Here** 
 
