@@ -119,8 +119,40 @@ Partial / incomplete (to be delivered):
 
 
 ## 3. Architecture -- Carter
-- **Chosen Architecture:** (e.g., client-server, microservices, monolith)
-- **Design Rationale:** Why was this architecture chosen?
+### Chosen Architecture
+Cupid Code adopts a **three-tier architecture** with a separation of concerns between presentation, application logic, and data persistence:
+
+1. **Frontend (Presentation Layer)**  
+   - Built with **Vue.js**.  
+   - Provides role-based portals for **Daters**, **Cupids (gig workers)**, and **Married Users**.  
+   - Handles real-time interactions (chat, notifications, scheduling UI).  
+   - Communicates with the backend exclusively through a REST API over HTTPS.  
+
+2. **Backend (Application Layer)**  
+   - Powered by **Django**.  
+   - Hosts business logic for authentication, payments, AI orchestration, and scheduling.  
+   - Exposes secure APIs to the frontend and integrates with external services (Stripe/PayPal, AI APIs, SMS/email notification providers).  
+   - Includes background task management (Celery + Redis) for notifications, scheduled events, and AI feedback.  
+
+3. **Database (Data Layer)**  
+   - Relational storage using **PostgreSQL**.  
+   - Stores user profiles, preferences, schedules, gig orders, transaction records, and AI interaction logs.  
+   - Employs strict schema definitions and foreign keys for consistency.  
+   - Sensitive data (e.g., payment info) is either securely encrypted or handled via external payment processors.
+
+### Design Rationale
+- **Separation of concerns:** Keeping UI, business logic, and storage distinct improves maintainability and scalability.  
+- **Security and compliance:** Sensitive financial and personal data is minimized/encrypted in storage.
+- **Scalability:** Each layer can be scaled independently (e.g., multiple frontend servers, load-balanced backend services, managed DB instances).  
+- **Extensibility:** New features like subscription tiers, AI integrations, or couple-specific modules can be added without impacting the entire system.  
+- **Cloud deployment:** Designed for deployment on **Azure** for backend, frontend, and database services.
+
+### Major Components & Interactions
+- **User Portals (Vue)** → **REST API (Django)** → **Postgres DB**  
+- **AI Services**: Django integrates with external AI APIs for chat, voice recognition, and real-time coaching.  
+- **Payment Services**: Stripe/PayPal APIs handle funds; Django manages session tokens and transaction status.  
+- **Notification Services**: Workers push updates via email/SMS and in-app alerts.  
+- **Manager/Admin Dashboard**: Real-time metrics and compliance reporting via Django views connected to Postgres.
 
 ## 4. Major Components -- Dallin
 For each component:
@@ -432,9 +464,42 @@ Our home page is designed after the layout of the Canvas Mobile app.
 - **Expected Volume:** (If relevant)
 
 ## 8. Security -- Carter
-- **Security at Each Layer:** (OS, application, network, data)
-- **Sensitive Data Handling:**
-- **Compliance Considerations:** (e.g., GDPR)
+### Security at Each Layer
+
+1. **Frontend (Vue)**  
+   - Enforces HTTPS-only connections.  
+   - Implements role-based access (different portals for daters, Cupids, married users).  
+   - Uses OAuth 2.0 / JWT tokens for secure session handling.  
+   - Client-side input validation to prevent malformed requests.  
+
+2. **Backend (Django)**  
+   - Authentication: Django’s built-in auth with salted + hashed passwords (PBKDF2/Argon2).  
+   - Authorization: Role-based access controls (RBAC) to isolate user classes.  
+   - API Security:  
+     - All endpoints protected with authentication/CSRF protection.  
+     - Rate limiting to prevent brute-force attacks.  
+   - Background tasks run in isolated workers with limited privileges.  
+
+3. **Database (PostgreSQL)**  
+   - Encryption at rest (AES-256) and in transit (TLS).  
+   - Strict schema constraints to prevent injection.  
+   - Role-based DB users (e.g., read-only vs. write access).  
+   - Sensitive information (like payment methods) never stored; only tokens from payment processors are persisted.  
+
+### Sensitive Data Handling
+- **User credentials** → Encrypted with PBKDF2/Argon2.  
+- **Payment data** → Delegated to Stripe/PayPal; only transaction IDs and metadata stored.  
+- **Personal Information (addresses, calendar data)** → Encrypted at rest; decrypted only when necessary for app functions.  
+- **AI interaction logs** → Stored with anonymization to protect user identities.  
+- **Audit logs** → All account changes, logins, and payment events logged for security monitoring.  
+
+### Compliance Considerations
+- **Age restriction:** Enforce 18+ verification with DOB validation at sign-up.  
+- **Data privacy:** Align with GDPR principles. Users can delete accounts and request data exports.  
+- **Financial compliance:** PCI-DSS compliance via third-party payment processors (Stripe/PayPal).  
+- **Accessibility compliance:** WCAG 2.1 AA standards for usability (screen readers, high contrast).  
+- **Security monitoring:** Logging and anomaly detection for suspicious activity; intrusion detection via cloud services.  
+- **Consent management:** Couples can configure privacy/consent settings for shared data (surprises, gifts, etc.).  
 
 ## 9. Risks and Mitigation -- Greg
 - **Key Risks:**
