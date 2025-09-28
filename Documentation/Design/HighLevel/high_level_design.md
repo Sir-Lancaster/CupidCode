@@ -155,15 +155,142 @@ Cupid Code adopts a **three-tier architecture** with a separation of concerns be
 - **Manager/Admin Dashboard**: Real-time metrics and compliance reporting via Django views connected to Postgres.
 
 ## 4. Major Components -- Dallin
-For each component:
-- **Name:**
-- **Responsibilities:**
-- **Technologies Used:**
-- **Internal Interfaces:** How does it communicate with other components?
+### Frontend (Vue 3 + Vite)
+
+- **Responsibilities**  
+The frontend is responsible for rendering the user interface and ensuring a smooth, responsive experience across devices. It manages client-side routing, maintains global application state (e.g., authentication, session data, preferences), and enforces accessibility standards such as ARIA roles and keyboard navigation. It communicates with the backend via APIs and, where necessary, establishes WebSocket connections for real-time features like chat or live notifications.  
+
+- **Technologies/Versions**  
+Vue 3 (Composition API) provides a modular approach to building reactive components, while Vite handles efficient bundling and hot-module reloading for development. Vue Router manages client-side navigation, and Socket.io or native WebSocket clients support real-time updates.  
+
+- **Internal Interfaces**  
+Common abstractions include an `apiClient` module for standardized HTTP requests, an `authStore` to track authentication state, a `notificationService` to manage system alerts, and reusable UI components to enforce consistency across the application.  
+
+
+
+### Backend API (Django + DRF)
+
+- **Responsibilities**  
+The backend exposes a RESTful API that supports all client-facing features. It manages authentication and enforces role-based access for different user types (Dater, Cupid, Manager). It implements business logic such as matchmaking, chat storage, and media uploads. It also handles background jobs such as notification dispatch, analytics aggregation, and payment confirmation through asynchronous workers.  
+
+- **Technologies/Versions**  
+Django 5.x provides a secure and scalable foundation, while Django REST Framework (DRF) simplifies the creation of API endpoints. 
+
+- **Internal Interfaces**  
+The backend is structured around `serializers` for data validation and formatting, `services/*` modules to encapsulate domain logic, `signals` for event-driven triggers, and `tasks.py` for asynchronous job execution.  
+
+
+
+### Database (SQLite → Postgres)
+
+- **Responsibilities**  
+The database persists all critical application data, including users, profiles, matches, chat messages, financial transactions, and notification logs. It provides transactional integrity, supports relational queries, and ensures long-term data durability.  
+
+- **Technologies/Versions**  
+SQLite is used during development for its simplicity and lightweight setup. 
+
+- **Internal Interfaces**  
+Django models serve as the primary abstraction for interacting with the database. Repository/service layers may be introduced to separate business logic from persistence logic.  
+
+
+
+### AI Service
+
+- **Responsibilities**  
+The AI service supports advanced features such as natural language chat responses, moderation of inappropriate content, and optional voice transcription. It can also rank or filter suggestions based on user context, providing a more personalized experience.  
+
+- **Technologies/Versions**  
+Integration with external large language models (OpenAI, Anthropic, etc.) powers text-based AI features. For speech-to-text, services like Whisper or Pyttsx3 equivalents can be used.  
+
+- **Internal Interfaces**  
+Clients communicate with the AI service through REST or streaming endpoints such as `/ai/chat` and `/ai/transcribe`. A dedicated API wrapper ensures consistent request formatting and error handling.  
+
+
+
+### Payments (Stripe / PayPal)
+
+- **Responsibilities**  
+This component manages the full lifecycle of user payments, including subscriptions, one-time transactions, and credits. It ensures that transactions are recorded securely, validates payment statuses via webhook callbacks, and generates receipts or invoices for users.  
+
+- **Technologies/Versions**  
+Stripe Checkout and PayPal Smart Buttons are used for payment processing. Both provide PCI-compliant hosted flows to reduce security risk.  
+
+- **Internal Interfaces**  
+Webhook processors validate payment events, a payment service module orchestrates subscriptions and credit logic, and a receipt generator prepares transactional records for users.  
+
+
+
+### Notifications (Email / SMS / Push)
+
+- **Responsibilities**  
+Notifications provide timely communication to users outside the app, such as verification emails, password resets, match alerts, or payment confirmations. Channels include email, SMS, and push notifications.  
+
+- **Technologies/Versions**  
+Twilio handles SMS and voice, while providers such as SendGrid or Firebase may handle email and push delivery. A message queue (e.g., Celery) ensures reliable, asynchronous delivery.  
+
+- **Internal Interfaces**  
+Core modules include a `notification_queue` for queuing outbound messages, a template renderer for creating consistent messages, and delivery gateways for dispatching to providers.  
+
+
+
+### Auth / Identity
+
+- **Responsibilities**  
+This component handles all user identity management. It supports user registration, login, session or token issuance, password recovery, and optional two-factor authentication. It also enforces rules like age verification to ensure compliance with platform requirements.  
+
+- **Technologies/Versions**  
+Django’s authentication system is extended with JWT (e.g., SimpleJWT) for API token management. OAuth integrations (Google, Apple) may be added for social logins.  
+
+- **Internal Interfaces**  
+The system includes a token generator for access/refresh tokens, session middleware for web clients, and validation services for age-gating and security checks.  
+
+
+
+### Admin / Manager Dashboard
+
+- **Responsibilities**  
+The dashboard provides administrators and managers with tools to oversee platform activity. Features include analytics views for monitoring engagement, moderation panels for handling reports or flagged content, and user management capabilities.  
+
+- **Technologies/Versions**  
+Django Admin provides an out-of-the-box management interface. Alternatively, a custom Vue-based admin panel can be built for a richer user experience.  
+
+- **Internal Interfaces**  
+Modules include metrics aggregation services for analytics, and privilege enforcement mechanisms to ensure only authorized managers can access sensitive data.  
+
 
 ## 5. External Interfaces -- Dallin
-- **Third-Party APIs/Services:** List and describe each (e.g., Stripe, PayPal, notification services).
-- **Protocols/Data Formats:** (e.g., REST, WebSocket, JSON)
+### Third-Party APIs / Services
+
+1. **AI Bot**  
+    - **Description:** The AI logic is dependent on and provided by Prof. Falor. It powers the “intelligence” behind AI chat and listening features.  
+    - **Used in:** All interactions involving a Cupid, including conversational chat, AI-assisted suggestions, and real-time responses.  
+    - **Notes:** The AI bot acts as the core decision-making engine; API reliability and latency are critical for responsive interaction.
+
+2. **Geolocation API**  
+    - **Description:** Provides device location data, either via GPS, IP address, or browser geolocation.  
+    - **Used in:** Matching users based on proximity and finding nearby gigs or events.  
+    - **Notes:** Requires explicit user permission; must handle location errors or denials gracefully.
+
+3. **Pyttsx3**  
+    - **Description:** Python text-to-speech library for converting text into spoken audio.  
+    - **Used in:** Accessibility features (for visually impaired users) and optionally for AI voice output during gigs.  
+    - **Notes:** Runs locally and does not require internet access; can be used as a fallback if external TTS services fail.
+
+4. **Twilio API**  
+    - **Description:** Cloud communication platform providing SMS, email, and voice messaging services.  
+    - **Used in:** Sending notifications, verification codes, and alerts to users.  
+    - **Notes:** Includes retry and fallback mechanisms; provider quotas should be monitored to avoid delivery failures.
+
+5. **Yelp Fusion API (via `yelpapi`)**  
+    - **Description:** Access to business data, reviews, events, and ratings through the Yelp platform.  
+    - **Used in:** Finding gigs, events, and venues for users based on location and preferences.  
+    - **Notes:** Must handle API rate limits and cache results to improve performance and reduce API calls.
+
+6. **Azure REST API**  
+    - **Description:** Cloud-based services for hosting, storage, and connecting multiple devices.  
+    - **Used in:** Supporting backend infrastructure, real-time device communication, and scalable storage for media or data.  
+    - **Notes:** Provides high availability and scalability; secure authentication and endpoint validation are required.
+
 
 ## 6. User Interface Design -- Zac
 
