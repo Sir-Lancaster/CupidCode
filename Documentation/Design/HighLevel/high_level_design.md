@@ -449,7 +449,7 @@ Our home page is designed after the layout of the Canvas Mobile app.
       - Send button 
       - Cancel button 
     - Bottom nav bar
-  4. Calander page 
+  4. Calender page 
     - Top nav bar 
     - Upcoming dates section
       - Cards of upcoming dates ordered from closests to farthest
@@ -464,7 +464,7 @@ Our home page is designed after the layout of the Canvas Mobile app.
     - Bottom nav bar
   5. Payment page 
     - Top nav bar 
-    - Current acount balance 
+    - Current account balance 
     - User will be able to select from saved cards 
     - User will be able to input amount they wish to add to account 
     - Deposit button
@@ -479,7 +479,10 @@ Our home page is designed after the layout of the Canvas Mobile app.
       - Personal Information section  
       - User information section 
       - Details about you section
-    - Save button 
+    - Save button
+    - Update pasword section 
+      - Dater will need to enter old password once, and new password twice.
+      - Update password button 
     - Bottom nav bar 
   7. Notifications page
     - Top nav bar 
@@ -495,7 +498,7 @@ Our home page is designed after the layout of the Canvas Mobile app.
       - Hamburger side bar 
         - Link to profile page 
         - Link to find gigs page 
-        - Link to complete gigs page 
+        - Link to completed gigs page 
         - Link to feeback page 
         - Logout button
     - Main section will have cards that link to all of the same pages
@@ -510,12 +513,13 @@ Our home page is designed after the layout of the Canvas Mobile app.
         - Completed gigs page 
         - Feedback page 
         - Profile page
+        - Notification page 
   2. Find Gigs Page 
     - Top nav bar 
     - Active gig section 
       - Here a cupid wil be able to see the gigs they have accepted 
       - Active gigs should appear in card format with relevant information
-      - Each active gig should have a completed button and a 
+      - Each active gig should have a completed button and a reject button
     - Available gigs section
       - Here a cupid will be able to see the gigs they can accept
       - Each available gig will be shown in card fomat with relevant information
@@ -543,6 +547,12 @@ Our home page is designed after the layout of the Canvas Mobile app.
     - Cupids personal information will be able to be edited 
     - Save button 
     - Bottom Nav bar 
+  6. Notifications page
+    - Top nav bar
+    - Unopened notifications section
+    - A user will see there unread notifications at the top in order from newest to oldest
+    - Opened notifications
+    - A user will see a list of opened notifications in order from newest to oldest
 
 **Manager**
   1. Home page
@@ -585,10 +595,139 @@ Our home page is designed after the layout of the Canvas Mobile app.
 
 ### UI Diagrams
 
+**Cupid Sign Up**
+
+![sign up Cupid](images/createCupid.jpg)
+
+**Dater Sign Up** 
+
+![sign up Dater](images/createDater.jpg)
+
+**Login Page** 
+
+![Login](images/login.jpg)
+
+**Dater Home Page**
+
+![Dater Home](images/daterHome.jpg)
+
+**AI Chat Tab**
+
+![AI chat](images/AIchat.jpg)
+
+**AI Voice Tab**
+
+![AI Voice](images/AIListen.jpg)
+
+**Plan Date Page**
+
+![plan date](images/planDate.jpg)
+
+**Rate Cupid/ Order Progress Page** 
+
+![rate cupid](images/rateCupid.jpg)
+
+**Calendar Page** 
+
+![calendar](images/calendar.jpg)
+
+**Payment Page**
+
+![payment](images/Payment.jpg)
+
+**Dater Profile Page** 
+
+![Dater profile](images/daterProfile.jpg)
+
+**Dater & Cupid Notifications Page**
+
+![notifications](images/Notification.jpg)
+
+**Cupid Home Page** 
+
+Note: Although all of the Cupid diagrams do not show the notification button on the bottom nav bar, it will be there.
+
+![Cupid home](images/cupidHome.jpg)
+
+**Find Gigs Page** 
+
+![find gigs](images/findGigs.jpg)
+
+**Completed Gigs Page** 
+
+![completed gigs](images/completedGigs.jpg)
+
+**Feedback Page** 
+
+![feedback](images/feedback.jpg)
+
+**Cupid Profile Page**
+
+![Cupid profile](images/cupidProfile.jpg)
+
+**Manager Home Page** 
+
+![Manager home](images/managerHome.jpg)
+
+**Cupid Info Page** 
+
+![Cupid info](images/cupidInfo.jpg)
+
+**Dater Info Page**
+
+![Dater info](images/daterInfo.jpg)
+
+
 ## 7. Input and Output -- Zac
-- **Types of Input:** (User actions, external data, etc.)
-- **Types of Output:** (UI updates, notifications, reports)
-- **Expected Volume:** (If relevant)
+Although most of this was mentioned previously, we have condensed all the the inputs and outputs into single lists.
+
+
+### Inputs
+
+- User Profile Information 
+  - Name 
+  - Email 
+  - Password 
+  - Preferences 
+    - Budget
+    - Range 
+    - Activity types 
+- Authentication 
+  - Username 
+  - Password 
+- AI interactions 
+  - Chat prompts 
+  - Questions 
+  - Commands 
+- Calendar date creation
+  - Edit date 
+- Payment card details 
+- Ratings
+- Navigation Actions 
+  - Button Presses 
+  - Taps 
+  - Menu selections  
+
+### Outputs 
+ 
+- AI responses 
+- Push notifications 
+- Date Plans 
+- Calendar Views 
+  - upcoming date notifications 
+- Payment Confirmations
+- Profile Updates 
+- Order & Cupid status updates 
+- Accessibility toggle
+
+### Expected Volume
+To anticipate load and scalability needs, we project the following average volumes at launch:
+
+- Daily Acitive Users: 100, scaling to 1,000 in later phases. 
+- Notifications: 1-3 per user per day (AI updates, date reminders, job statues)
+- AI requests: 1-3 per user per session (questions, planning, feedback) 
+- Payment: 1 transaction per active user per week 
+- Calendar Events: 2-3 new or updated events per user per month
 
 ## 8. Security -- Carter
 ### Security at Each Layer
