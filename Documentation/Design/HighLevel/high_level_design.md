@@ -250,7 +250,9 @@ As stated before, we aim to make the user's experience as simple as possible; th
 Our home page is designed after the layout of the Canvas Mobile app.
 - All pages are accessible with just two clicks from the home page.
 - Pages:
-  0. Sign up page
+  
+  0. **Sign up page**
+
     - This page will be simple in design
     - A new user will use a toggle to determine whether they are signing up as a cupid or a dater
     - If they are signing up as a cupid then they will have a  smaller sign up page as not as much information is needed from them
@@ -262,12 +264,13 @@ Our home page is designed after the layout of the Canvas Mobile app.
       - Past dating history 
       - Dating strengths 
    - Both sign up pages will have a create acount page
-  1. Login page 
+  1. **Login page**
     - Simple normal looking login page
     - Will be the same page for all users (Daters, Cupids, Managers)
     - Button to sign in with at bottom
+
 **Dater**
-  0. Home Page 
+  0. **Home Page**
     - Top nav bar (This is on Every page)
       - Logo center 
       - Hamburger button
@@ -290,7 +293,7 @@ Our home page is designed after the layout of the Canvas Mobile app.
           - Link to Payment page 
           - Link to Profile page 
           - Link to Notifications Page 
-  1. AI Page
+  1. **AI Page**
     - Top nav bar (discussed previously)
     - AI chat tab  
       - Chat history ( only avalible for current chat)
@@ -301,13 +304,13 @@ Our home page is designed after the layout of the Canvas Mobile app.
       - user should be able to see an AI response after stoping the recording
       - AI chat button ( changes UI to AI chat tab)
     - Bottom nav bar (discussed previously)  
-  2. Plan a date/create gig page 
+  2. **Plan a date/create gig page**
     - Top nav bar 
     - User will be able to manually plan a date/ create a gig
     - Will need to input the What, When, Where, How($$), to create a valid date/gig
     - Button to add gig/create date 
     - Bottom nav bar 
-  3. Rate Cupid/ Order Status page 
+  3. **Rate Cupid/ Order Status page**
     - Top nav bar  
     - Unclaimed section 
       - Cards for all unclaimed gigs 
@@ -322,7 +325,7 @@ Our home page is designed after the layout of the Canvas Mobile app.
       - Send button 
       - Cancel button 
     - Bottom nav bar
-  4. Calender page 
+  4. **Calender page**
     - Top nav bar 
     - Upcoming dates section
       - Cards of upcoming dates ordered from closests to farthest
@@ -335,7 +338,7 @@ Our home page is designed after the layout of the Canvas Mobile app.
       - Cards of past dates ordered from closest to farthest
         - All card details are the same as the upcomming dates cards
     - Bottom nav bar
-  5. Payment page 
+  5. **Payment page**
     - Top nav bar 
     - Current account balance 
     - User will be able to select from saved cards 
@@ -345,7 +348,7 @@ Our home page is designed after the layout of the Canvas Mobile app.
       - User will be able to add and save a new card to their account
       - Save button 
     - Bottom nav bar 
-  6. Profile Page 
+  6. **Profile Page**
     - Top nav bar 
     - User's information will be split up into sections which can be edited
     - Section topics will include the following
@@ -357,7 +360,7 @@ Our home page is designed after the layout of the Canvas Mobile app.
       - Dater will need to enter old password once, and new password twice.
       - Update password button 
     - Bottom nav bar 
-  7. Notifications page
+  7. **Notifications page**
     - Top nav bar 
     - Unopened notifications section
     - A user will see there unread notifications at the top in order from newest to oldest
@@ -365,7 +368,7 @@ Our home page is designed after the layout of the Canvas Mobile app.
     - A user will see a list of opened notifications in order from newest to oldest
 
 **Cupid**
-  1. Home page 
+  1. **Home page**
     - Because a cupid has less needs, we are able to give them multiple ways to get anywhere they need from the home page
     - Top nav bar 
       - Hamburger side bar 
@@ -387,8 +390,8 @@ Our home page is designed after the layout of the Canvas Mobile app.
         - Feedback page 
         - Profile page
         - Notification page 
-  2. Find Gigs Page 
-    - Top nav bar 
+  2. **Find Gigs Page**
+    - Top nav bar
     - Active gig section 
       - Here a cupid wil be able to see the gigs they have accepted 
       - Active gigs should appear in card format with relevant information
@@ -398,7 +401,7 @@ Our home page is designed after the layout of the Canvas Mobile app.
       - Each available gig will be shown in card fomat with relevant information
       - Accept buttons should be on each card 
     - Bottom nav bar
-  3. Completed gigs page
+  3. **Completed gigs page**
     - This page allows the cupid to reflect on their completed gigs
     - All completed gigs will be in card form with relevant information to the gig
     - Each card will have a Rate Dater button which create pop up to rate dater
@@ -406,21 +409,21 @@ Our home page is designed after the layout of the Canvas Mobile app.
       - A cupid will be able to describe interaction with dater
       - There will be a rating system like 1-5 stars 
       - send and cancel buttons 
-    - Bottom nav bar 
-  4. Feedback page
+    - Bottom nav bar
+  4. **Feedback page**
     - Top nav bar 
-    - This page will have an overall star ratings at the top 
-    - all feedback/ ratings from daters will be shown in card format 
+    - This page will have an overall star ratings at the top
+    - all feedback/ ratings from daters will be shown in card format
     - Each feedback card will show relevant information
     - Bottom nav bar 
-  5. Profile Page 
+  5. **Profile Page**
     - Top nav bar 
     - Profile picture 
     - Cupids will be able to find their account balance, and how many successful gigs vs the amount of gigs they have accepted
     - Cupids personal information will be able to be edited 
     - Save button 
     - Bottom Nav bar 
-  6. Notifications page
+  6. **Notifications page**
     - Top nav bar
     - Unopened notifications section
     - A user will see there unread notifications at the top in order from newest to oldest
@@ -428,10 +431,10 @@ Our home page is designed after the layout of the Canvas Mobile app.
     - A user will see a list of opened notifications in order from newest to oldest
 
 **Manager**
-  1. Home page
+  1. **Home page**
     - Banner at top showing logo and Logout button 
     - 2 cards that link to both Cupids info page, and Daters info page
-    - Will have graph to show revenue over time 
+    - Will have graph to show revenue over time
     - Will have a general stats section which will hold information like: 
       - Total dater 
       - Total cupids 
@@ -450,7 +453,7 @@ Our home page is designed after the layout of the Canvas Mobile app.
         - Home ( will be disabled when on home page) 
         - Cupids info 
         - Daters info 
-  2. Cupids info page 
+  2. **Cupids info page**
     - Manager will be able to see all cupids in card form 
     - Each cupid card will have relevant information like: 
       - Rating 
@@ -458,7 +461,7 @@ Our home page is designed after the layout of the Canvas Mobile app.
       - Completed gigs 
       - A button to suspend the cupid 
     - Bottom nav bar 
-  3. Daters info page
+  3. **Daters info page**
     - Manager will be able to see all Daters in card form 
     - Each dater card will have relevant information like: 
       - Rating 
