@@ -629,8 +629,25 @@ Our home page is designed after the layout of the Canvas Mobile app.
 - **Consent management:** Couples can configure privacy/consent settings for shared data (surprises, gifts, etc.).  
 
 ## 9. Risks and Mitigation -- Greg
-- **Key Risks:**
-- **Mitigation Strategies:**
+
+#### Risk Table Key
+- **L (Low):** Rare/Minor (unlikely or easily handled)
+- **M (Medium):** Possible/Moderate (would disrupt but manageable)
+- **H (High):** Likely/Critical (seriously affects project or business)
+- **Status:** Open = active/unresolved; Monitoring = being tracked; Closed = fully mitigated/resolved
+- **Exposure:** Combines likelihood and impact for overall risk attention
+- **Trigger/Indicator:** Metric or event that flags a risk may materialize
+
+
+| ID  | Category         | Risk Statement                                                  | Likelihood | Impact | Exposure | Preventative Mitigation                | Contingency / Fallback             | Trigger/Indicator                   | Status    |
+|-----|------------------|-----------------------------------------------------------------|------------|--------|----------|-----------------|----------------------------------------|-------------------------------------|-------------------------------------|
+| R1  | Payments/Webhooks| Webhook failures/job overlaps → Revenue loss, user impact       | Medium     | High   | High      | Sandbox-first, idempotency keys        | Circuit breaker, manual audit, retry| Failure rate >2%/day                | Monitoring |
+| R2  | AI Latency/Cost  | AI slow/costly → Bad experience, unscalable costs               | Medium     | Medium | Medium   | Observability, rate limiting           | Disable costly features, fallback   | Latency p95 >1.2s for 3 days         | Monitoring |
+| R3  | Notification     | Non-delivery → Missed connections, retention drop               | Low        | High   | Medium   | Retry logic, multiple providers        | Alert users, manual notification    | Notification failures >1%/day        | Monitoring |
+| R4  | Auth/SSO         | SSO/auth errors → Users locked out, increased support            | Low        | High   | Low      | Feature flags, error logging           | Switch to local login, escalate     | Auth error spikes >100/hr            | Monitoring |
+| R5  | Data Migration   | Migration loss → Data integrity compromised, app downtime        | Low        | High   | Medium         | Sandbox/backup, rollback plan          | Restore backup, freeze changes      | Audit fails, missing records         | Monitoring |
+| R6  | Schedule         | ML/data delays → Missed launch/revenue                          | Medium     | Medium | Medium   |  Milestone review, cadence checks       | Shift resources, move deadlines     | Milestone slip, unresolved blockers  | Monitoring |
+| R7  | Security  | Bank info unencrypted → Data breach → Legal, financial, and reputation damage | Medium        | High      | High        | Implement AES-256 encryption, limit access, audit regularly | Immediate full encryption, user & regulator notification | Audit reveals unencrypted bank info, or breach occurs | Open     |
 
 ## 10. Data Design -- Greg
 - **Data Stored:**
