@@ -552,9 +552,55 @@ Note: Although all of the Cupid diagrams do not show the notification button on 
 
 
 ## 7. Input and Output -- Zac
-- **Types of Input:** (User actions, external data, etc.)
-- **Types of Output:** (UI updates, notifications, reports)
-- **Expected Volume:** (If relevant)
+Although most of this was mentioned previously, we have condensed all the the inputs and outputs into single lists.
+
+
+### Inputs
+
+- User Profile Information 
+  - Name 
+  - Email 
+  - Password 
+  - Preferences 
+    - Budget
+    - Range 
+    - Activity types 
+- Authentication 
+  - Username 
+  - Password 
+- AI interactions 
+  - Chat prompts 
+  - Questions 
+  - Commands 
+- Calendar date creation
+  - Edit date 
+- Payment card details 
+- Ratings
+- Navigation Actions 
+  - Button Presses 
+  - Taps 
+  - Menu selections  
+
+### Outputs 
+ 
+- AI responses 
+- Push notifications 
+- Date Plans 
+- Calendar Views 
+  - upcoming date notifications 
+- Payment Confirmations
+- Profile Updates 
+- Order & Cupid status updates 
+- Accessibility toggle
+
+### Expected Volume
+To anticipate load and scalability needs, we project the following average volumes at launch:
+
+- Daily Acitive Users: 100, scaling to 1,000 in later phases. 
+- Notifications: 1-3 per user per day (AI updates, date reminders, job statues)
+- AI requests: 1-3 per user per session (questions, planning, feedback) 
+- Payment: 1 transaction per active user per week 
+- Calendar Events: 2-3 new or updated events per user per month
 
 ## 8. Security -- Carter
 ### Security at Each Layer
