@@ -214,111 +214,217 @@ Our main users, the daters, are comprised of tech enthusiasts; for this reason, 
 ![Accessible.png](images/Accessible.png)
 
 ### Navigation Flow
-**Dater**
-
 As stated before, we aim to make the user's experience as simple as possible; therefore, we strive to follow the following navigation plan.
 Our home page is designed after the layout of the Canvas Mobile app.
 - All pages are accessible with just two clicks from the home page.
 - Pages:
-  0. sign up page 
-    - toggle for type of account (Cupid, or Dater) 
-    - simple page with input boxes for: 
-      - username 
-      - password 
-      - first name 
-      - last name 
-      - email 
-      - phone number 
-      - address 
-      - physical discription
-    - file upload button for a Profile picture
-    - dedicated card space for a preview of prfile picture 
-    - create account button 
-  1. login page 
-    - input boxes for:
-      - email
-      - password 
-    - button to sign in with
-  2. Home Page 
-    - top nav bar (This is on Every page)
+  0. Sign up page
+    - This page will be simple in design
+    - A new user will use a toggle to determine whether they are signing up as a cupid or a dater
+    - If they are signing up as a cupid then they will have a  smaller sign up page as not as much information is needed from them
+    - If they are signing up as a dater then a long sign up page will be present as more details information is needed
+    - Examples of dater sign up info 
+      - Nerd type 
+      - Relationship goals 
+      - Intrests 
+      - Past dating history 
+      - Dating strengths 
+   - Both sign up pages will have a create acount page
+  1. Login page 
+    - Simple normal looking login page
+    - Will be the same page for all users (Daters, Cupids, Managers)
+    - Button to sign in with at bottom
+**Dater**
+  0. Home Page 
+    - Top nav bar (This is on Every page)
       - Logo center 
-      - hamburger button
+      - Hamburger button
         - Accessible mode toggle 
-        - link to profile page
-        - link to payment page
-        - logout link
-    - main content card style 
+        - Link to profile page
+        - Link to payment page
+        - Logout link
+    - Main content card style 
       - Card to link to AI page 
       - Card to link to Plan a Date/ create a gig  page 
       - Card to link to Rate Cupids/Order Status page 
       - Card to link to Calendar 
       - Upcoming Dates Preview
         - 1-3 cards showing upcoming dates/events 
-    - bottom nav bar (This is on every page)
-      - link to Home page (disabled when on home page) 
-      - Link to AI page 
-      - Link to Payment page 
-      - Link to Profile page 
-      - Link to Notifications Page 
-  3. AI Page
-    - top nav bar (discussed previously)
+      - On smaller screen sizes there will be a bottom nav bar with buttons to take you to the different pages
+        - On larger screens this nav bar will be at the top underneath the logo
+        - Bottom nav bar (This is on every page)
+          - link to Home page (disabled when on home page) 
+          - Link to AI page 
+          - Link to Payment page 
+          - Link to Profile page 
+          - Link to Notifications Page 
+  1. AI Page
+    - Top nav bar (discussed previously)
     - AI chat tab  
-      - chat history ( only avalible for current chat)
-      - input message box
+      - Chat history ( only avalible for current chat)
+      - User will be able to ask AI questions and recieve responses in real time
       - AI voice button ( changes UI to AI listening tab) 
     - AI listening tab
-      - start listening button
-      - stop listening button 
-      - real time AI response box ( only will load after stop listening) 
-      - AI chat button ( changes UI to AI chat tab
-    - bottom nav bar (discussed previously)  
-  4. Plan a date/create gig page 
-    - top nav bar 
-    - input boxes for: 
-      - choose the day 
-      - where you are going 
-      - what you will be doing 
-      - max budget for gig
-    - button to add gig/create date 
-    - bottom nav bar 
-  5. Rate Cupid/ Order Status page 
-    - top nav bar  
+      - User will be able to start and stop AI recording 
+      - user should be able to see an AI response after stoping the recording
+      - AI chat button ( changes UI to AI chat tab)
+    - Bottom nav bar (discussed previously)  
+  2. Plan a date/create gig page 
+    - Top nav bar 
+    - User will be able to manually plan a date/ create a gig
+    - Will need to input the What, When, Where, How($$), to create a valid date/gig
+    - Button to add gig/create date 
+    - Bottom nav bar 
+  3. Rate Cupid/ Order Status page 
+    - Top nav bar  
     - Unclaimed section 
       - Cards for all unclaimed gigs 
     - Claimed section 
-      = Cards for all claimed gigs 
+      - Cards for all claimed gigs 
     - Completed Gigs section 
       - Cards for all completed gigs 
-        - completed gigs cards will have a button to rate cupid 
-    - rate cupid popup 
-      - description input box
-      - hearts radios 
-      - send button 
-      - cancel button 
-    - bottom nav bar
-  6. calander page 
-    - top nav bar 
-    -upcoming dates section
-      - cards of upcoming dates ordered from closests to farthest
-        - date details 
-          - when
-          - where 
-          - what 
-          - budget 
-    - past dates section 
-      - cards of past dates ordered from closest to farthest.
-        - all card details are the same as the upcomming dates cards.
-    - bottom nav bar
-  7. Payment page 
-    
+        - Completed gigs cards will have a button to rate cupid 
+    - Rate cupid popup 
+      - Will have a way to describe interaction with cupid 
+      - Will have a way to rate the cupid using hearts 
+      - Send button 
+      - Cancel button 
+    - Bottom nav bar
+  4. Calander page 
+    - Top nav bar 
+    - Upcoming dates section
+      - Cards of upcoming dates ordered from closests to farthest
+        - Date details will include  
+          - When
+          - Where 
+          - What 
+          - Budget 
+    - Past dates section 
+      - Cards of past dates ordered from closest to farthest
+        - All card details are the same as the upcomming dates cards
+    - Bottom nav bar
+  5. Payment page 
+    - Top nav bar 
+    - Current acount balance 
+    - User will be able to select from saved cards 
+    - User will be able to input amount they wish to add to account 
+    - Deposit button
+    - Add card section 
+      - User will be able to add and save a new card to their account
+      - Save button 
+    - Bottom nav bar 
+  6. Profile Page 
+    - Top nav bar 
+    - User's information will be split up into sections which can be edited
+    - Section topics will include the following
+      - Personal Information section  
+      - User information section 
+      - Details about you section
+    - Save button 
+    - Bottom nav bar 
+  7. Notifications page
+    - Top nav bar 
+    - Unopened notifications section
+    - A user will see there unread notifications at the top in order from newest to oldest
+    - Opened notifications
+    - A user will see a list of opened notifications in order from newest to oldest
 
 **Cupid**
-
+  1. Home page 
+    - Because a cupid has less needs, we are able to give them multiple ways to get anywhere they need from the home page
+    - Top nav bar 
+      - Hamburger side bar 
+        - Link to profile page 
+        - Link to find gigs page 
+        - Link to complete gigs page 
+        - Link to feeback page 
+        - Logout button
+    - Main section will have cards that link to all of the same pages
+    - Availble gigs section
+      - Here users should be able to see 2-3 availble gigs in card form to make accepting gigs faster and easier
+    - On smaller screen sizes there will be a bottom nav bar with buttons to take you to the different pages
+    - This nav bar will appear on every page
+      - On larger screens this nav bar will be at the top underneath the logo
+      - Nav bar buttons will link to the following pages
+        - Home (if on home disabled) 
+        - Find gigs page 
+        - Completed gigs page 
+        - Feedback page 
+        - Profile page
+  2. Find Gigs Page 
+    - Top nav bar 
+    - Active gig section 
+      - Here a cupid wil be able to see the gigs they have accepted 
+      - Active gigs should appear in card format with relevant information
+      - Each active gig should have a completed button and a 
+    - Available gigs section
+      - Here a cupid will be able to see the gigs they can accept
+      - Each available gig will be shown in card fomat with relevant information
+      - Accept buttons should be on each card 
+    - Bottom nav bar
+  3. Completed gigs page
+    - This page allows the cupid to reflect on their completed gigs
+    - All completed gigs will be in card form with relevant information to the gig
+    - Each card will have a Rate Dater button which create pop up to rate dater
+    - Rate dater pop up 
+      - A cupid will be able to describe interaction with dater
+      - There will be a rating system like 1-5 stars 
+      - send and cancel buttons 
+    - Bottom nav bar 
+  4. Feedback page
+    - Top nav bar 
+    - This page will have an overall star ratings at the top 
+    - all feedback/ ratings from daters will be shown in card format 
+    - Each feedback card will show relevant information
+    - Bottom nav bar 
+  5. Profile Page 
+    - Top nav bar 
+    - Profile picture 
+    - Cupids will be able to find their account balance, and how many successful gigs vs the amount of gigs they have accepted
+    - Cupids personal information will be able to be edited 
+    - Save button 
+    - Bottom Nav bar 
 
 **Manager**
+  1. Home page
+    - Banner at top showing logo and Logout button 
+    - 2 cards that link to both Cupids info page, and Daters info page
+    - Will have graph to show revenue over time 
+    - Will have a general stats section which will hold information like: 
+      - Total dater 
+      - Total cupids 
+      - Active cupids 
+      - Active daters 
+    - Gigs stats section will hold information like: 
+      - Total gigs 
+      - Gigs per day 
+      - Gigs completed 
+      - Gigs dropped 
+    - Will be a convert to PDF button to take stats and graph and produce a downloadable PDF of that information
+    - On smaller screen sizes there will be a bottom nav bar with buttons to take you to the different pages
+    - This nav bar will appear on every page
+      - On larger screens this nav bar will be at the top underneath the logo
+      - Nav bar buttons will link to the following pages
+        - Home ( will be disabled when on home page) 
+        - Cupids info 
+        - Daters info 
+  2. Cupids info page 
+    - Manager will be able to see all cupids in card form 
+    - Each cupid card will have relevant information like: 
+      - Rating 
+      - Name 
+      - Completed gigs 
+      - A button to suspend the cupid 
+    - Bottom nav bar 
+  3. Daters info page
+    - Manager will be able to see all Daters in card form 
+    - Each dater card will have relevant information like: 
+      - Rating 
+      - Name 
+      - A button to suspend the dater
+    - Bottom nav bar
 
-- **Navigation Flow:**
-- **Wireframes/Mockups:** (Insert or link to images)
+### UI Diagrams
 
 ## 7. Input and Output -- Zac
 - **Types of Input:** (User actions, external data, etc.)
