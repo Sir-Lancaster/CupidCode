@@ -119,40 +119,72 @@ Partial / incomplete (to be delivered):
 
 
 ## 3. Architecture -- Carter
-### Chosen Architecture
-Cupid Code adopts a **three-tier architecture** with a separation of concerns between presentation, application logic, and data persistence:
+### Architecture Style
+Cupid Code is designed using a **client–server monolithic architecture** centered on **Django**. While the backend currently functions as a monolith for simplicity and rapid development, it is organized into **modular services** (authentication, scheduling, payments, AI integration, notifications). This modular design provides a clear **pathway to evolve into a service-oriented or microservices architecture** in the future if scalability demands increase.  
 
-1. **Frontend (Presentation Layer)**  
-   - Built with **Vue.js**.  
-   - Provides role-based portals for **Daters**, **Cupids (gig workers)**, and **Married Users**.  
-   - Handles real-time interactions (chat, notifications, scheduling UI).  
-   - Communicates with the backend exclusively through a REST API over HTTPS.  
+This style was chosen because:
+- It is well-suited to the **team size** and **tight project deadlines**.  
+- It allows for **simpler deployment** and maintenance compared to a microservices setup.  
+- It leverages the **existing Django codebase** and ecosystem, minimizing onboarding time for developers.  
+- It balances the need for quick iteration with long-term maintainability and potential scaling.
 
-2. **Backend (Application Layer)**  
-   - Powered by **Django**.  
-   - Hosts business logic for authentication, payments, AI orchestration, and scheduling.  
-   - Exposes secure APIs to the frontend and integrates with external services (Stripe/PayPal, AI APIs, SMS/email notification providers).  
-   - Includes background task management (Celery + Redis) for notifications, scheduled events, and AI feedback.  
+### Deployment View
+Cupid Code will be deployed in **three environments**: local development, staging/testing, and production. Each environment mirrors the core setup to ensure smooth promotion of code between stages.  
 
-3. **Database (Data Layer)**  
-   - Relational storage using **PostgreSQL**.  
-   - Stores user profiles, preferences, schedules, gig orders, transaction records, and AI interaction logs.  
-   - Employs strict schema definitions and foreign keys for consistency.  
-   - Sensitive data (e.g., payment info) is either securely encrypted or handled via external payment processors.
+- **Frontend (Vue.js):**  
+  Compiled into static assets and served via **Azure App Service** or a **CDN** for fast delivery.  
+- **Backend (Django):**  
+  Runs in an **Azure App Service container** with autoscaling enabled for higher loads. Handles API requests, business logic, and orchestration of external services.  
+- **Database (PostgreSQL):**  
+  Deployed as a **managed Azure Database for PostgreSQL** instance. Configured with automatic backups, encryption at rest, and role-based access controls.  
+- **Secrets Management:**  
+  Sensitive keys (API keys, DB credentials) stored in **Azure Key Vault**, never hardcoded.  
+- **Networking & DNS:**  
+  Deployed behind **Azure Application Gateway** with HTTPS termination. DNS configured via a custom domain with TLS certificates auto-renewed by **Azure Certificate Manager**.  
 
-### Design Rationale
-- **Separation of concerns:** Keeping UI, business logic, and storage distinct improves maintainability and scalability.  
-- **Security and compliance:** Sensitive financial and personal data is minimized/encrypted in storage.
-- **Scalability:** Each layer can be scaled independently (e.g., multiple frontend servers, load-balanced backend services, managed DB instances).  
-- **Extensibility:** New features like subscription tiers, AI integrations, or couple-specific modules can be added without impacting the entire system.  
-- **Cloud deployment:** Designed for deployment on **Azure** for backend, frontend, and database services.
+This setup ensures **fast iteration for developers**, **secure production hosting**, and **cloud-native scalability**.
 
 ### Major Components & Interactions
-- **User Portals (Vue)** → **REST API (Django)** → **Postgres DB**  
-- **AI Services**: Django integrates with external AI APIs for chat, voice recognition, and real-time coaching.  
-- **Payment Services**: Stripe/PayPal APIs handle funds; Django manages session tokens and transaction status.  
-- **Notification Services**: Workers push updates via email/SMS and in-app alerts.  
-- **Manager/Admin Dashboard**: Real-time metrics and compliance reporting via Django views connected to Postgres.
+Cupid Code follows a **three-tier separation of concerns** with clear boundaries between presentation, logic, and storage:
+
+1. **Frontend (Presentation Layer)**  
+   - Vue.js single-page application (SPA).  
+   - Role-based portals for Daters, Cupids, and Admins.  
+   - Communicates with backend solely via HTTPS API calls.  
+
+2. **Backend (Application Layer)**  
+   - Django monolith structured into modular apps (auth, scheduling, payments, notifications, AI).  
+   - Celery + Redis handle background jobs like reminders, notifications, and AI feedback.  
+   - Integrates with third-party services: Stripe/PayPal (payments), AI APIs, email/SMS notification providers.  
+
+3. **Database (Data Layer)**  
+   - PostgreSQL stores user accounts, schedules, orders, and logs.  
+   - Payment methods are never stored directly; only tokens from Stripe/PayPal are persisted.  
+   - Strict schema with foreign keys to preserve consistency.  
+
+### Design Rationale
+- **Maintainability:** Monolith reduces deployment complexity while modularization ensures clean code boundaries.  
+- **Scalability:** Although currently monolithic, service boundaries allow migration to microservices as traffic grows.  
+- **Security:** Data separation, managed services, and secure key handling reduce attack surface.  
+- **Extensibility:** Easy to add subscription tiers, new AI integrations, or enhanced scheduling features.  
+- **Cloud-Native:** Uses Azure-managed services for scalability, security, and monitoring out of the box.  
+
+### Component Diagram
+The following diagram illustrates Cupid Code’s architecture and external integrations:
+
+```mermaid
+graph TD
+    A["User Browser\n(Vue.js SPA)"] -->|HTTPS API Calls| B["Django Backend\n(Monolithic Core)"]
+    B --> C["PostgreSQL Database\n(Managed Azure Instance)"]
+    B --> D["Celery + Redis\n(Background Tasks)"]
+    B --> E["Payment Gateway\n(Stripe/PayPal)"]
+    B --> F["AI Services\n(Chat/Coaching APIs)"]
+    B --> G["Notification Services\n(Email/SMS Providers)"]
+    H["Azure Key Vault\n(Secrets Storage)"] --> B
+    I["Azure App Service\n(Hosting Backend)"] --> B
+    J["CDN / Static Hosting\n(Serving Vue Assets)"] --> A
+    K["Azure DNS + TLS\n(Custom Domain + HTTPS)"] --> A
+```
 
 ## 4. Major Components -- Dallin
 For each component:
@@ -358,42 +390,124 @@ Our home page is designed after the layout of the Canvas Mobile app.
 - **Expected Volume:** (If relevant)
 
 ## 8. Security -- Carter
-### Security at Each Layer
+### Overview — Defense in Depth
+Cupid Code adopts a **defense-in-depth** approach: multiple independent controls are applied across the stack (client, server, data, and infrastructure).  Security is treated as a property of the entire system (architecture, code, build pipeline, and operations) rather than a single checkbox.  Controls are layered so that failure of one layer does not immediately expose sensitive data or critical functions.
 
-1. **Frontend (Vue)**  
-   - Enforces HTTPS-only connections.  
-   - Implements role-based access (different portals for daters, Cupids, married users).  
-   - Uses OAuth 2.0 / JWT tokens for secure session handling.  
-   - Client-side input validation to prevent malformed requests.  
+---
 
-2. **Backend (Django)**  
-   - Authentication: Django’s built-in auth with salted + hashed passwords (PBKDF2/Argon2).  
-   - Authorization: Role-based access controls (RBAC) to isolate user classes.  
-   - API Security:  
-     - All endpoints protected with authentication/CSRF protection.  
-     - Rate limiting to prevent brute-force attacks.  
-   - Background tasks run in isolated workers with limited privileges.  
+### Threat Model — Summary & Key Mitigations
+This section summarizes the highest-priority threats for Cupid Code and concrete mitigations.  The focus reflects your app’s features (real-time AI listening, payments, gig-worker access, shared couple data).
 
-3. **Database (PostgreSQL)**  
-   - Encryption at rest (AES-256) and in transit (TLS).  
-   - Strict schema constraints to prevent injection.  
-   - Role-based DB users (e.g., read-only vs. write access).  
-   - Sensitive information (like payment methods) never stored; only tokens from payment processors are persisted.  
+#### High-level threats
+- **Unauthorized access / authN / authZ bypass**  
+  *Mitigations:* strong password hashing (Argon2 preferred; PBKDF2 as fallback), email/phone verification, MFA for sensitive roles, short-lived access tokens + refresh tokens, OAuth2/OpenID Connect for external SSO, RBAC with least-privilege enforcement, require step-up auth for destructive operations (refunds, bans, data exports). Log and alert suspicious login patterns (IP/geolocation anomalies, impossible travel).
 
-### Sensitive Data Handling
-- **User credentials** → Encrypted with PBKDF2/Argon2.  
-- **Payment data** → Delegated to Stripe/PayPal; only transaction IDs and metadata stored.  
-- **Personal Information (addresses, calendar data)** → Encrypted at rest; decrypted only when necessary for app functions.  
-- **AI interaction logs** → Stored with anonymization to protect user identities.  
-- **Audit logs** → All account changes, logins, and payment events logged for security monitoring.  
+- **Injection (SQL, command, template)**  
+  *Mitigations:* use Django ORM and parameterized queries only; avoid raw SQL. Validate and sanitize all inputs server-side. Static analysis and dependency scanning to catch vulnerable libraries. Apply a deny-by-default input validation policy for endpoints that accept free text.
 
-### Compliance Considerations
-- **Age restriction:** Enforce 18+ verification with DOB validation at sign-up.  
-- **Data privacy:** Align with GDPR principles. Users can delete accounts and request data exports.  
-- **Financial compliance:** PCI-DSS compliance via third-party payment processors (Stripe/PayPal).  
-- **Accessibility compliance:** WCAG 2.1 AA standards for usability (screen readers, high contrast).  
-- **Security monitoring:** Logging and anomaly detection for suspicious activity; intrusion detection via cloud services.  
-- **Consent management:** Couples can configure privacy/consent settings for shared data (surprises, gifts, etc.).  
+- **Cross-Site Scripting (XSS)**  
+  *Mitigations:* rely on Vue template auto-escaping; enforce CSP headers, sanitize any user HTML before rendering (if rich text is allowed), use HttpOnly cookies for session tokens when appropriate, and encode untrusted data placed into attributes or script contexts.
+
+- **Cross-Site Request Forgery (CSRF)**  
+  *Mitigations:* enable Django CSRF middleware for all form/API interactions that use cookies; require CSRF tokens on state-changing endpoints. For token-based API auth (Bearer/JWT), prefer header-based auth instead of cookies to avoid CSRF vectors.
+
+- **Secret leakage (keys, tokens)**  
+  *Mitigations:* never commit secrets to source control. Store secrets in Azure Key Vault (or equivalent KMS) and access them via managed identities. Enforce automated secret scanning for PRs and CI. Apply least-privilege to service accounts and rotate keys regularly.
+
+- **Sensitive data exposure (PII, addresses, payment info)**  
+  *Mitigations:* do not store raw payment card data — use Stripe/PayPal tokenization; encrypt PII at rest (field-level/envelope encryption for addresses); minimize retention; anonymize or redact logs; implement strict access controls and audit trails for PII access.
+
+- **Denial of Service (DoS)**  
+  *Mitigations:* rate limiting at API gateway, use Azure DDoS protection, autoscaling rules for legitimate traffic spikes, and circuit breakers for heavy third-party calls (AI, payment providers).
+
+- **Privilege escalation / insider misuse**  
+  *Mitigations:* RBAC, least privilege, separation of duties, require 2FA for admin actions, restrict DB and Key Vault access to ephemeral credentials and approved service principals, and log all privileged actions for review.
+
+---
+
+### Layered Controls (by layer)
+#### Frontend (Vue)
+- Enforce HTTPS everywhere (HSTS).  
+- CSP headers; subresource integrity for critical third-party scripts.  
+- Input validation on UI (but do not rely on it — always validate server side).  
+- Use secure storage patterns: avoid persistent storage of sensitive tokens in localStorage; prefer short-lived tokens in memory, or HttpOnly cookies with proper SameSite settings for session cookies.  
+- Obfuscate (never "securely hide") sensitive UI elements for couples (e.g., “surprise” flags) until consent reveals them.
+
+#### Backend (Django)
+- Use Django’s security middleware: CSRF, X-Frame-Options, XSS protections.  
+- Centralized auth using Django + OAuth2/OIDC for SSO options (Google, GitHub) with verified email.  
+- Granular RBAC enforcement at both view and object level (row-level checks where necessary).  
+- Use parameterized queries exclusively; restrict any raw SQL to reviewed, tested code.  
+- All background workers run with limited permissions; service accounts scoped to required resources.
+
+#### Data Layer (Postgres, blob storage)
+- Encryption at rest (DB-managed or Azure-managed AES-256).  
+- Encrypted backups and snapshots.  
+- Field-level encryption for PII such as addresses; use envelope encryption keys stored in Key Vault.  
+- Tokenize payment instruments: store only processor tokens (Stripe PaymentMethod IDs) and transaction metadata.
+
+#### Infrastructure / Cloud
+- Secrets in Azure Key Vault; access with managed identities and RBAC.  
+- TLS 1.3 across all endpoints; strict cipher suites.  
+- Azure-native logging and monitoring (integrate with SIEM / Azure Sentinel).  
+- Network-level controls: private subnets for DB, limited inbound rules, and API gateway rate limiting.
+
+---
+
+### Data Protection: specifics & best practices
+- **At-rest encryption:** enforce Azure-managed encryption (AES-256) for Postgres, Blob storage, and backups. Use database-level Transparent Data Encryption (TDE) where supported.  
+- **In-transit encryption:** require TLS 1.2+ (prefer TLS 1.3) for all communications (client↔API, API↔DB, API↔third-party). Certificate management handled by Azure Certificates/Key Vault or Let’s Encrypt via automation.  
+- **Secrets & Key Rotation:** store all secrets/keys in Azure Key Vault. Enforce automated rotation policies for keys and credentials (e.g., 90-day rotation or as required by policy). Use short-lived service tokens where possible. Monitor Key Vault access logs.  
+- **Addresses & Calendar data:** treat addresses as sensitive PII. Use field-level encryption (envelope encryption) for these fields; decrypt only in server memory and only when needed by a business flow (e.g., displaying to the user or sharing with an assigned Cupid, with user consent). For couple-shared data, honor per-partner consent flags before decryption.  
+- **Payment/Card handling:** do not store PANs or CVV. Use Stripe Elements / Payment Intents to collect card data directly and receive a token/PaymentMethod id that can be used server-side. Keep PCI scope minimal by delegating card capture and storage to the payment processor. Log only non-sensitive transaction metadata.  
+- **Token scopes and lifetime:** use OAuth2 scopes for granular API tokens (e.g., `read:profile`, `write:gigs`, `admin:billing`). Keep access tokens short-lived (minutes to hours) and use refresh tokens with rotation and revocation. Implement token revocation lists and immediate session invalidation after password changes or account deletion.
+
+---
+
+### Role-Based Access Control (RBAC) — model & enforcement
+Define clear roles and least-privilege permissions. Enforce both coarse-grained (API-level) and fine-grained (resource/object-level) rules.
+
+#### Roles & typical permissions
+- **Dater (end-user)**  
+  - Create/update own profile and preferences.  
+  - Initiate payments (via Stripe/PayPal token flow), schedule dates, enable/disable in-date listening.  
+  - View own transaction history, AI interaction logs (anonymized), and delete own account.
+
+- **Cupid (gig worker)**  
+  - View assigned gigs/orders and non-sensitive contextual info needed to fulfill tasks (approximate address, time window) — only after user's explicit consent where required.  
+  - Update gig status, send messages to assigned dater, request reimbursements.  
+  - No access to user's full financial history or private couple notes unless explicitly authorized.
+
+- **Manager / Admin**  
+  - System telemetry, safety/moderation tools (flagging, bans), dispute resolution (refunds), and compliance reporting.  
+  - Sensitive actions (e.g., refunds, account takeovers, data exports) require two-person approval or step-up authentication.  
+  - Admin accesses are logged, time-limited sessions with enforced MFA.
+
+#### Enforcement patterns
+- Use object-level permissions (Django Guardian-style or similar) for resources that must be shared selectively (couple timelines, surprise gifts).  
+- All privileged endpoints require an `admin` scope and step-up MFA.  
+- Periodic automated audits of role assignments; revoke stale privileges.  
+- Implement consent flags for couples: features like “hide surprise gift” are enforced in the authorization layer — decryption and display logic check consent before revealing.
+
+---
+
+### Compliance & Governance
+- **Age gating:** require DOB at registration and validate via email/phone verification. Deny or lock accounts under 18. Keep dob validation logs for audit.  
+- **Data subject rights:** support export (machine-readable format) and permanent deletion of user data. Provide an admin workflow to comply with verified deletion requests and a method to redact backups per policy.  
+- **Audit logs:** immutable, tamper-evident logs of authentication events, role changes, payment events, admin actions, and data accesses. Centralize logs in a SIEM and retain according to regulatory requirements (e.g., 1 year for routine logs, longer for financial events). Log access must itself be audited.  
+- **PII minimization:** collect only required attributes. Where possible, store derived or hashed values instead of raw PII (e.g., hashed addresses for deduplication). Anonymize AI logs used for model improvement; retain raw transcripts only when explicitly approved by the user.  
+- **Payments / PCI:** remain out of PCI-scope by relying on Stripe/PayPal for card storage and processing. Ensure server interactions with payment APIs follow recommended best practices (server-side verification of webhooks, idempotency keys).  
+- **Legal & privacy policy:** publish a clear privacy policy describing data use, retention, and sharing. Provide opt-outs for marketing and telemetry. Maintain a data processing addendum if working with processors in GDPR jurisdictions.  
+- **Testing & audits:** plan regular security scans (SAST/DAST), quarterly dependency vulnerability scans, and at least annual penetration testing. Consider a bug-bounty or coordinated vulnerability disclosure program as the product grows.
+
+---
+
+### Operational Security Practices & Incident Response
+- **Secure SDLC:** require code reviews, SAST in CI, dependency vulnerability checks (dependabot/renovate), and secret scanning for pull requests.  
+- **CI/CD:** separate pipelines and credentials for dev/staging/prod. Use ephemeral deploy tokens and require approvals for production deploys.  
+- **Access management:** enforce MFA for all developer and admin accounts; use role-based access to Azure resources; periodic access reviews.  
+- **Monitoring & alerting:** integrate application logs and Azure activity logs into a SIEM (Azure Sentinel recommended). Create runbooks for critical alerts.  
+- **Incident response:** maintain an incident response playbook (containment, forensics, user notification timelines), contacts for legal/regulatory obligations, and pre-defined communication templates for breach notifications. Test the IR playbook with tabletop exercises.
 
 ## 9. Risks and Mitigation -- Greg
 - **Key Risks:**
