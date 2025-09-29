@@ -78,6 +78,10 @@ This structured approach ensures clarity, accountability, and readiness to handl
 - **Architecture Diagram**
 - **Component Diagram**
 - **Sequence Diagram(s)**
+
+#### **Gig Request**
+![Sequence-Diagram](./images/Sequence_Diagram.jpg)
+
 - **Use Case Diagram(s)**
 
 
