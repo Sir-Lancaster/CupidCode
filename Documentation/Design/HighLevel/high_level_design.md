@@ -69,8 +69,6 @@ This structured approach ensures clarity, accountability, and readiness to handl
 | R6  | Schedule         | ML/data delays → Missed launch/revenue                          | Medium     | Medium | Medium   |  Milestone review, cadence checks       | Shift resources, move deadlines     | Milestone slip, unresolved blockers  | Monitoring |
 | R7  | Security  | Bank info unencrypted → Data breach → Legal, financial, and reputation damage | Medium        | High      | High        | Implement AES-256 encryption, limit access, audit regularly | Immediate full encryption, user & regulator notification | Audit reveals unencrypted bank info, or breach occurs | Open     |
 
-Paragraph summarizing what the above table says
-
 ## 10. Data Design -- Greg
 - **Data Stored:**
 - **Data Structure:**
