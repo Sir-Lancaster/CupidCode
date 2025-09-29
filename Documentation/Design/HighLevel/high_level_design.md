@@ -258,6 +258,13 @@ Django Admin provides an out-of-the-box management interface. Alternatively, a c
 Modules include metrics aggregation services for analytics, and privilege enforcement mechanisms to ensure only authorized managers can access sensitive data.  
 
 
+**Backend Components UML** 
+
+![Components Diagram](images/componentsDiagram.png)
+
+
+
+
 ## 5. External Interfaces -- Dallin
 ### Third-Party APIs / Services
 
