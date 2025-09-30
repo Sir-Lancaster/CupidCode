@@ -6,14 +6,14 @@ Sprint Followers: Zac Cunningham, Greg Steele, Dallin Tew, Carter Johnson
 
 ## Contents
   - [Introduction](#1-introduction)
-  - [Sysem Overview](#2-system-overview----kayden)
-  - [Architecture](#3-architecture----carter)
-  - [Major Components](#4-major-components----dallin)
-  - [External Interfaces](#5-external-interfaces----dallin)
-  - [User Interface Design](#6-user-interface-design----zac)
-  - [Input and Output](#7-input-and-output----zac)
-  - [Security](#8-security----carter)
-  - [Risks and Mitigations](#9-risks-and-mitigation----greg)
+  - [System Overview](#2-system-overview)
+  - [Architecture](#3-architecture)
+  - [Major Components](#4-major-components)
+  - [External Interfaces](#5-external-interfaces)
+  - [User Interface Design](#6-user-interface-design)
+  - [Input and Output](#7-input-and-output)
+  - [Security](#8-security)
+  - [Risks and Mitigations](#9-risks-and-mitigation)
   - [Data Design](#10-data-design)
   - [Diagrams](#11-diagrams----all)
 ## 1. Introduction
@@ -22,10 +22,10 @@ Provide a concise high‑level technical design for the current Cupid Code platf
 
 **Scope**  
 Covers:  
-- System context and current vs planned capabilities (AI assist, gigs, payments, notifications).  
+- System context and current vs planned capabilities (AI assist, Gigs, payments, notifications).  
 - Architectural style (web client + Django REST backend) and core component boundaries.  
 - Roles and data domains (Dater, Cupid, Manager/Admin, Couple/Shared).  
-- High‑level data handling (profiles, gigs, feedback, authentication, future payments, AI session artifacts).  
+- High‑level data handling (profiles, Gigs, feedback, authentication, future payments, AI session artifacts).  
 - Integration points (future: Stripe, PayPal, weather, messaging, location).  
 Excludes: low‑level class diagrams, detailed endpoint specs, test plans, deployment runbooks (to be documented separately). References: Requirements Specification (requirements.md) for authoritative functional, nonfunctional, business, and user requirements.
 
@@ -48,11 +48,11 @@ Excludes: low‑level class diagrams, detailed endpoint specs, test plans, deplo
 - Full subscription tiering or microtransactions (explicit Won’t).  
 - Full multilingual & advanced analytics dashboards (later phases).  
 
-## 2. System Overview -- Kayden
+## 2. System Overview
 **System Description**  
-Cupid Code is a role‑based web application that assists users (primarily socially anxious or inexperienced daters) with AI‑driven, context‑aware coaching and on‑demand human “Cupid” gig interventions. The platform delivers:  
-- Dater experience: AI chat + (future) passive listening for live guidance; scheduling and gig request flows.  
-- Cupid experience: Manage gigs, respond to interventions, (future) earnings and availability.  
+Cupid Code is a role‑based web application that assists users (primarily socially anxious or inexperienced Daters) with AI‑driven, context‑aware coaching and on‑demand human “Cupid” Gig interventions. The platform delivers:  
+- Dater experience: AI chat + (future) passive listening for live guidance; scheduling and Gig request flows.  
+- Cupid experience: Manage Gigs, respond to interventions, (future) earnings and availability.  
 - Manager/Admin: User oversight, future compliance/reporting, operational dashboards.  
 - Couple extension (Should/Could): Shared calendar, joint preferences, gift/timeline concepts.  
 Current stack:  
@@ -60,7 +60,7 @@ Current stack:
 - Backend: Django + Django REST style views (api app) with SQLite (to migrate to managed cloud DB).  
 - Auth: Username/password (working), role persisted in backend models.  
 - AI: Placeholder endpoints; microphone capture pipeline present; logic for real guidance still minimal.  
-- Storage: Local DB for users, gigs, feedback scaffolding (see server/api/models.py).  
+- Storage: Local DB for users, Gigs, feedback scaffolding (see server/api/models.py).  
 - Tests: Selenium UI scripts for login and role flows.  
 
 **Legacy System Overview**  
@@ -79,7 +79,7 @@ Partial / incomplete (to be delivered):
 
 **Planned Enhancements (Near Term)**  
 - Integrate payment providers (abstracted service layer).  
-- AI session store referencing user profile + prior date context.  
+- AI session store referencing user profile + prior Date context.  
 - Notification subsystem (queued + provider adapters).  
 - Role‑segregated data views and future couple privacy controls.  
 - Deployment to Azure (containerized or managed app service).  
@@ -91,7 +91,7 @@ Partial / incomplete (to be delivered):
 
 **High-Level Data Domains**  
 - Identity & Roles (User, DaterProfile, CupidProfile, Manager/Admin).  
-- Scheduling & Gigs (gig requests, status, Cupid assignment, intervention notes).  
+- Scheduling & Gigs (Gig requests, status, Cupid assignment, intervention notes).  
 - AI Interaction (chat transcripts, advice events, memory embeddings—planned).  
 - Financial (wallet, transactions, payouts—planned).  
 - Feedback & Ratings (post‑gig + AI evaluation—planned).  
@@ -114,7 +114,7 @@ Partial / incomplete (to be delivered):
 
 **Success Criteria for This Phase**  
 - End-to-end flow: Dater logs in → requests AI help → receives contextual response referencing stored preferences.  
-- Cupid gig lifecycle visible (create → assign placeholder → mark complete).  
+- Cupid Gig lifecycle visible (create → assign placeholder → mark complete).  
 - Stubs for payment & notification services integrated behind clear service interfaces to enable parallel work streams.  
 
 
@@ -186,7 +186,7 @@ graph TD
     K["Azure DNS + TLS\n(Custom Domain + HTTPS)"] --> A
 ```
 
-## 4. Major Components -- Dallin
+## 4. Major Components
 ### Frontend (Vue 3 + Vite)
 
 - **Responsibilities**  
@@ -242,7 +242,7 @@ Clients communicate with the AI service through REST or streaming endpoints such
 ### Payments (Stripe / PayPal)
 
 - **Responsibilities**  
-This component manages the full lifecycle of user payments, including subscriptions, one-time transactions, and credits. It ensures that transactions are recorded securely, validates payment statuses via webhook callbacks, and generates receipts or invoices for users.  
+This component manages the full lifecycle of user payments, including subscriptions, one-time transactions, and credits. It ensures that transactions are recorded securely, validates payment status' via webhook callbacks, and generates receipts or invoices for users.  
 
 - **Technologies/Versions**  
 Stripe Checkout and PayPal Smart Buttons are used for payment processing. Both provide PCI-compliant hosted flows to reduce security risk.  
@@ -307,12 +307,12 @@ Modules include metrics aggregation services for analytics, and privilege enforc
 
 2. **Geolocation API**  
     - **Description:** Provides device location data, either via GPS, IP address, or browser geolocation.  
-    - **Used in:** Matching users based on proximity and finding nearby gigs or events.  
+    - **Used in:** Matching users based on proximity and finding nearby Gigs or events.  
     - **Notes:** Requires explicit user permission; must handle location errors or denials gracefully.
 
 3. **Pyttsx3**  
     - **Description:** Python text-to-speech library for converting text into spoken audio.  
-    - **Used in:** Accessibility features (for visually impaired users) and optionally for AI voice output during gigs.  
+    - **Used in:** Accessibility features (for visually impaired users) and optionally for AI voice output during Gigs.  
     - **Notes:** Runs locally and does not require internet access; can be used as a fallback if external TTS services fail.
 
 4. **Twilio API**  
@@ -322,7 +322,7 @@ Modules include metrics aggregation services for analytics, and privilege enforc
 
 5. **Yelp Fusion API (via `yelpapi`)**  
     - **Description:** Access to business data, reviews, events, and ratings through the Yelp platform.  
-    - **Used in:** Finding gigs, events, and venues for users based on location and preferences.  
+    - **Used in:** Finding Gigs, events, and venues for users based on location and preferences.  
     - **Notes:** Must handle API rate limits and cache results to improve performance and reduce API calls.
 
 6. **Azure REST API**  
@@ -331,7 +331,7 @@ Modules include metrics aggregation services for analytics, and privilege enforc
     - **Notes:** Provides high availability and scalability; secure authentication and endpoint validation are required.
 
 
-## 6. User Interface Design -- Zac
+## 6. User Interface Design
 
 ### UI/UX Principles
 
@@ -343,7 +343,7 @@ Modules include metrics aggregation services for analytics, and privilege enforc
 ### Rebranding and Color Schemes
 
 As part of the Rebranding for Cupid Code, our team has decided to lean into who our users are and focus the color scheme and logos around them.
-Our main users, the daters, are comprised of tech enthusiasts; for this reason, we have decided to give the app a more techy vibe and style the app around the terminal. 
+Our main users, the Daters, are comprised of tech enthusiasts; for this reason, we have decided to give the app a more techy vibe and style the app around the terminal. 
 
 - The rebranding will feature a new logo designed to resemble intricate code elements.
 - Below is an example of what the new logo could look like.
@@ -422,16 +422,16 @@ Our home page is designed after the layout of the Canvas Mobile app.
 1. **Sign up page**
 
   - This page will be simple in design
-  - A new user will use a toggle to determine whether they are signing up as a cupid or a dater
+  - A new user will use a toggle to determine whether they are signing up as a cupid or a Dater
   - If they are signing up as a cupid then they will have a  smaller sign up page as not as much information is needed from them
-  - If they are signing up as a dater then a long sign up page will be present as more details information is needed
-  - Examples of dater sign up info 
+  - If they are signing up as a Dater then a long sign up page will be present as more details information is needed
+  - Examples of Dater sign up info 
     - Nerd type 
     - Relationship goals 
     - Intrests 
     - Past dating history 
     - Dating strengths 
-  - Both sign up pages will have a create acount page
+  - Both sign up pages will have a create account page
   
 2. **Login page**
     
@@ -452,11 +452,11 @@ Our home page is designed after the layout of the Canvas Mobile app.
       - Logout link
   - Main content card style 
     - Card to link to AI page 
-    - Card to link to Plan a Date/ create a gig  page 
+    - Card to link to Plan a Date/ create a Gig page 
     - Card to link to Rate Cupids/Order Status page 
     - Card to link to Calendar 
     - Upcoming Dates Preview
-      - 1-3 cards showing upcoming dates/events 
+      - 1-3 cards showing upcoming Dates/events 
     - On smaller screen sizes there will be a bottom nav bar with buttons to take you to the different pages
       - On larger screens this nav bar will be at the top underneath the logo
       - Bottom nav bar (This is on every page)
@@ -470,7 +470,7 @@ Our home page is designed after the layout of the Canvas Mobile app.
 
   - Top nav bar (discussed previously)
   - AI chat tab  
-    - Chat history ( only avalible for current chat)
+    - Chat history ( only available for current chat)
     - User will be able to ask AI questions and recieve responses in real time
     - AI voice button ( changes UI to AI listening tab) 
     - AI listening tab
@@ -479,24 +479,24 @@ Our home page is designed after the layout of the Canvas Mobile app.
     - AI chat button ( changes UI to AI chat tab)
   - Bottom nav bar (discussed previously)  
   
-3. **Plan a date/create gig page**
+3. **Plan a Date/create Gig page**
     
   - Top nav bar 
-  - User will be able to manually plan a date/ create a gig
-  - Will need to input the What, When, Where, How($$), to create a valid date/gig
-  - Button to add gig/create date 
+  - User will be able to manually plan a Date/ create a Gig
+  - Will need to input the What, When, Where, How($$), to create a valid Date/Gig
+  - Button to add Gig/create Date 
   - Bottom nav bar 
   
 4. **Rate Cupid/ Order Status page**
     
   - Top nav bar  
   - Unclaimed section 
-    - Cards for all unclaimed gigs 
+    - Cards for all unclaimed Gigs 
   - Claimed section 
-    - Cards for all claimed gigs 
+    - Cards for all claimed Gigs 
   - Completed Gigs section 
-    - Cards for all completed gigs 
-      - Completed gigs cards will have a button to rate cupid 
+    - Cards for all completed Gigs 
+      - Completed Gigs cards will have a button to rate cupid 
   - Rate cupid popup 
     - Will have a way to describe interaction with cupid 
     - Will have a way to rate the cupid using hearts 
@@ -507,16 +507,16 @@ Our home page is designed after the layout of the Canvas Mobile app.
 5. **Calender page**
  
   - Top nav bar 
-  - Upcoming dates section
-    - Cards of upcoming dates ordered from closests to farthest
+  - Upcoming Dates section
+    - Cards of upcoming Dates ordered from closest to farthest
       - Date details will include  
         - When
         - Where 
         - What 
         - Budget 
-  - Past dates section 
-    - Cards of past dates ordered from closest to farthes
-    - All card details are the same as the upcomming dates cards
+  - Past Dates section 
+    - Cards of past Dates ordered from closest to farthest
+    - All card details are the same as the upcoming Dates cards
   - Bottom nav bar
   
 6. **Payment page**
@@ -560,20 +560,20 @@ Our home page is designed after the layout of the Canvas Mobile app.
   - Top nav bar 
     - Hamburger side bar 
       - Link to profile page 
-      - Link to find gigs page 
-      - Link to completed gigs page 
+      - Link to find Gigs page 
+      - Link to completed Gigs page 
       - Link to feeback page 
       - Logout button
   - Main section will have cards that link to all of the same pages
-  - Availble gigs section
-    - Here users should be able to see 2-3 availble gigs in card form to make accepting gigs faster and easier
+  - Availble Gigs section
+    - Here users should be able to see 2-3 availble Gigs in card form to make accepting Gigs faster and easier
   - On smaller screen sizes there will be a bottom nav bar with buttons to take you to the different pages
   - This nav bar will appear on every page
     - On larger screens this nav bar will be at the top underneath the logo
     - Nav bar buttons will link to the following pages
       - Home (if on home disabled) 
-      - Find gigs page 
-      - Completed gigs page 
+      - Find Gigs page 
+      - Completed Gigs page 
       - Feedback page 
       - Profile page
       - Notification page 
@@ -581,23 +581,23 @@ Our home page is designed after the layout of the Canvas Mobile app.
 2. **Find Gigs Page**
     
   - Top nav bar
-  - Active gig section 
-    - Here a cupid wil be able to see the gigs they have accepted 
-    - Active gigs should appear in card format with relevant information
-    - Each active gig should have a completed button and a reject button
-  - Available gigs section
-    - Here a cupid will be able to see the gigs they can accept
-    - Each available gig will be shown in card fomat with relevant information
+  - Active Gig section 
+    - Here a cupid wil be able to see the Gigs they have accepted 
+    - Active Gigs should appear in card format with relevant information
+    - Each active Gig should have a completed button and a reject button
+  - Available Gigs section
+    - Here a cupid will be able to see the Gigs they can accept
+    - Each available Gig will be shown in card fomat with relevant information
     - Accept buttons should be on each card 
   - Bottom nav bar
   
-3. **Completed gigs page**
+3. **Completed Gigs page**
     
-  - This page allows the cupid to reflect on their completed gigs
-  - All completed gigs will be in card form with relevant information to the gig
-  - Each card will have a Rate Dater button which create pop up to rate dater
-  - Rate dater pop up 
-    - A cupid will be able to describe interaction with dater
+  - This page allows the cupid to reflect on their completed Gigs
+  - All completed Gigs will be in card form with relevant information to the Gig
+  - Each card will have a Rate Dater button which create pop up to rate Dater
+  - Rate Dater pop up 
+    - A cupid will be able to describe interaction with Dater
     - There will be a rating system like 1-5 stars 
     - send and cancel buttons 
   - Bottom nav bar
@@ -606,7 +606,7 @@ Our home page is designed after the layout of the Canvas Mobile app.
   
   - Top nav bar 
   - This page will have an overall star ratings at the top
-  - all feedback/ ratings from daters will be shown in card format
+  - all feedback/ ratings from Daters will be shown in card format
   - Each feedback card will show relevant information
   - Bottom nav bar 
   
@@ -614,7 +614,7 @@ Our home page is designed after the layout of the Canvas Mobile app.
     
   - Top nav bar 
   - Profile picture 
-  - Cupids will be able to find their account balance, and how many successful gigs vs the amount of gigs they have accepted
+  - Cupids will be able to find their account balance, and how many successful Gigs vs the amount of Gigs they have accepted
   - Cupids personal information will be able to be edited 
   - Save button 
   - Bottom Nav bar 
@@ -635,12 +635,12 @@ Our home page is designed after the layout of the Canvas Mobile app.
   - 2 cards that link to both Cupids info page, and Daters info page
   - Will have graph to show revenue over time
   - Will have a general stats section which will hold information like: 
-    - Total dater 
+    - Total Dater 
     - Total cupids 
     - Active cupids 
-    - Active daters 
+    - Active Daters 
   - Gigs stats section will hold information like: 
-    - Total gigs 
+    - Total Gigs 
     - Gigs per day 
     - Gigs completed 
     - Gigs dropped 
@@ -659,17 +659,17 @@ Our home page is designed after the layout of the Canvas Mobile app.
   - Each cupid card will have relevant information like: 
     - Rating 
     - Name 
-    - Completed gigs 
+    - Completed Gigs 
     - A button to suspend the cupid 
   - Bottom nav bar 
   
 3. **Daters info page**
 
   - Manager will be able to see all Daters in card form 
-  - Each dater card will have relevant information like:   
+  - Each Dater card will have relevant information like:   
     - Rating 
     - Name 
-    - A button to suspend the dater
+    - A button to suspend the Dater
   - Bottom nav bar
 
 ### UI Diagrams
@@ -730,11 +730,11 @@ Note: Although all of the Cupid diagrams do not show the notification button on 
 
 **Find Gigs Page** 
 
-![find gigs](images/findGigs.jpg)
+![find Gigs](images/findGigs.jpg)
 
 **Completed Gigs Page** 
 
-![completed gigs](images/completedGigs.jpg)
+![completed Gigs](images/completedGigs.jpg)
 
 **Feedback Page** 
 
@@ -757,7 +757,7 @@ Note: Although all of the Cupid diagrams do not show the notification button on 
 ![Dater info](images/daterInfo.jpg)
 
 
-## 7. Input and Output -- Zac
+## 7. Input and Output
 Although most of this was mentioned previously, we have condensed all the the inputs and outputs into single lists.
 
 
@@ -803,7 +803,7 @@ Although most of this was mentioned previously, we have condensed all the the in
 To anticipate load and scalability needs, we project the following average volumes at launch:
 
 - Daily Acitive Users: 100, scaling to 1,000 in later phases. 
-- Notifications: 1-3 per user per day (AI updates, date reminders, job statues)
+- Notifications: 1-3 per user per day (AI updates, date reminders, jobs status)
 - AI requests: 1-3 per user per session (questions, planning, feedback) 
 - Payment: 1 transaction per active user per week 
 - Calendar Events: 2-3 new or updated events per user per month
@@ -928,7 +928,7 @@ Define clear roles and least-privilege permissions. Enforce both coarse-grained 
 - **Monitoring & alerting:** integrate application logs and Azure activity logs into a SIEM (Azure Sentinel recommended). Create runbooks for critical alerts.  
 - **Incident response:** maintain an incident response playbook (containment, forensics, user notification timelines), contacts for legal/regulatory obligations, and pre-defined communication templates for breach notifications. Test the IR playbook with tabletop exercises.
 
-## 9. Risks and Mitigation -- Greg
+## 9. Risks and Mitigation
 
 ### Explanation of Risk Mitigation Table
 The table below summarizes the key risks identified for the AI-assisted dating help app, across critical categories such as Technology, Security, Data, and Schedule. Each risk is described with its causal factors, potential impact, and likelihood of occurrence. To support proactive management, specific preventative mitigations are outlined that aim to reduce the chance or severity of each risk. Contingency or fallback plans describe actions to be taken if a risk materializes despite these safeguards.
@@ -964,7 +964,7 @@ Current schema (SQLite) implements merged role+profile patterns (Dater, Cupid) a
 | Entity (Code Name) | Implemented? | Purpose (Current) | Planned Change / Future Name |
 |--------------------|-------------|-------------------|------------------------------|
 | User               | Yes         | Auth + role + phone_number | Add UUID PK (optional), audit fields |
-| Dater (OneToOne User) | Yes      | Extended dater attributes & metrics | Rename to DaterProfile; trim large free‑text fields; encrypt selected PII |
+| Dater (OneToOne User) | Yes      | Extended Dater attributes & metrics | Rename to DaterProfile; trim large free‑text fields; encrypt selected PII |
 | Cupid (OneToOne User) | Yes      | Cupid state & performance stats | Rename to CupidProfile; add availability & payout token (no raw banking) |
 | Gig                | Yes         | Match Dater to Cupid + status | Extract GigAssignment (separate Cupid link + timestamps) |
 | Quest              | Yes         | Requested items / context for a Gig | Fold into Gig (JSON) or keep normalized; evaluate |
@@ -982,10 +982,12 @@ Current schema (SQLite) implements merged role+profile patterns (Dater, Cupid) a
 | KeyRotationEvent   | No          | Track encryption key usage | Add with encryption rollout |
 
 ### 10.3 Current Entity Details (from /code/server/api/models.py)
+![DatabaseERD](./images/cupidERD.png)
+
 (Fields summarized; omit Django implicit id unless primary key overridden.)
 
 User  
-- Fields: id (int PK), username, email, password, role (dater|cupid|manager), phone_number (unique, length=10).  
+- Fields: id (int PK), username, email, password, role (Dater|cupid|manager), phone_number (unique, length=10).  
 - Gaps: No created_at/updated_at audit timestamps; no soft delete; no MFA.
 
 Dater  
@@ -1007,15 +1009,14 @@ Quest
 - Single OneToOne on Gig; potentially mergeable.
 
 Gig  
-- Fields: dater (FK Dater), cupid (FK Cupid nullable), status (UNCLAIMED|CLAIMED|COMPLETE), date_time_of_request (auto), date_time_of_claim, date_time_of_completion, quest (OneToOne), dropped_count, accepted_count.  
+- Fields: Dater (FK Dater), cupid (FK Cupid nullable), status (UNCLAIMED|CLAIMED|COMPLETE), date_time_of_request (auto), date_time_of_claim, date_time_of_completion, Quest (OneToOne), dropped_count, accepted_count.  
 - Missing: Explicit monetary, title/description, cancellation reason, normalized assignment audit.
 
 Date  
-- Fields: dater, date_time, location, description, status (planned|occurring|past|canceled), budget.  
-- Not referenced elsewhere yet.
+- Fields: Dater, date_time, location, description, status (planned|occurring|past|canceled), budget.  
 
 Feedback  
-- Fields: owner (nullable, SET_NULL), target (User), gig, message, star_rating, date_time.  
+- Fields: owner (nullable, SET_NULL), target (User), Gig, message, star_rating, date_time.  
 - Missing: Constraints on rating range (validation), no uniqueness (duplicate ratings possible).
 
 PaymentCard (To Remove)  
@@ -1030,11 +1031,11 @@ BankAccount (To Remove)
 | Critical | Remove PaymentCard & BankAccount before prod; migrate to external tokenization (Stripe) | Eliminate PCI scope & breach risk |
 | High | Introduce AISession & AIMessage; migrate existing Message rows | Enables retention limits & analytics |
 | High | Add created_at/updated_at (auto timestamps) to core entities | Auditing & troubleshooting |
-| High | Replace Gig.cupid nullable with GigAssignment (Gig FK + Cupid FK + timestamps) | Normalizes lifecycle events |
+| High | Replace gig.cupid nullable with gigAssignment (Gig FK + Cupid FK + timestamps) | Normalizes lifecycle events |
 | Medium | Consolidate / structure large Dater narrative fields (enum + JSON) | Queryability & privacy |
 | Medium | Add soft delete or active flags (User, Dater, Cupid) | Regulatory deletes |
-| Medium | Add Feedback constraints (rating 1–5, unique (owner,gig) ) | Data integrity |
-| Medium | Add indexes (Gig.status, Message.owner + id) | Query performance |
+| Medium | Add Feedback constraints (rating 1–5, unique (owner,Gig) ) | Data integrity |
+| Medium | Add indexes (gig.status, Message.owner + id) | Query performance |
 | Low | Merge Quest into Gig JSON field or formalize separate use cases | Reduce joins |
 | Low | Add AuditLog table | Security visibility |
 | Low | Introduce FeatureFlag table | Safe gradual rollout |
@@ -1045,7 +1046,7 @@ BankAccount (To Remove)
 | UserProfile               | (Absent)      | Either add minimal profile table or keep fields in role models |
 | DaterProfile              | Dater         | Rename + field review & encryption |
 | CupidProfile              | Cupid         | Rename + availability expansion |
-| GigAssignment             | (Inline cupid FK on Gig) | Create new table; move timestamps |
+| gigAssignment             | (Inline cupid FK on Gig) | Create new table; move timestamps |
 | AISession/AIMessage       | Message       | Split & migrate |
 | Payment/Transaction       | (Absent)      | Add with Stripe integration |
 | Notification              | (Absent)      | Add queue table + outbox pattern |
@@ -1062,7 +1063,7 @@ BankAccount (To Remove)
 | description / strengths / weaknesses / past / interests | Dater | Sensitive narrative | Consider classification + optional encryption |
 | Message.text | Message | Sensitive conversation | Apply retention limit & later anonymization |
 | rating_sum / rating_count | Dater/Cupid | Low sensitivity | OK |
-| gig timestamps | Gig | OK | Ensure timezone UTC |
+| Gig timestamps | Gig | OK | Ensure timezone UTC |
 
 Planned Protection Additions:
 - Application-layer field encryption (select narrative or location fields if stored long term).
@@ -1071,7 +1072,7 @@ Planned Protection Additions:
 
 ### 10.7 Data Flows (Tagging Current vs Planned)
 1. Dater requests Gig (Implemented) → Gig row (status=UNCLAIMED).  
-2. Cupid claims Gig (Implemented) → status=CLAIMED; future: create GigAssignment row.  
+2. Cupid claims Gig (Implemented) → status=CLAIMED; future: create gigAssignment row.  
 3. AI Chat (Partial) → Message rows (from_ai bool) — future: create AISession then AIMessage rows.  
 4. Feedback submitted (Implemented) → Feedback row (no validation on duplicates).  
 5. Payments & Notifications (Planned) → No current persistence (remove earlier implication).  
@@ -1084,9 +1085,9 @@ Current Enforced:
 
 Needed / Planned:
 - CHECK rating 1–5 (Feedback).
-- UNIQUE (owner, gig) on Feedback.
-- UNIQUE (GigAssignment.gig_id) when introduced.
-- NOT NULL defaults for Gig.status (already via choices).
+- UNIQUE (owner, Gig) on Feedback.
+- UNIQUE (gigAssignment.gig_id) when introduced.
+- NOT NULL defaults for gig.status (already via choices).
 - DB index additions (see 10.9).
 
 ### 10.9 Index & Performance Plan
@@ -1096,8 +1097,8 @@ Immediate (add migrations):
 - Feedback: (gig_id).
 Post-Refactor:
 - AIMessage: (session_id, created_at).
-- GigAssignment: (cupid_id, created_at).
-- Partial indexes (Postgres) for active gigs once migrated.
+- gigAssignment: (cupid_id, created_at).
+- Partial indexes (Postgres) for active Gigs once migrated.
 
 ### 10.10 Migration / Refactor Strategy
 Phase A (Pre-security hardening):
@@ -1114,10 +1115,10 @@ Phase C (AI Session Separation):
 - Backfill: For each unique (owner) contiguous Message block create session.
 
 Phase D (Gig Assignment):
-- Create GigAssignment; migrate existing cupid/time fields.
+- Create gigAssignment; migrate existing cupid/time fields.
 - Remove cupid FK from Gig (or keep nullable for fast access, but ensure consistency).
 
-### 10.11 Retention & Deletion (Adjusted)
+### 10.11 Retention & Deletion
 | Data | Interim Policy | Target Policy |
 |------|----------------|---------------|
 | Message.text | Stored indefinitely | 90 day retention / anonymize older |
@@ -1130,22 +1131,6 @@ Phase D (Gig Assignment):
 Current: Local SQLite (manual copy only).  
 Target (pre-payments): Migrate to managed Postgres + daily logical backup + WAL. (Original backup plan retained but not yet applicable.)
 
-### 10.13 Open Decisions
-| Topic | Question | Status |
-|-------|----------|--------|
-| Drop raw financial tables timeline | Before first external test user? | Decide date |
-| Introduce UUID PKs | Worth migration or keep int? | Evaluate |
-| Encrypt narrative fields | Scope vs performance | Assess after MVP |
-| Merge Quest into Gig | Simplify vs future reuse | Pending |
-| Session model necessity now | Defer until AI metrics needed? | Decide Sprint N |
-
-### 10.14 Artifacts To Produce
-- schema_snapshot.md (generated via inspectdb) — baseline.
-- migration_plan_refactor.md (Phases A–D tasks).
-- draft_models_future.py (proposed AISession, AIMessage, GigAssignment).
-- risk_note_financial_data.md (documents removal of PaymentCard/BankAccount).
-
-(Original conceptual entities retained above only where they map to planned refactors.)
 
 ## 11. Diagrams -- All
 - **Architecture Diagram**
