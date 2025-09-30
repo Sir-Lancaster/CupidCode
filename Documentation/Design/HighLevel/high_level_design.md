@@ -854,6 +854,8 @@ Current schema (SQLite) implements merged role+profile patterns (Dater, Cupid) a
 | KeyRotationEvent   | No          | Track encryption key usage | Add with encryption rollout |
 
 ### 10.3 Current Entity Details (from /code/server/api/models.py)
+![DatabaseERD](./images/cupidERD.png)
+
 (Fields summarized; omit Django implicit id unless primary key overridden.)
 
 User  
@@ -884,7 +886,6 @@ Gig
 
 Date  
 - Fields: Dater, date_time, location, description, status (planned|occurring|past|canceled), budget.  
-- Not referenced elsewhere yet.
 
 Feedback  
 - Fields: owner (nullable, SET_NULL), target (User), Gig, message, star_rating, date_time.  
