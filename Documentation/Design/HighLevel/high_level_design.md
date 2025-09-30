@@ -15,7 +15,7 @@ Sprint Followers: Zac Cunningham, Greg Steele, Dallin Tew, Carter Johnson
   - [Security](#8-security)
   - [Risks and Mitigations](#9-risks-and-mitigation)
   - [Data Design](#10-data-design)
-  - [Diagrams](#11-diagrams----all)
+
 ## 1. Introduction
 **Purpose**  
 Provide a concise high‑level technical design for the current Cupid Code platform so the team can complete an MVP (Minimum Viable Product) that delivers the Must requirements (MoSCoW) for 2025–2026. This document aligns inherited code (frontend Vue app + Django backend) with the updated requirements specification and guides subsequent detailed design, implementation, and risk mitigation.
@@ -118,7 +118,7 @@ Partial / incomplete (to be delivered):
 - Stubs for payment & notification services integrated behind clear service interfaces to enable parallel work streams.  
 
 
-## 3. Architecture -- Carter
+## 3. Architecture
 ### Architecture Style
 Cupid Code is designed using a **client–server monolithic architecture** centered on **Django**. While the backend currently functions as a monolith for simplicity and rapid development, it is organized into **modular services** (authentication, scheduling, payments, AI integration, notifications). This modular design provides a clear **pathway to evolve into a service-oriented or microservices architecture** in the future if scalability demands increase.  
 
@@ -187,6 +187,10 @@ graph TD
 ```
 
 ## 4. Major Components
+
+#### **Gig Request**
+![Sequence-Diagram](./images/Sequence_Diagram.jpg)
+
 ### Frontend (Vue 3 + Vite)
 
 - **Responsibilities**  
@@ -297,7 +301,7 @@ Modules include metrics aggregation services for analytics, and privilege enforc
 
 
 
-## 5. External Interfaces -- Dallin
+## 5. External Interfaces 
 ### Third-Party APIs / Services
 
 1. **AI Bot**  
@@ -808,7 +812,7 @@ To anticipate load and scalability needs, we project the following average volum
 - Payment: 1 transaction per active user per week 
 - Calendar Events: 2-3 new or updated events per user per month
 
-## 8. Security -- Carter
+## 8. Security
 ### Overview — Defense in Depth
 Cupid Code adopts a **defense-in-depth** approach: multiple independent controls are applied across the stack (client, server, data, and infrastructure).  Security is treated as a property of the entire system (architecture, code, build pipeline, and operations) rather than a single checkbox.  Controls are layered so that failure of one layer does not immediately expose sensitive data or critical functions.
 
@@ -1130,16 +1134,5 @@ Phase D (Gig Assignment):
 ### 10.12 Backup & Restore
 Current: Local SQLite (manual copy only).  
 Target (pre-payments): Migrate to managed Postgres + daily logical backup + WAL. (Original backup plan retained but not yet applicable.)
-
-
-## 11. Diagrams -- All
-- **Architecture Diagram**
-- **Component Diagram**
-- **Sequence Diagram(s)**
-
-#### **Gig Request**
-![Sequence-Diagram](./images/Sequence_Diagram.jpg)
-
-- **Use Case Diagram(s)**
 
 
