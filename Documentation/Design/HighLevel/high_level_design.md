@@ -6,14 +6,14 @@ Sprint Followers: Zac Cunningham, Greg Steele, Dallin Tew, Carter Johnson
 
 ## Contents
   - [Introduction](#1-introduction)
-  - [System Overview](#2-system-overview----kayden)
-  - [Architecture](#3-architecture----carter)
-  - [Major Components](#4-major-components----dallin)
-  - [External Interfaces](#5-external-interfaces----dallin)
-  - [User Interface Design](#6-user-interface-design----zac)
-  - [Input and Output](#7-input-and-output----zac)
-  - [Security](#8-security----carter)
-  - [Risks and Mitigations](#9-risks-and-mitigation----greg)
+  - [System Overview](#2-system-overview)
+  - [Architecture](#3-architecture)
+  - [Major Components](#4-major-components)
+  - [External Interfaces](#5-external-interfaces)
+  - [User Interface Design](#6-user-interface-design)
+  - [Input and Output](#7-input-and-output)
+  - [Security](#8-security)
+  - [Risks and Mitigations](#9-risks-and-mitigation)
   - [Data Design](#10-data-design)
   - [Diagrams](#11-diagrams----all)
 ## 1. Introduction
@@ -48,7 +48,7 @@ Excludes: low‑level class diagrams, detailed endpoint specs, test plans, deplo
 - Full subscription tiering or microtransactions (explicit Won’t).  
 - Full multilingual & advanced analytics dashboards (later phases).  
 
-## 2. System Overview -- Kayden
+## 2. System Overview
 **System Description**  
 Cupid Code is a role‑based web application that assists users (primarily socially anxious or inexperienced Daters) with AI‑driven, context‑aware coaching and on‑demand human “Cupid” Gig interventions. The platform delivers:  
 - Dater experience: AI chat + (future) passive listening for live guidance; scheduling and Gig request flows.  
@@ -118,7 +118,7 @@ Partial / incomplete (to be delivered):
 - Stubs for payment & notification services integrated behind clear service interfaces to enable parallel work streams.  
 
 
-## 3. Architecture -- Carter
+## 3. Architecture
 ### Chosen Architecture
 Cupid Code adopts a **three-tier architecture** with a separation of concerns between presentation, application logic, and data persistence:
 
@@ -154,7 +154,7 @@ Cupid Code adopts a **three-tier architecture** with a separation of concerns be
 - **Notification Services**: Workers push updates via email/SMS and in-app alerts.  
 - **Manager/Admin Dashboard**: Real-time metrics and compliance reporting via Django views connected to Postgres.
 
-## 4. Major Components -- Dallin
+## 4. Major Components
 ### Frontend (Vue 3 + Vite)
 
 - **Responsibilities**  
@@ -258,7 +258,7 @@ Django Admin provides an out-of-the-box management interface. Alternatively, a c
 Modules include metrics aggregation services for analytics, and privilege enforcement mechanisms to ensure only authorized managers can access sensitive data.  
 
 
-## 5. External Interfaces -- Dallin
+## 5. External Interfaces
 ### Third-Party APIs / Services
 
 1. **AI Bot**  
@@ -292,7 +292,7 @@ Modules include metrics aggregation services for analytics, and privilege enforc
     - **Notes:** Provides high availability and scalability; secure authentication and endpoint validation are required.
 
 
-## 6. User Interface Design -- Zac
+## 6. User Interface Design
 
 ### UI/UX Principles
 
@@ -718,7 +718,7 @@ Note: Although all of the Cupid diagrams do not show the notification button on 
 ![Dater info](images/daterInfo.jpg)
 
 
-## 7. Input and Output -- Zac
+## 7. Input and Output
 Although most of this was mentioned previously, we have condensed all the the inputs and outputs into single lists.
 
 
@@ -769,7 +769,7 @@ To anticipate load and scalability needs, we project the following average volum
 - Payment: 1 transaction per active user per week 
 - Calendar Events: 2-3 new or updated events per user per month
 
-## 8. Security -- Carter
+## 8. Security
 ### Security at Each Layer
 
 1. **Frontend (Vue)**  
@@ -807,7 +807,7 @@ To anticipate load and scalability needs, we project the following average volum
 - **Security monitoring:** Logging and anomaly detection for suspicious activity; intrusion detection via cloud services.  
 - **Consent management:** Couples can configure privacy/consent settings for shared data (surprises, gifts, etc.).  
 
-## 9. Risks and Mitigation -- Greg
+## 9. Risks and Mitigation
 
 #### Risk Table Key
 - **L (Low):** Rare/Minor (unlikely or easily handled)
