@@ -930,6 +930,13 @@ Define clear roles and least-privilege permissions. Enforce both coarse-grained 
 
 ## 9. Risks and Mitigation -- Greg
 
+### Explanation of Risk Mitigation Table
+The table below summarizes the key risks identified for the AI-assisted dating help app, across critical categories such as Technology, Security, Data, and Schedule. Each risk is described with its causal factors, potential impact, and likelihood of occurrence. To support proactive management, specific preventative mitigations are outlined that aim to reduce the chance or severity of each risk. Contingency or fallback plans describe actions to be taken if a risk materializes despite these safeguards.
+
+Triggers and early warning indicators provide measurable signals or thresholds that help detect when a risk is emerging or escalating, enabling rapid response. The residual risk denotes the remaining exposure after applying mitigations, while the status tracks the current risk handling state (e.g., Open, Monitoring).
+
+This structured approach ensures clarity, accountability, and readiness to handle uncertainties, helping safeguard the project’s success and user trust in our app.
+
 #### Risk Table Key
 - **L (Low):** Rare/Minor (unlikely or easily handled)
 - **M (Medium):** Possible/Moderate (would disrupt but manageable)
@@ -1144,6 +1151,10 @@ Target (pre-payments): Migrate to managed Postgres + daily logical backup + WAL.
 - **Architecture Diagram**
 - **Component Diagram**
 - **Sequence Diagram(s)**
+
+#### **Gig Request**
+![Sequence-Diagram](./images/Sequence_Diagram.jpg)
+
 - **Use Case Diagram(s)**
 
 
