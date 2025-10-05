@@ -1091,15 +1091,423 @@ Allow Dater users to **view, edit, and update their personal and dating-related 
 - Access the **Update Password Section** to reset credentials securely.  
 - Navigate to other app areas via the **Bottom Navigation Bar** or **Hamburger Menu**.  
 
+#### 7.3.3 Cupid Screens
 
+---
 
-Wireframes/prototypes (for all roles: Dater, Cupid, Manager/Admin).
+**IMAGE HERE**
 
-Accessibility support (color blindness mode, keyboard navigation).
+**Page Name:** Cupid Home Page
 
-Usability considerations (2-click navigation, mobile-first design).
+**Purpose:**  
+Serve as the **central hub for Cupid users**, allowing quick access to all major operational functions such as viewing gigs, completing orders, submitting feedback, and managing profiles. The Cupid Home Page is designed for speed and simplicity—keeping the experience lightweight and actionable for users who frequently check in between gigs.
 
-User flows for key actions (sign up, gig request, payment, feedback).
+**Elements on this page:**  
+- **Top Bar**
+  - Centered **Cupid Code** logo  
+  - **Hamburger menu** on the left providing quick access for all pages, Accessibility Mode, and Logout.  
+
+- **Main Sections**
+  - **Pages Section:**  
+    - Four large action cards providing direct navigation to the Cupid’s main tools:
+      - **Profile:** Opens Cupid Profile page for editing personal details and balance information.  
+      - **Find Gigs:** Opens list of available gigs and active assignments.  
+      - **Completed Gigs:** Opens history of finished gigs with rating options for daters.  
+      - **Feedback:** Opens review section showing received ratings and comments.  
+  - **Available Gigs Section:**  
+    - Displays a preview of 1–3 available gigs to encourage immediate action.  
+    - Each gig card includes:  
+      - **Dater Name:** The client’s first name (e.g., *Newton*, *Bob*).  
+      - **Item:** The requested task or object (e.g., *Flowers*, *Movie Tickets*).  
+      - **Budget:** Amount allocated for the gig.  
+      - **Location:** Where the task will occur.  
+      - **Accept Button:** Allows the Cupid to accept the gig directly from the home screen.  
+
+- **Validation / Messaging**
+  - If a gig is successfully accepted, a toast confirmation appears (e.g., *“Gig accepted successfully!”*).  
+  - If a gig becomes unavailable (e.g., already claimed by another Cupid), an alert appears (e.g., *“This gig has already been accepted by another Cupid.”*).  
+  - Input handling is minimal since this page is primarily navigational and informational.  
+
+- **Navigation**
+  - **Bottom Navigation Bar (Cupid View):**
+    - **Home:** Active (disabled while on this page).  
+    - **Find Gigs:** Opens Cupid Find Gigs page.  
+    - **Completed Gigs:** Opens Completed Gigs page.  
+    - **Feedback:** Opens Feedback page with ratings received from daters.  
+    - **Profile:** Opens Cupid Profile page.  
+    - **Notifications:** Opens Notifications page (shared with all roles).  
+
+**Expected User Actions:**  
+- Tap a **page card** (Profile, Find Gigs, Completed Gigs, or Feedback) to navigate to that section.  
+- Review **Available Gigs** at the bottom and tap **Accept** to claim one instantly.  
+- Use the **Hamburger Menu** or **Bottom Navigation Bar** for quick role-specific navigation.  
+- Monitor notifications for updates or new gig assignments while remaining within two taps of any key feature.
+
+**IMAGE HERE**
+
+**Page Name:** Cupid Find Gigs Page
+
+**Purpose:**  
+Provide Cupids with a clear overview of both **active** and **available** gigs so they can efficiently manage their workload and accept new assignments. This page functions as the Cupid’s task dashboard, allowing them to **complete**, **drop**, or **accept** gigs directly without navigating through multiple menus. It is designed to keep workflow fast and intuitive while maintaining consistency with Cupid Code’s terminal-inspired visual style.
+
+**Elements on this page:**  
+- **Top Bar**
+  - Centered **Cupid Code** logo  
+  - **Hamburger menu** on the left for quick access to all pages, Accessibility Mode, and Logout.  
+
+- **Main Sections**
+  - **Active Gigs Section:**  
+    - Displays gigs currently accepted by the Cupid.  
+    - Each card includes:  
+      - **Dater Name** (e.g., *Steve*, *Bob*)  
+      - **Item:** The task or purchase (e.g., *Rodeo Tickets*, *Movie Tickets*)  
+      - **Budget:** The allotted gig budget.  
+      - **Location:** Where the task takes place.  
+      - **Complete Button (Green):** Marks the gig as successfully finished and moves it to the *Completed Gigs* page.  
+      - **Drop Button (Red):** Allows the Cupid to unassign themselves from the gig if unable to complete it.  
+  - **Available Gigs Section:**  
+    - Displays open gigs that any Cupid can accept.  
+    - Each card includes the same details: **Dater Name**, **Item**, **Budget**, and **Location.**  
+    - **Accept Button (Green):** Claims the gig immediately, moving it to the *Active Gigs* section.
+
+- **Validation / Messaging**
+  - Confirmation message appears after each action:  
+    - *“Gig marked as complete.”*  
+    - *“Gig dropped successfully.”*  
+    - *“Gig accepted successfully.”*  
+  - Error messages appear if the gig is no longer available: *“Gig already claimed by another Cupid.”*  
+  - Visual indicators update dynamically after each action to prevent duplicate submissions.  
+
+- **Navigation**
+  - **Bottom Navigation Bar (Cupid View):**
+    - **Home:** Returns to Cupid Home Page.  
+    - **Find Gigs:** Active (disabled while on this page).  
+    - **Completed Gigs:** Opens history of finished gigs.  
+    - **Feedback:** Opens Feedback page.  
+    - **Profile:** Opens Cupid Profile Page.  
+    - **Notifications:** Opens Notifications Page (shared view).  
+
+**Expected User Actions:**  
+- Scroll through the **Active Gigs** list to monitor ongoing assignments.  
+- Tap **Complete** to finalize a gig after successful delivery.  
+- Tap **Drop** to release a gig if unable to fulfill it.  
+- Scroll to **Available Gigs** and tap **Accept** to claim new tasks.  
+- Use the **Hamburger Menu** or **Bottom Navigation Bar** to move between other pages efficiently.  
+- Upon completing or dropping a gig, the page refreshes to reflect updated status instantly.
+
+**IMAGE HERE**
+
+**Page Name:** Cupid Completed Gigs Page
+
+**Purpose:**  
+Allow Cupids to review and manage **finished gigs** while providing an easy way to give feedback on their dating interactions. The page maintains the same terminal-style visual consistency as other Cupid views and is optimized for quick scrolling and simple rating submission. It ensures Cupids can close the feedback loop by rating Daters promptly after completing gigs.
+
+**Elements on this page:**  
+- **Top Bar**
+  - Centered **Cupid Code** logo  
+  - **Hamburger menu** on the left providing quick access to all pages, Accessibility Mode, and Logout.  
+
+- **Main Section**
+  - **Completed Gigs:**  
+    - Displays all gigs that the Cupid has successfully finished.  
+    - Each card includes:  
+      - **Dater Name:** Who the gig was completed for (e.g., *Steve*, *Ned*, *Bob*).  
+      - **Item:** The task fulfilled (e.g., *Movie Tickets*, *Rodeo Tickets*).  
+      - **Budget:** The amount spent or allocated.  
+      - **Location:** Where the date or delivery took place.  
+      - **Rate Dater Button (Green):** Opens a rating popup for leaving feedback about the Dater.  
+
+- **Rating Popup Modal (after tapping “Rate Dater”)**
+  - **Text Field:** Optional comments about the interaction (e.g., *“Easy to coordinate with”*).  
+  - **Star Rating System:** 1–5 hearts or stars for visual consistency with Dater ratings.  
+  - **Submit Button:** Sends the rating and saves feedback.  
+  - **Cancel Button:** Closes the popup without submitting changes.  
+  - Toast confirmation appears on success: *“Thank you for rating your Dater!”*  
+
+- **Validation / Messaging**
+  - Error messages displayed if submission fails (e.g., *“Rating could not be saved”*).  
+  - Once a rating is submitted, the corresponding card updates to indicate that feedback has been recorded.  
+  - Cards are arranged in two-column format for readability and efficient space use.  
+
+- **Navigation**
+  - **Bottom Navigation Bar (Cupid View):**
+    - **Home:** Returns to Cupid Home Page.  
+    - **Find Gigs:** Opens Find Gigs Page.  
+    - **Completed Gigs:** Active (disabled while on this page).  
+    - **Feedback:** Opens Feedback Page.  
+    - **Profile:** Opens Cupid Profile Page.  
+    - **Notifications:** Opens Notifications Page.  
+
+**Expected User Actions:**  
+- Scroll through the list of **Completed Gigs** to review all previously finished assignments.  
+- Tap **Rate Dater** under each gig to open the rating modal and provide feedback.  
+- Enter a short comment (optional) and select a 1–5 heart rating → tap **Submit**.  
+- Observe confirmation message and visual change on the rated card.  
+- Navigate to other app sections using the **Bottom Navigation Bar** or **Hamburger Menu** for additional features.
+
+**IMAGE HERE**
+
+**Page Name:** Cupid Feedback Page
+
+**Purpose:**  
+Provide Cupids with an overview of all feedback and ratings they’ve received from Daters. The page highlights the **overall performance score** (average rating) at the top, followed by detailed reviews from individual Daters. This allows Cupids to monitor their reputation and identify areas for improvement while maintaining transparency and motivation.
+
+**Elements on this page:**  
+- **Top Bar**
+  - Centered **Cupid Code** logo  
+  - **Hamburger menu** on the left for quick access to all pages, Accessibility Mode, and Logout.  
+
+- **Main Sections**
+  - **Overall Rating Section:**  
+    - Prominently displays the Cupid’s **average rating** (e.g., *4.5 hearts*).  
+    - Includes a visual representation of hearts to reflect the rating.  
+    - Updates automatically as new feedback is received.  
+  - **Feedback Cards Section:**  
+    - Lists all reviews from Daters in reverse chronological order (most recent first).  
+    - Each feedback card includes:  
+      - **Dater Name** (e.g., *Newton Schrute*, *Joe Sparks*).  
+      - **Rating:** Numerical value displayed alongside heart icons (1–5).  
+      - **Description:** Short written feedback from the Dater describing the interaction or service quality.  
+    - Cards are visually styled in **blue backgrounds with green text**, consistent with Cupid Code’s rebranding.  
+    - Cards use rounded corners and evenly spaced stacking for smooth scrolling.  
+
+- **Validation / Messaging**
+  - Displays placeholder text if no feedback has been received yet (e.g., *“No feedback available yet.”*).  
+  - Ratings and comments are static, pulled from the server as read-only data.  
+  - Feedback automatically refreshes when the page is reopened or when a new rating is received.  
+
+- **Navigation**
+  - **Bottom Navigation Bar (Cupid View):**
+    - **Home:** Returns to Cupid Home Page.  
+    - **Find Gigs:** Opens Cupid Find Gigs Page.  
+    - **Completed Gigs:** Opens Completed Gigs Page.  
+    - **Feedback:** Active (disabled while on this page).  
+    - **Profile:** Opens Cupid Profile Page.  
+    - **Notifications:** Opens Notifications Page.  
+
+**Expected User Actions:**  
+- View their **overall rating** and read detailed feedback from Daters.  
+- Scroll through feedback cards to review multiple ratings.  
+- Use the **Hamburger Menu** or **Bottom Navigation Bar** to navigate to other Cupid pages.  
+- Observe live rating updates after new feedback submissions from Daters, ensuring real-time performance tracking.  
+
+**IMAGE HERE**
+
+**Page Name:** Cupid Profile Page
+
+**Purpose:**  
+Provide Cupids with an editable view of their personal information, work statistics, and account management options. This page allows Cupids to review their performance, update personal details, manage their range of service, and securely change passwords. The design focuses on clarity, organization, and the ability to scroll through well-defined sections without overwhelming the user.
+
+**Elements on this page:**  
+- **Top Bar**
+  - Centered **Cupid Code** logo  
+  - **Hamburger menu** on the left providing quick access to all pages, Accessibility Mode, and Logout.  
+
+- **Main Sections**
+  - **Profile Header**
+    - Displays Cupid’s **profile image** (editable via upload field).  
+    - Shows **name** (e.g., *Riley Hart*), **account balance**, and **gig success ratio** (e.g., *20 successful gigs out of 21 accepted*).  
+  - **Personal Information Section**
+    - **First Name** (text input)  
+    - **Last Name** (text input)  
+    - **Username** (text input; usually read-only if tied to login credentials)  
+    - **Email** (email field; validated format)  
+    - **Phone Number** (numeric input; format validation)  
+    - **Range** (numeric input or slider, defining delivery/service distance in miles)  
+    - **Profile Picture Upload** (file selector with filename label displayed next to button)  
+  - **Physical Description Section**
+    - Multi-line read-only text area summarizing the Cupid’s appearance (e.g., *Height, Build, Hair, Eyes, Clothing*).  
+    - Editable in profile settings if the Cupid wants to update self-description.  
+  - **Save Changes Section**
+    - **Update/Save Changes Button:** Saves edits to user information.  
+    - Displays confirmation toast (“Profile updated successfully”) after saving.  
+  - **Password Update Section**
+    - **Old Password:** Masked input for current password verification.  
+    - **New Password:** Masked input with strength validation.  
+    - **Repeat Password:** Confirms new password match before submission.  
+    - **Update Password Button:** Submits changes to update account credentials securely.  
+    - Displays toast for success or error messages.  
+
+- **Validation / Messaging**
+  - Inline validation ensures all fields are complete before saving.  
+  - Error messages displayed beneath incorrect fields (e.g., *“Invalid email format”* or *“Passwords do not match”*).  
+  - Success message confirms when updates are applied.  
+  - Inputs are scrollable for smaller screens, ensuring usability without clutter.
+
+- **Navigation**
+  - **Bottom Navigation Bar (Cupid View):**
+    - **Home:** Returns to Cupid Home Page.  
+    - **Find Gigs:** Opens Cupid Find Gigs Page.  
+    - **Completed Gigs:** Opens Completed Gigs Page.  
+    - **Feedback:** Opens Cupid Feedback Page.  
+    - **Profile:** Active (disabled while on this page).  
+    - **Notifications:** Opens Notifications Page (shared across all roles).  
+
+**Expected User Actions:**  
+- Review and edit personal details, contact info, and service range.  
+- Upload a new profile picture using the **Choose File** button.  
+- Tap **Update/Save Changes** to apply edits.  
+- Scroll down to the **Update Password Section** to change credentials securely.  
+- Use **Bottom Navigation Bar** or **Hamburger Menu** for quick access to other Cupid functions.  
+- Observe confirmation toasts for profile and password updates.  
+- Return to active gig tracking or feedback pages with a single tap, maintaining two-click navigation across the interface.
+
+#### 7.3.4 Manager Screens
+
+---
+
+**IMAGE HERE**
+
+**Page Name:** Manager Home Page
+
+**Purpose:**  
+Serve as the **central dashboard** for Manager users, displaying both **business analytics** and **operational statistics**. This page enables quick access to the Cupid and Dater information pages, as well as a summarized view of profits, user activity, and gig metrics. It is designed to give managers a complete snapshot of Cupid Code’s performance at a glance while maintaining the app’s clean, terminal-inspired visual consistency.
+
+**Elements on this page:**  
+- **Top Bar**
+  - Centered **Cupid Code** logo  
+  - **Hamburger menu** on the left for quick access to all pages, Accessibility Mode, and Logout.  
+
+- **Main Sections**
+  - **Pages Section:**  
+    - Two large navigation buttons:  
+      - **Cupid Info:** Opens the page displaying all active Cupids, their ratings, and performance data.  
+      - **Dater Info:** Opens the page showing all active Daters, their ratings, and activity summaries.  
+    - Buttons are large, rounded blue cards with green text to clearly indicate interactive navigation.  
+
+  - **Stats Section:**  
+    - Contains the **Monthly Profits Graph**, showing revenue trends over time.  
+    - Line chart includes month labels along the X-axis and profit values on the Y-axis.  
+    - Displays an overview of the app’s financial performance, helping managers identify seasonal highs and lows.  
+
+  - **General Stats Section:**  
+    - Displays total counts for users in blue rounded statistic cards:
+      - **Total Daters:** Total number of registered Dater accounts.  
+      - **Total Cupids:** Total number of registered Cupid accounts.  
+      - **Active Daters:** Number of Daters currently active.  
+      - **Active Cupids:** Number of Cupids currently active or fulfilling gigs.  
+
+  - **Gig Stats Section:**  
+    - Provides operational data about gigs across the platform:  
+      - **Total Gigs:** Total number of gigs created to date.  
+      - **Gigs per Day:** Average number of gigs created daily.  
+      - **Gigs Completed:** Number of successfully completed gigs.  
+      - **Gigs Dropped:** Number of gigs that were canceled or not completed.  
+
+  - **Convert to PDF Button:**  
+    - Large button located at the bottom of the screen.  
+    - When tapped, it generates a downloadable PDF report that includes the profit chart and all summary statistics.  
+    - Used for recordkeeping or reporting purposes.
+
+- **Validation / Messaging**
+  - Stats and graphs are **read-only** and automatically updated in real time from the database.  
+  - If no data is available, placeholders appear (e.g., *“No stats available at this time.”*).  
+  - PDF generation triggers a brief confirmation message (e.g., *“Report exported successfully.”*).  
+
+- **Navigation**
+  - **Bottom Navigation Bar (Manager View):**
+    - **Home:** Active (disabled while on this page).  
+    - **Cupid Info:** Opens the Cupid Info Page.  
+    - **Dater Info:** Opens the Dater Info Page.  
+    - **Notifications:** Opens Notifications Page (shared with other roles).  
+
+**Expected User Actions:**  
+- Tap **Cupid Info** or **Dater Info** to manage user lists and view performance metrics.  
+- Review **Monthly Profits Graph** to track earnings trends.  
+- Reference **General Stats** and **Gig Stats** for up-to-date activity summaries.  
+- Tap **Convert to PDF** to generate a downloadable summary report for business use.  
+- Navigate to other management views using the **Bottom Navigation Bar** or **Hamburger Menu** for efficiency. 
+
+**IMAGE HERE**
+
+**Page Name:** Manager Cupid Info Page
+
+**Purpose:**  
+Allow Managers to view and manage all **Cupid accounts**, including performance stats, ratings, and disciplinary controls. This page provides a concise, card-based layout that helps administrators monitor each Cupid’s activity and take quick action when necessary. It aligns with the high-level design goal of making management tools **fast, clear, and accessible within two clicks** from the home screen.
+
+**Elements on this page:**  
+- **Top Bar**
+  - Centered **Cupid Code** logo  
+  - **Hamburger menu** on the left for quick navigation to all pages, Accessibility Mode, and Logout.  
+
+- **Main Section**
+  - **Cupid Info Cards:**  
+    - Each Cupid is represented by a card displaying their key information:
+      - **Name:** Full name of the Cupid (e.g., *Riley Hart*, *Joe Sparks*).  
+      - **Rating:** Visual heart icons with a numerical value.  
+      - **Location:** Cupid’s base or primary service area (e.g., *Logan, UT*).  
+      - **Completed Gigs:** Number of gigs successfully completed.  
+      - **Dropped Gigs:** Number of gigs the Cupid did not complete or canceled.  
+      - **Suspend Button (Red):** Allows the Manager to temporarily deactivate the Cupid’s account or remove them from active listings.  
+    - Cards use a consistent **blue background with green text** to match the Cupid Code color scheme and emphasize clarity.  
+    - Layout displays cards in a two-column grid format for optimal visibility on mobile devices.  
+
+- **Validation / Messaging**
+  - Tapping **Suspend** triggers a confirmation popup:  
+    - *“Are you sure you want to suspend this Cupid?”*  
+    - Options: **Confirm** / **Cancel**.  
+  - Upon confirmation, a toast message appears (e.g., *“Cupid suspended successfully.”*).  
+  - If the action fails, an error message appears (e.g., *“Action could not be completed. Try again later.”*).  
+  - All data displayed is read-only except for administrative actions like suspension.  
+
+- **Navigation**
+  - **Bottom Navigation Bar (Manager View):**
+    - **Home:** Opens Manager Home Page.  
+    - **Cupid Info:** Active (disabled while on this page).  
+    - **Dater Info:** Opens Dater Info Page.  
+    - **Notifications:** Opens Notifications Page (shared view).  
+
+**Expected User Actions:**  
+- Review each Cupid’s profile summary for quick insights into performance and reliability.  
+- Tap **Suspend** on a Cupid’s card to temporarily disable their account if required.  
+- Confirm or cancel suspension in the popup modal.  
+- Navigate between **Cupid Info**, **Dater Info**, and **Home** pages using the **Bottom Navigation Bar** or **Hamburger Menu**.  
+- Monitor active Cupids regularly to maintain service quality and uphold community standards. 
+
+**IMAGE HERE**
+
+**Page Name:** Manager Dater Info Page
+
+**Purpose:**  
+Allow Managers to view, monitor, and manage all **Dater accounts** within the Cupid Code platform. This page mirrors the layout and functionality of the **Cupid Info Page** for consistency but focuses on Dater-specific information such as ratings, locations, and moderation controls. It provides a quick, visual overview of user activity and reputation, enabling Managers to take appropriate administrative actions when needed.
+
+**Elements on this page:**  
+- **Top Bar**
+  - Centered **Cupid Code** logo  
+  - **Hamburger menu** on the left for quick access to all pages, Accessibility Mode, and Logout.  
+
+- **Main Section**
+  - **Dater Info Cards:**  
+    - Each Dater is represented by an individual card containing the following details:
+      - **Name:** Full name of the Dater (e.g., *Newton Schrute*, *Joe Sparks*).  
+      - **Rating:** Visual heart icons with a numeric value.  
+      - **Location:** General area where the Dater is based (e.g., *Logan, UT*, *SLC, UT*, *USU*).  
+      - **Suspend Button (Red):** Allows the Manager to temporarily deactivate a Dater’s account or restrict their activity in case of reported issues.  
+    - Cards are styled in **blue backgrounds with green text** to match the terminal-inspired color scheme and maintain brand consistency.  
+    - Cards are presented in a **two-column grid layout** for easy readability and quick scanning of multiple users.  
+
+- **Validation / Messaging**
+  - When the **Suspend** button is tapped, a confirmation dialog appears:  
+    - *“Are you sure you want to suspend this Dater?”*  
+    - Options: **Confirm** / **Cancel**.  
+  - Successful action triggers a toast message (e.g., *“Dater suspended successfully.”*).  
+  - Errors display if the action fails (e.g., *“Unable to suspend user. Please try again later.”*).  
+  - Dater data is read-only except for administrative suspension controls.  
+
+- **Navigation**
+  - **Bottom Navigation Bar (Manager View):**
+    - **Home:** Opens Manager Home Page.  
+    - **Cupid Info:** Opens Manager Cupid Info Page.  
+    - **Dater Info:** Active (disabled while on this page).  
+    - **Notifications:** Opens Notifications Page (shared across all roles).  
+
+**Expected User Actions:**  
+- Review each Dater’s rating and location to assess engagement or behavior trends.  
+- Tap **Suspend** to disable a Dater’s account if necessary.  
+- Confirm or cancel the suspension action in the dialog box.  
+- Use the **Hamburger Menu** or **Bottom Navigation Bar** to switch between **Cupid Info**, **Home**, or **Notifications** pages.  
+- Regularly monitor this section to maintain a safe and respectful community environment across the platform. 
+
 
 ## 8. Technology Stack
 
