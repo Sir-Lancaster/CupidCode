@@ -535,11 +535,11 @@ and is integrated across all roles (Dater, Cupid, and Manager).
 
 Cupid Code’s visual identity draws from a terminal-inspired palette that balances bold contrast with simplicity. The selected colors are:
 
-- **Imperial Red:** <span style="color:#FB3640; font-weight:bold;">#FB3640</span>  
-- **Polynesian Blue:** <span style="color:#1F487E; font-weight:bold;">#1F487E</span>  
-- **Vivid Sky Blue:** <span style="color:#00CCFF; font-weight:bold;">#00CCFF</span>  
-- **Pigment Green:** <span style="color:#09A129; font-weight:bold;">#09A129</span>  
-- **Black (Background):** <span style="color:#000000; font-weight:bold;">#000000</span>
+- **Imperial Red:** #FB3640
+- **Polynesian Blue:** #1F487E
+- **Vivid Sky Blue:** #00CCFF
+- **Pigment Green:** #09A129
+- **Black (Background):** #000000
 
 This color scheme was tested against the most common forms of color blindness—**Protanopia**, **Deuteranopia**, **Tritanopia**, and **Achromatopsia**—to ensure clear differentiation between 
 interface elements.  
@@ -549,8 +549,8 @@ interface elements.
 To further improve usability, Cupid Code includes an **Accessibility Mode** toggle that adjusts colors and contrast for users with visual sensitivities.  
 
 When enabled, Accessibility Mode makes the following changes:
-- Background color changes from **<span style="color:#000000; font-weight:bold;">#000000</span>** (Black) → **<span style="color:#FFFFFF; background-color:#000000; font-weight:bold;">#FFFFFF</span>** (White)
-- Text color changes from **<span style="color:#09A129; font-weight:bold;">#09A129</span>** (Pigment Green) → **<span style="color:#000000; font-weight:bold;">#000000</span>** (Black)
+- Background color changes from **#00000** (Black) → *>#FFFFF>** (White)
+- Text color changes from **#09A129** (Pigment Green) → *>#00000>** (Black)
 - All interactive buttons and icons retain their accent colors for brand recognition and clarity.
 
 The **Accessibility Mode toggle** will be visible on every page through:
@@ -589,7 +589,7 @@ Cupid Code uses a predictable, mobile-first navigation model that minimizes fric
 
 ### 7.3 Page Wireframes & Descriptions
 
-# <span style="color:#FB3640; font-weight:800;">WARNING: PROTOTYPE SCREENS ONLY</span>
+# $`\textcolor{red}{\textbf{WARNING: PROTOTYPE SCREENS ONLY}}`$
 
 The images referenced in this section are **non-functional prototypes** created in **Figma** to illustrate layout, flow, and component placement. They are not connected to live data or services, and **buttons/inputs do not work**. Final implementation details (spacing, copy, and micro-interactions) may change during development.
 
@@ -597,7 +597,7 @@ The images referenced in this section are **non-functional prototypes** created 
 
 ---
 
-**IMAGE HERE**
+![create cupid](images/CreateCupid.png)
 
 **Page Name:** Cupid Create Account
 
@@ -626,7 +626,7 @@ Enable a new Cupid to register an account using only the most essential informat
 - On success: account record created; user is directed to **Cupid Home** 
 - If validation fails: inline errors displayed with clear remediation (e.g., “Username already in use,” “Passwords don’t match,”).
 
-**IMAGE HERE**
+![create dater](images/CreateDater.png)
 
 **Page Name:** Dater Create Account
 
@@ -656,7 +656,7 @@ Allow a new Dater to register a basic account with minimal required information 
 - On success: account record is created, and the user is directed to the **Dater Home** screen.  
 - If validation fails: inline errors are displayed with clear remediation (e.g., “Username already in use,” “Passwords don’t match,” “Invalid email format”).
 
-**IMAGE HERE**
+![Login](images/Login.png)
 
 **Page Name:** Universal Login Page
 
@@ -688,7 +688,7 @@ Provide a unified, simple login experience for all user roles — **Manager**, *
 - On failure: inline message appears beneath the password field prompting the user to retry or reset their password (future feature).  
 - User may switch tabs at the top to **Create Account** if they don’t yet have an account, or to **Welcome** to learn more about the app.
 
-**IMAGE HERE**
+![notifications](images/Notifications.png)
 
 **Page Name:** Notifications Page (Dater View)
 
@@ -723,7 +723,7 @@ Provide users with an organized list of updates and alerts related to their acti
 
 ---
 
-**IMAGE HERE**
+![dater home](images/DaterHome.png)
 
 **Page Name:** Dater Home Page
 
@@ -758,7 +758,7 @@ Serve as the **central hub** for Dater users, allowing quick access to all major
 - Use the **Bottom Nav Bar** or **Hamburger Menu** for quick navigation to other app sections.  
 - The Dater can return to this Home Page from any other screen in **two taps or fewer**, maintaining the user experience standard defined in the High-Level Design.
 
-**IMAGE HERE**
+![AI chat](images/DaterAIChat.png)
 
 **Page Name:** Dater AI Chat Page
 
@@ -800,7 +800,7 @@ Provide Dater users with an interactive space to receive real-time AI assistance
 - Return to the Home Page or other sections using the **Bottom Navigation Bar**.  
 - Press the **Microphone Icon** to enable voice chat and receive AI feedback via text.
 
-**IMAGE HERE**
+![AI Voice](images/DaterAIVoice.png)
 
 **Page Name:** Dater AI Voice Page (AI Listen Mode)
 
@@ -841,7 +841,7 @@ Allow Dater users to interact with the AI through **voice-based input and respon
 - Use the **Hamburger Menu** to toggle Accessibility Mode or log out.  
 - Navigate to other pages using the **Bottom Navigation Bar** once finished with the AI session.
 
-**IMAGE HERE**
+![Plan date](images/DaterPlanDate.png)
 
 **Page Name:** Dater Plan Date / Create Gig Page
 
@@ -878,7 +878,7 @@ Allow Dater users to create new **date events** or **gigs** quickly by specifyin
 - On failure (missing or invalid fields): inline errors prompt the user to correct information.  
 - After successful creation, the user may return to **Home** or view notifications confirming gig creation.
 
-**IMAGE HERE**
+![Rate cupid](images/DaterRatedCupid.png)
 
 **Page Name:** Dater Rate Cupid / Gig Status Page
 
@@ -932,7 +932,7 @@ Enable Dater users to **track the status of their gigs** (dates) and provide fee
 - After rating submission, the modal closes, and the gig card updates to reflect that the Cupid has been rated.  
 - Navigate freely using the **Bottom Navigation Bar** or **Hamburger Menu** to access other features.  
 
-**IMAGE HERE**
+![dater calendar](images/DaterCalendar.png)
 
 **Page Name:** Dater Calendar Page
 
@@ -978,7 +978,7 @@ Provide Dater users with an organized overview of both **upcoming** and **past**
 - Tap a **Past Date Card** to open the **Rate Cupid / Gig Status Page** and provide a rating if applicable.  
 - Use the **Bottom Navigation Bar** or **Hamburger Menu** to navigate to other features or toggle Accessibility Mode.  
 
-**IMAGE HERE**
+![Dater payment](images/DaterPayment.png)
 
 **Page Name:** Dater Payment Page
 
@@ -1023,7 +1023,7 @@ Allow Dater users to **manage their account balance** and **stored payment metho
 - Enter **new card information** and tap **Add Card** to securely save payment details for future use.  
 - Navigate to other app sections using the **Bottom Navigation Bar** or access **Accessibility Mode** via the Hamburger Menu.  
 
-**IMAGE HERE**
+![dater profile](images/DaterProfile.png)
 
 **Page Name:** Dater Profile Page
 
@@ -1095,7 +1095,7 @@ Allow Dater users to **view, edit, and update their personal and dating-related 
 
 ---
 
-**IMAGE HERE**
+![cupid home](images/CupidHome.png)
 
 **Page Name:** Cupid Home Page
 
@@ -1143,7 +1143,7 @@ Serve as the **central hub for Cupid users**, allowing quick access to all major
 - Use the **Hamburger Menu** or **Bottom Navigation Bar** for quick role-specific navigation.  
 - Monitor notifications for updates or new gig assignments while remaining within two taps of any key feature.
 
-**IMAGE HERE**
+![cupid find gigs](images/CupidFindGigs.png)
 
 **Page Name:** Cupid Find Gigs Page
 
@@ -1195,7 +1195,7 @@ Provide Cupids with a clear overview of both **active** and **available** gigs s
 - Use the **Hamburger Menu** or **Bottom Navigation Bar** to move between other pages efficiently.  
 - Upon completing or dropping a gig, the page refreshes to reflect updated status instantly.
 
-**IMAGE HERE**
+![cupid completed gigs](images/CupidCompleteGigs.png)
 
 **Page Name:** Cupid Completed Gigs Page
 
@@ -1245,7 +1245,7 @@ Allow Cupids to review and manage **finished gigs** while providing an easy way 
 - Observe confirmation message and visual change on the rated card.  
 - Navigate to other app sections using the **Bottom Navigation Bar** or **Hamburger Menu** for additional features.
 
-**IMAGE HERE**
+![cupid feedback](images/CupidFeedback.png)
 
 **Page Name:** Cupid Feedback Page
 
@@ -1291,7 +1291,7 @@ Provide Cupids with an overview of all feedback and ratings they’ve received f
 - Use the **Hamburger Menu** or **Bottom Navigation Bar** to navigate to other Cupid pages.  
 - Observe live rating updates after new feedback submissions from Daters, ensuring real-time performance tracking.  
 
-**IMAGE HERE**
+![cupid profile](images/CupidProfile.png)
 
 **Page Name:** Cupid Profile Page
 
@@ -1356,7 +1356,7 @@ Provide Cupids with an editable view of their personal information, work statist
 
 ---
 
-**IMAGE HERE**
+![manager home](images/ManagerHome.png)
 
 **Page Name:** Manager Home Page
 
@@ -1418,7 +1418,7 @@ Serve as the **central dashboard** for Manager users, displaying both **business
 - Tap **Convert to PDF** to generate a downloadable summary report for business use.  
 - Navigate to other management views using the **Bottom Navigation Bar** or **Hamburger Menu** for efficiency. 
 
-**IMAGE HERE**
+![Manager Cupid info](images/ManagerCupidInfo.png)
 
 **Page Name:** Manager Cupid Info Page
 
@@ -1464,7 +1464,7 @@ Allow Managers to view and manage all **Cupid accounts**, including performance 
 - Navigate between **Cupid Info**, **Dater Info**, and **Home** pages using the **Bottom Navigation Bar** or **Hamburger Menu**.  
 - Monitor active Cupids regularly to maintain service quality and uphold community standards. 
 
-**IMAGE HERE**
+![manager dater info](images/ManagerDaterInfo.png)
 
 **Page Name:** Manager Dater Info Page
 
