@@ -56,19 +56,543 @@ Rationale for final design.
 
 ## 3. Subsystems & Class Design
 
-For each subsystem: Auth/Identity, Gig Scheduling, Messaging/AI, Payments, Notifications, Admin/Manager Dashboard, UI (Frontend Vue)
+### 3.1 Auth/Identity
 
-For each:
+**Responsibilities**
 
-Responsibilities (specific role in system).
+The authentication system manages user registration through the create_user() endpoint, which creates User instances with role-based profiles (Dater, Cupid, Manager) and automatically logs users in upon successful creation. User login is handled by sign_in(), which authenticates credentials using Django's built-in functions and returns serialized user data based on role. The system enforces authorization through helper functions like authenticated_dater() and authenticated_cupid() that validate user permissions before accessing protected resources. Session management relies on Django's session framework with CSRF protection, while logout functionality clears sessions through the logout_view(). The custom User model extends AbstractUser to include role designation and phone numbers, enabling role-based access control throughout the application where users can only access resources appropriate to their assigned role.
 
-Class Breakdown (detailed class list, adhering to SRP).
+**Class breakdown**
 
-UML Class Diagrams (fields, methods, relationships).
+*Backend Classes*
 
-Design Choices & Alternatives (inheritance vs composition, why chosen).
+- **User (Django Model)**
+  - Extends AbstractUser with custom role field and phone number
+  - Defines role choices: DATER, CUPID, MANAGER
+  - Serves as the base authentication model for all user types
 
-Edge Cases considered.
+- **Dater (Django Model)**
+  - OneToOne relationship with User
+  - Stores dater-specific profile data (budget, preferences, dating history)
+  - Manages communication preferences and AI interaction settings
+  - Tracks ratings, balance, and suspension status
+
+- **Cupid (Django Model)**
+  - OneToOne relationship with User
+  - Manages gig worker profile data and availability status
+  - Tracks completed/failed gigs, ratings, and earnings
+  - Controls gig acceptance settings and location range
+
+- **UserSerializer (DRF Serializer)**
+  - Handles User model serialization/deserialization
+  - Validates user registration data
+  - Converts User instances to JSON for API responses
+
+- **DaterSerializer (DRF Serializer)**
+  - Serializes Dater profile data
+  - Validates dater-specific form inputs
+  - Handles profile updates and data formatting
+
+- **CupidSerializer (DRF Serializer)**
+  - Manages Cupid profile serialization
+  - Validates cupid registration and profile data
+  - Formats cupid data for API responses
+
+*Frontend Classes/Components*
+
+- **Login (Vue Component)**
+  - Handles user login form and validation
+  - Makes authentication requests to backend
+  - Routes users to appropriate dashboards based on role
+
+- **SignUp (Vue Component)**
+  - Manages user registration process
+  - Handles role selection and form validation
+  - Submits registration data and auto-logs in users
+
+- **NavSuite (Vue Component)**
+  - Provides navigation and logout functionality
+  - Manages user session state in the UI
+  - Handles drawer navigation and profile routing
+
+**UML case diagrams**
+
+[To be added]
+
+**Design choices/alternatives**
+
+Auth/identity was produced by the previous team that worked on that project, as such we must keep it regardless, as to save time.
+
+**Edge cases**
+
+The authentication system handles duplicate user prevention via Django unique constraints, automatic role assignment in model save methods, suspension status checks with redirects, and permission validation preventing cross-user access through authenticated_dater() functions. Frontend components manage authentication failures with error displays, role-based routing, and form validation preventing incomplete submissions. The system handles profile creation rollbacks, distinguishes "user not found" vs "incorrect password" errors, and includes CSRF protection with session management. Key gaps include missing rate limiting, email verification, session timeout handling, and password strength validation.
+
+### 3.2 Gig Scheduling
+**Responsibilities**
+
+The Gig Scheduling subsystem is responsible for finding and managing local events relevant to users. It retrieves event data from external sources using the Yelpapi API and determines which gigs to surface based on user location from the Geolocation API. It stores, updates, and filters event listings and handles any logic for scheduling, refreshing, or organizing gigs in the app. Its role is limited to acquiring, processing, and providing event data tied to user location.
+
+**Class breakdown**
+
+*Backend Classes*
+
+- **Gig (Django Model)**
+  - Manages gig lifecycle with status tracking (UNCLAIMED, CLAIMED, COMPLETE)
+  - Links dater (requester) and cupid (assignee) with timestamps for each stage
+  - Tracks dropped_count and accepted_count for analytics
+  - Enforces foreign key relationships to Dater, Cupid, and Quest
+
+- **Quest (Django Model)**
+  - Stores gig details including budget, items_requested, and pickup_location
+  - OneToOne relationship with Gig for detailed task specifications
+  - Provides structured data for cupids to understand gig requirements
+
+- **GigSerializer (DRF Serializer)**
+  - Handles gig data serialization/deserialization for API responses
+  - Validates gig creation and status update data
+  - Formats gig data with related user information for frontend display
+
+- **QuestSerializer (DRF Serializer)**
+  - Manages quest data validation and formatting
+  - Handles budget validation and location data processing
+  - Converts quest specifications to JSON for API consumption
+
+*Frontend Components*
+
+- **DaterGigs (Vue Component)**
+  - Displays dater's gigs categorized by status (claimed, unclaimed, complete)
+  - Provides gig cancellation and cupid rating functionality
+  - Manages rating popup with heart-based star system
+
+- **GigDetails (Vue Component)**
+  - Shows available gigs for cupids to accept
+  - Filters gigs by cupid's location and range preferences
+  - Provides accept/reject functionality for gig assignments
+
+- **GigComplete (Vue Component)**
+  - Displays completed gigs for cupid review
+  - Enables dater rating and feedback submission
+  - Shows gig history and completion statistics
+
+- **Calendar (Vue Component)**
+  - Manages date scheduling and gig timeline visualization
+  - Integrates with gig creation for planning purposes
+  - Displays upcoming gigs and date events
+
+**UML case diagrams**
+
+[To be added]
+
+**Design choices/alternatives**
+
+The gig system uses a separate Quest model rather than embedding gig details directly in the Gig model to maintain clear separation between gig lifecycle management and task specifications, enabling future quest reusability and detailed validation. Status tracking uses IntegerChoices enum rather than string fields to improve query performance and data consistency while preventing invalid status values. The system employs explicit foreign key relationships to Dater and Cupid rather than generic foreign keys to maintain referential integrity and enable efficient joins. Location-based filtering is implemented in Python rather than database spatial queries to avoid complex PostGIS setup for MVP, though this limits scalability for large geographic areas. Gig assignment uses a nullable cupid field on Gig rather than a separate GigAssignment table for simplicity, though the database design document recommends future normalization to track assignment history and handle concurrent claims more robustly.
+
+**Edge cases**
+
+The gig system handles location-based filtering to prevent cupids from seeing gigs outside their range, validates budget constraints during quest creation, and manages concurrent gig acceptance attempts through status checking. It prevents cross-user gig manipulation through authenticated_dater/cupid helper functions and handles orphaned gigs when cupids drop assignments. The system tracks completion statistics for performance analytics and validates gig ownership before allowing cancellation or modification. Missing capabilities include gig expiration handling, payment escrow during active gigs, and automated reassignment when cupids repeatedly drop gigs.
+
+### 3.3 Messaging/AI
+  Responsibilities
+    The Messaging/AI subsystem handles all chatbot interactions and AI-driven communication features. It manages conversations between users and the in-app AI, generates responses, and provides real-time suggestions during dates based on live input. It can listen to user dialogue, evaluate communication proficiency, and recommend topics to keep the conversation active. Its role is limited to processing user messages, producing AI output, and supporting interaction through analysis and suggestion.
+
+  Class breakdown
+    Backend Classes
+
+      Message (Django Model)
+      Stores individual chat messages with owner reference and from_ai flag
+      Links messages to users and distinguishes between user and AI responses
+      Provides text storage for conversation history and context
+
+      MessageSerializer (DRF Serializer)
+      Handles message data validation and formatting for API responses
+      Manages conversation serialization for frontend display
+      Validates message text and user ownership
+
+    Frontend Components
+
+      AiChat (Vue Component)
+      Provides text-based chat interface with AI
+      Displays conversation history with visual distinction between user and AI messages
+      Handles message sending and real-time conversation updates
+      Manages chat state and auto-scrolling for new messages
+
+      AiListen (Vue Component)
+      Manages voice recording and speech-to-text functionality
+      Provides emergency gig creation through popup interface
+      Handles audio capture and transmission to backend STT endpoint
+      Displays AI responses and listening status feedback
+
+    Helper Functions
+
+      speech_to_text() (API View)
+      Processes audio data for speech recognition
+      Converts voice input to text for AI processing
+      Handles audio format validation and response generation
+
+  UML case diagrams
+  Design choices/alternatives
+    The messaging system uses a simple Message model with from_ai boolean flag rather than separate UserMessage and AIMessage tables to minimize complexity for MVP, though this approach limits advanced features like message threading and conversation branching. Speech-to-text processing is handled synchronously in the API view rather than asynchronously to provide immediate feedback during live conversations, accepting potential latency issues for better user experience. The system stores all conversation history without automatic expiration to maintain context for AI responses, though the database design document proposes AISession separation for better retention management. Browser-based audio recording is used instead of native mobile recording to maintain web-first architecture, limiting audio quality but ensuring cross-platform compatibility. AI responses are generated on-demand rather than cached to provide personalized context, trading performance for response relevance but increasing API costs and latency.
+  Edge cases
+    The messaging system handles conversation persistence across sessions, manages concurrent message sending, and validates user ownership of conversations. It processes speech-to-text with error handling for poor audio quality and manages real-time AI response generation. The system handles emergency scenarios through immediate gig creation during listening sessions and maintains conversation context for coherent AI responses. Missing features include message encryption, conversation archiving, AI response caching, and advanced speech recognition error recovery.
+
+
+Payments
+  Responsibilities
+    The Payments subsystem manages all monetary transactions through the Stripe API. It handles the purchase of Cupid Cash, and ensures that payment requests, confirmations, and balances are processed correctly. It records transactions, verifies successful payments, and updates user currency balances. Its role is limited to processing purchases, interacting with Stripe, and maintaining accurate Cupid Cash allocations for use in funding gigs.
+
+  Class breakdown
+    Backend Classes
+
+      PaymentMethodToken (Django Model)
+      Stores tokenized payment method references from Stripe/PayPal
+      Links users to secure external payment tokens without storing sensitive data
+      Tracks payment method metadata (brand, last4, expiration) for display
+      Manages multiple payment methods per user with primary selection
+      Provides secure payment method validation and verification status
+
+      PaymentIntent (Django Model)
+      Manages payment processing lifecycle from creation to completion
+      Stores Stripe/PayPal payment intent IDs and processing status
+      Tracks payment amounts, currency, and associated gig/transaction
+      Handles payment confirmation, failure, and refund processing
+      Provides audit trail for all payment attempts and outcomes
+
+      Transaction (Django Model)
+      Maintains comprehensive financial ledger for all user transactions
+      Records debits, credits, transfers, and balance adjustments
+      Links transactions to payment intents, gigs, and external references
+      Provides immutable transaction history for accounting and auditing
+      Supports transaction categorization and reporting requirements
+
+      WalletBalance (Django Model)
+      Tracks user account balances and available funds
+      Manages separate balances for daters and cupids with role validation
+      Handles balance updates with atomic operations and concurrency control
+      Provides balance history and low-balance notification triggers
+      Supports multiple currencies and conversion tracking
+
+      EscrowHold (Django Model)
+      Manages funds held in escrow during active gigs
+      Links held amounts to specific gigs and payment sources
+      Handles automatic release on gig completion or manual intervention
+      Tracks hold duration and provides escrow status reporting
+      Manages dispute resolution and partial release scenarios
+
+      PaymentMethodTokenSerializer (DRF Serializer)
+      Handles secure payment method display and validation
+      Manages tokenization requests to payment providers
+      Validates payment method updates and primary selection
+      Formats payment method data for secure frontend display
+      Handles payment method verification and status updates
+
+      PaymentIntentSerializer (DRF Serializer)
+      Manages payment processing request validation and formatting
+      Handles payment confirmation and status update serialization
+      Validates payment amounts and gig associations
+      Formats payment intent data for frontend tracking
+      Manages error handling and retry logic for failed payments
+
+      TransactionSerializer (DRF Serializer)
+      Handles transaction history serialization and filtering
+      Manages transaction search and reporting data formatting
+      Validates transaction creation and status updates
+      Provides transaction categorization and summary data
+      Handles pagination for large transaction histories
+
+    Frontend Components
+
+      CupidCash (Vue Component)
+      Manages dater balance display and Cupid Cash purchasing
+      Provides payment card selection and amount input interface
+      Handles deposit transactions and balance updates
+      Integrates with payment processing for fund additions
+
+    Helper Functions
+
+      dater_transfer() / cupid_transfer() (API Views)
+      Handle balance transfers and payment processing
+      Manage transaction validation and balance updates
+      Process payment confirmations and error handling
+
+      get_dater_balance() / get_cupid_balance() (API Views)
+      Retrieve current user balance information
+      Validate user permissions for balance access
+      Format balance data for frontend display
+
+      save_card() / save_bank_account() (API Views) - DEPRECATED
+      Store payment method information - high security risk
+      To be replaced with tokenized payment method storage
+      Currently handle raw payment data validation
+
+  UML case diagrams
+  Design choices/alternatives
+    The payment system currently stores raw payment card data directly in the database for rapid MVP development, though this creates significant PCI compliance risks that require immediate migration to Stripe/PayPal tokenization before production deployment. Balance tracking uses simple decimal fields on user profiles rather than a separate transaction ledger to minimize complexity, though this approach limits audit capabilities and transaction history. Payment processing is handled synchronously in API views rather than using background jobs to provide immediate user feedback, accepting potential timeout risks for better user experience. The system uses separate dater and cupid balance fields rather than a unified wallet system to maintain clear separation between user types and prevent accidental cross-role transactions. Payment provider selection prioritizes Stripe over PayPal due to superior developer experience and webhook reliability, though both remain viable options for user choice and payment method diversity.
+  Edge cases
+    The payment system handles balance validation to prevent overdrafts, validates payment card formats, and manages transaction atomicity to prevent double-charging. It enforces user permissions ensuring users can only access their own payment information and balances. The system handles payment processing failures with appropriate error responses and maintains transaction logs for audit purposes. Critical security gaps include raw payment data storage requiring immediate tokenization, missing PCI compliance controls, lack of payment method verification, and no fraud detection mechanisms.
+
+
+Notifications
+  Responsibilities
+    Sends alerts to users through the Twilio API. It delivers updates about gigs and confirms transactions such as purchases of Cupid Cash. It handles message formatting, delivery, and routing to the correct user based on phone or contact data. Its role is limited to generating and sending outbound notifications triggered by events in other subsystems.
+
+  Class breakdown
+    Backend Classes
+
+      Notification 
+      Would store notification queue with delivery status tracking
+      Would manage recipient information and delivery preferences
+      Would track delivery attempts and failure handling
+
+    Helper Functions
+
+      notify() (API View)
+      Processes notification requests and formats messages
+      Handles routing to appropriate delivery channels (SMS/email)
+      Manages notification validation and delivery confirmation
+
+      Twilio Integration Functions
+      get_twilio_authenticated_sender_email() - Retrieves sender email configuration
+      get_twilio_authenticated_sender_phone_number() - Gets SMS sender number
+      get_twilio_authenticated_reserve_phone_number() - Manages backup phone numbers
+      Handle Twilio API authentication and message delivery
+
+    Frontend Components
+
+      Notification Display (Integrated in NavSuite)
+      Shows in-app notifications and alerts to users
+      Manages notification state and user acknowledgment
+      Provides notification history and status updates
+
+  UML case diagrams
+  Design choices/alternatives
+    The notification system uses Twilio as the primary provider for SMS and email delivery rather than implementing multiple providers to reduce integration complexity for MVP, though this creates vendor lock-in risks. Notifications are sent synchronously from API views rather than using a background queue system to ensure immediate delivery feedback, accepting potential performance impacts for simpler error handling. The system lacks persistent notification storage, instead relying on immediate delivery or failure, which limits retry capabilities and notification history but reduces database complexity. Template management is handled through simple string formatting rather than a sophisticated template engine to minimize dependencies and maintain rapid development pace. In-app notifications are integrated directly into the NavSuite component rather than using a dedicated notification service to leverage existing UI patterns and reduce frontend complexity, though this limits notification customization and advanced features like notification categories or priority levels.
+  Edge cases
+    The notification system handles delivery failures with retry mechanisms, validates recipient contact information, and manages notification preferences per user. It processes notification templates and formatting for different delivery channels and handles rate limiting to prevent spam. The system validates notification content and manages delivery timing for optimal user experience. Current gaps include missing notification persistence, no delivery confirmation tracking, limited template management, and no unsubscribe handling for external notifications.
+
+
+Admin/Manager Dashboard
+  Responsibilities
+    Provides management access to app-wide data and user oversight. It displays key metrics such as total users, active users, revenue over time, and gig statistics including completion and drop rates. It allows managers to view and manage Cupid and Dater accounts, including suspending users when needed. It generates PDFs of statistical data and graphs for reporting purposes. The dashboard also controls navigation to different administrative pages and adapts its layout for different screen sizes. Its role is limited to data presentation, user oversight, reporting, and interface access for management actions.
+
+  
+  Class breakdown
+    Backend Classes
+
+      ManagerSerializer (DRF Serializer)
+      Handles manager account data serialization for admin interfaces
+      Validates manager-specific permissions and data access
+      Formats manager profile information for dashboard display
+
+    API Views (Manager Functions)
+
+      get_daters() / get_cupids() - Retrieve user lists for management interface
+      get_dater_count() / get_cupid_count() - Provide user count statistics
+      get_active_daters() / get_active_cupids() - Track active user metrics
+      get_gig_rate() / get_gig_count() - Calculate gig performance statistics
+      get_gig_drop_rate() / get_gig_complete_rate() - Analyze gig completion metrics
+      suspend() / unsuspend() - Manage user account status and access control
+      delete_user() - Handle account deletion with proper data cleanup
+
+    Frontend Components
+
+      ManagerHome (Vue Component)
+      Displays dashboard overview with key metrics and navigation
+      Shows revenue graphs, user statistics, and gig performance data
+      Provides navigation to detailed management pages
+      Integrates PDF generation functionality for reporting
+
+      Daters (Vue Component)
+      Lists all dater accounts with management controls
+      Provides suspension/unsuspension functionality for dater accounts
+      Displays dater ratings, status, and account details
+      Handles bulk operations on dater accounts
+
+      Cupid (Vue Component - for Cupid Management)
+      Manages cupid account oversight and controls
+      Shows cupid performance metrics, ratings, and gig completion rates
+      Provides cupid suspension and account management tools
+      Displays cupid availability and service statistics
+
+    Utility Functions
+
+      to_pdf() (Frontend Utility)
+      Generates PDF reports from dashboard statistics and graphs
+      Handles chart and data export formatting
+      Manages download functionality for management reports
+
+  UML case diagrams
+  Design choices/alternatives
+    The admin dashboard uses Django's IsAdminUser permission class rather than custom role checking to leverage built-in Django admin patterns and ensure consistent security enforcement. Statistics are calculated on-demand in API views rather than pre-computed and cached to ensure real-time accuracy for administrative decisions, accepting performance costs for data freshness. The dashboard uses separate Vue components for different user management pages rather than a single unified interface to maintain clear separation of concerns and enable independent development of Dater and Cupid management features. PDF generation is handled client-side using jsPDF rather than server-side rendering to reduce backend complexity and enable immediate download without additional API calls. User lists are loaded without pagination for the MVP to simplify implementation, though this approach limits scalability as user counts grow and will require pagination implementation for production use.
+  Edge cases
+    The admin dashboard handles role-based access with IsAdminUser permission enforcement, validates admin actions before execution, and manages concurrent administrative operations. It processes large user lists with pagination and filtering and handles data export with proper formatting. The system tracks administrative actions for audit purposes and validates user management operations. Missing features include detailed audit logging, advanced analytics filtering, bulk user operations, automated report scheduling, and sophisticated user search capabilities.
+
+
+UI (Frontend Vue)
+  Responsibilities
+    The UI subsystem handles all user-facing screens and interactions using Vue. It renders pages for authentication, gigs, messaging, payments, notifications, and the manager dashboard. It manages user input, state display, navigation, and component layouts across different screen sizes. It communicates with backend APIs to show real-time data and trigger actions like logging in, purchasing Cupid Cash, or viewing gigs. Its role is limited to presentation, interaction handling, and API integration on the client side.
+    
+  Class breakdown
+    Core Components
+
+      App (Vue Component)
+      Root application component managing global state and routing
+      Handles application initialization and top-level navigation
+      Provides authentication state management across the application
+
+      Router (Vue Router Configuration)
+      Manages client-side routing with hash-based navigation
+      Defines route mappings for all user roles and page types
+      Handles route guards and role-based access control
+
+    Common Components
+
+      NavSuite (Vue Component)
+      Provides consistent navigation interface across all pages
+      Handles drawer navigation, logout functionality, and profile routing
+      Manages responsive navigation for different screen sizes
+
+      Login (Vue Component)
+      Handles user authentication with email/password validation
+      Manages error display and role-based routing after login
+      Integrates with backend authentication endpoints
+
+      SignUp (Vue Component)
+      Manages user registration with role selection (Dater/Cupid)
+      Handles different form fields based on selected user role
+      Provides file upload for profile pictures and form validation
+
+      Welcome (Vue Component)
+      Landing page with application introduction and feature overview
+      Provides navigation to registration and login pages
+      Displays application branding and value proposition
+
+      PinkButton (Vue Component)
+      Reusable button component with consistent styling
+      Handles click events and provides accessible button interface
+      Ensures design consistency across the application
+
+      Heart (Vue Component)
+      Rating component using heart icons for feedback systems
+      Manages interactive rating selection and display
+      Used in cupid/dater rating interfaces
+
+      Popup (Vue Component)
+      Modal dialog component for overlays and confirmations
+      Handles popup state management and content display
+      Provides consistent modal interface across the application
+
+    Dater-Specific Components
+
+      DaterHome (Vue Component)
+      Dashboard overview for dater users with feature navigation
+      Displays key action cards for AI chat, listening, calendar, and balance
+      Provides quick access to all dater functionality
+
+      AiChat (Vue Component)
+      Text-based chat interface with AI conversation management
+      Handles message display, sending, and conversation history
+      Manages real-time chat updates and message formatting
+
+      AiListen (Vue Component)
+      Voice recording interface with speech-to-text functionality
+      Manages audio capture, processing, and AI response display
+      Handles emergency gig creation through integrated popup
+
+      DaterProfile (Vue Component)
+      Profile management with editable user information and preferences
+      Handles form validation, data updates, and password changes
+      Manages profile picture upload and personal information editing
+
+      DaterGigs (Vue Component)
+      Displays dater's gigs categorized by status with management controls
+      Provides gig cancellation and cupid rating functionality
+      Handles rating submission with heart-based interface
+
+      Calendar (Vue Component)
+      Date and event management with scheduling capabilities
+      Integrates with gig system for timeline visualization
+      Handles date creation, editing, and budget planning
+
+      CupidCash (Vue Component)
+      Balance management and payment processing interface
+      Handles Cupid Cash purchasing and payment method selection
+      Manages transaction processing and balance display
+
+      DaterFeedback (Vue Component)
+      Displays received feedback and ratings from cupids
+      Shows feedback history and rating summaries
+      Provides feedback management and review functionality
+
+    Cupid-Specific Components
+
+      CupidHome (Vue Component)
+      Dashboard for cupid users with gig-focused navigation
+      Displays available gig previews and quick action access
+      Provides navigation to gig management and profile pages
+
+      CupidDetails (Vue Component)
+      Cupid profile management with availability and preference settings
+      Handles cupid-specific information editing and gig range configuration
+      Manages cupid status and acceptance preferences
+
+      GigDetails (Vue Component)
+      Available gig browser with location-based filtering
+      Displays gig details and provides acceptance/rejection functionality
+      Handles gig assignment and status updates
+
+      GigComplete (Vue Component)
+      Completed gig history with rating and feedback capabilities
+      Shows gig completion statistics and performance metrics
+      Handles dater rating submission and review management
+
+      CupidFeedback (Vue Component)
+      Displays feedback received from daters with rating summaries
+      Shows performance history and improvement suggestions
+      Manages feedback review and response capabilities
+
+    Manager-Specific Components
+
+      ManagerHome (Vue Component)
+      Administrative dashboard with system metrics and navigation
+      Displays user statistics, gig analytics, and revenue graphs
+      Provides PDF export functionality and management tool access
+
+      Daters (Vue Component)
+      User management interface for dater account oversight
+      Handles user suspension, account details, and bulk operations
+      Provides search and filtering capabilities for user management
+
+      Cupid (Vue Component - Manager View)
+      Cupid account management with performance tracking
+      Shows cupid metrics, ratings, and service statistics
+      Handles cupid account administration and oversight
+
+    Utility Components
+
+      GigData (Vue Component)
+      Reusable component for displaying gig information consistently
+      Handles gig detail formatting and status visualization
+      Used across dater and cupid interfaces for consistency
+
+    Shared Services
+
+      makeRequest (JavaScript Utility)
+      Centralized API communication with CSRF protection and session management
+      Handles HTTP requests, error processing, and response formatting
+      Provides consistent interface for backend communication
+
+      logoutRequest (JavaScript Utility)
+      Specialized logout handling with session cleanup
+      Manages logout API calls and state clearing
+      Ensures proper session termination across the application
+
+  UML case diagrams
+
+  Design choices/alternatives
+    The frontend uses Vue 3 with Composition API rather than Options API to provide better TypeScript support and improved component reusability, though this requires more modern JavaScript knowledge from developers. Hash-based routing is used instead of history mode to avoid server configuration requirements for SPA deployment, accepting less clean URLs for simpler deployment. The system employs role-specific Vue component directories (DaterVues, CupidVues, ManagerVues) rather than feature-based organization to maintain clear role separation and enable independent development of user type interfaces. Session-based authentication with cookies is used instead of token-based authentication to leverage Django's CSRF protection and simplify logout handling, though this limits mobile app compatibility. The application uses a centralized makeRequest utility rather than a full state management library like Vuex to minimize complexity for MVP, accepting manual state synchronization challenges for faster development and smaller bundle size.
+
+  Edge cases
+    The UI system handles responsive design across device sizes, manages role-based component rendering, and validates form inputs before submission. It processes navigation state and handles route protection based on authentication status. The system manages component state synchronization, handles API communication errors gracefully, and maintains consistent styling across all interfaces. Current limitations include missing loading states, limited error boundary handling, no offline capability, basic accessibility support, and minimal client-side caching for API responses.
 
 ## 4. Database Design
 
