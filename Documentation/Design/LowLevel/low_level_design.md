@@ -1759,6 +1759,13 @@ Serve as the **central hub** for Dater users, allowing quick access to all major
 - Use the **Bottom Nav Bar** or **Hamburger Menu** for quick navigation to other app sections.  
 - The Dater can return to this Home Page from any other screen in **two taps or fewer**, maintaining the user experience standard defined in the High-Level Design.
 
+**Responsive Behavior**
+
+Below is an example of what the home page would look like from a large tablet/ desktop. 
+
+![desktop dater home](images/LargeScreen.png)
+
+
 ![AI chat](images/DaterAIChat.png)
 
 **Page Name:** Dater AI Chat Page
