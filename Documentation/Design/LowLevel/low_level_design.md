@@ -48,11 +48,286 @@ Out of scope: microservices decomposition, native mobile apps, full analytics da
 
 ## 2. System Architecture (Detailed View)
 
-Finalized architecture diagram (with updated detail: services, components, APIs).
+> **Purpose:** this section expands the high-level architecture into a concrete, implementation-focused low-level design (LLD). It includes the finalized architecture diagram, detailed component interactions, repository and runtime structure, API/DB shapes, operational considerations, alternatives considered (and why they were rejected), and justification for the chosen solution.
 
-Alternatives considered (e.g., monolith vs microservices, database options).
+---
 
-Rationale for final design.
+### Finalized Architecture Diagram
+
+```mermaid
+graph TD
+  %% Define nodes
+  U["User"]
+  DNS["Azure DNS + TLS (Custom Domain + HTTPS)"]
+  CDN["CDN / Static Hosting (Vue Assets)"]
+  FE["Vue.js SPA (User Browser)"]
+  BE["Azure App Service (Django Backend - Monolith) (ASGI + WSGI workers)"]
+  DB["PostgreSQL (Managed Azure Database)"]
+  TASKQ["Celery Workers + Redis (Broker + Cache)"]
+  KV["Azure Key Vault (Secrets & Keys)"]
+  PAY["Stripe / PayPal (Payment Gateway)"]
+  AI["AI Provider (ASR / NLP / Agent APIs)"]
+  NOTIFY["Notification Providers (SMS / Email / Push)"]
+
+  %% Connections
+  U -->|resolve domain| DNS
+  U -->|request static assets| CDN
+  U -->|"interact (SPA)"| FE
+  FE -->|"HTTPS REST/GraphQL Auth (JWT / Cookie)"| BE
+  BE -->|"read/write (ORM)"| DB
+  BE -->|"enqueue jobs (Celery)"| TASKQ
+  TASKQ -->|"read/write (job state, results)"| DB
+  BE -->|payment tokenization & requests| PAY
+  BE -->|send audio/text,\nreceive responses| AI
+  BE -->|send email/SMS/push| NOTIFY
+  BE -->|retrieve secrets/keys\nvia managed identity| KV
+```
+
+---
+
+### Component interactions (detailed sequences)
+
+Below are two canonical interaction paths showing call patterns, responsibilities, and failure handling considerations.
+
+#### User sign-in (browser → API → DB)
+1. **Browser (Vue SPA)** posts credentials to `POST /api/v1/auth/login`.  
+2. **Django Backend**:
+   - Validates input server-side (throttles attempts, checks CAPTCHA after threshold).
+   - Queries Postgres for user record via Django ORM (parameterized).
+   - Verifies password using Argon2 (or PBKDF2 fallback) and checks `is_active`, `age >= 18`.
+   - On success: create a short-lived access token (JWT) and a refresh token (rotating, stored hashed in DB). Optionally also set an HttpOnly secure cookie for SPA flows that require cookie-based CSRF protection.
+   - Emit an audit log entry (`audit_logs` table) for the login event and forward to the logging pipeline.
+3. **DB**: returns user metadata (id, role, consent flags).  
+4. **Backend** responds with `200 OK` + `access_token` (or cookie) and minimal user context.
+
+**Failure handling:**  
+- Lock account or require step-up MFA on suspicious login patterns (impossible travel, IP changes).  
+- Rate limit enforced at API gateway (Azure Application Gateway / API Management) and in Django (per-IP and per-account).  
+- Provide machine-readable error codes for client UX to show contextual messages (e.g., `ERR_AUTH_LOCKED`, `ERR_RATE_LIMITED`).
+
+---
+
+#### Real-time AI listening + coaching (browser → WebSocket/HTTP streaming → Backend → Celery → AI provider → Backend → DB → user)
+1. **Browser** opens a WebSocket (or WebRTC/secure WebSocket) to `/ws/ai-session/:session_id` with bearer token or secure cookie.  
+2. **Django (Channels / ASGI wrapper)** accepts the auth on upgrade and creates an `audio_session` record in DB (status: active).  
+3. **Browser** streams short audio chunks to the WebSocket; chunks buffered and published as messages into a Redis channel or forwarded to a Celery worker via a secure internal endpoint.  
+4. **Celery Worker** assembles audio frames into small batches and forwards encrypted streams over TLS to the AI provider (ASR/LLM pipeline). Worker uses a dedicated service identity and secrets from Key Vault.  
+5. **AI Provider** returns transcriptions and suggested coaching messages (structured JSON). Worker enriches with timestamps & confidence scores and persists to `ai_interactions` table (JSONB) and triggers follow-up actions (e.g., suggested push notification to the dater).  
+6. **Backend** pushes the coaching suggestions to the browser via the WebSocket channel, optionally also scheduling delayed notifications via Celery.  
+7. **DB** stores audit and interaction logs (anonymized where possible). Sensitive data is stored encrypted (see Data section).
+
+**Failure handling & cost controls:**  
+- Chunk buffering plus local fallback (on connection failure, continue client-side to collect and retry).  
+- Implement circuit-breaker between worker and AI provider to avoid runaway costs and retries.  
+- Apply sampling for persistent storage of transcripts (e.g., store only when user opts in for post-date feedback) to limit storage cost and privacy exposure.
+
+---
+
+### Concrete component descriptions & runtime placement
+
+> **Where things run** — summarized mapping of code → runtime → Azure service.
+
+- **Vue SPA**  
+  - **Build:** Node 18+, build pipeline (Vite/webpack) in CI producing optimized static assets.  
+  - **Runtime:** served from CDN backed by Azure Blob Storage / Static Website or Azure Front Door.  
+  - **Responsibilities:** UI/UX, local validation, audio capture (MediaDevices / WebRTC), offline caching and local state (Pinia/Vuex), push subscription registration, optimistic updates for gig statuses.
+
+- **Django Backend (Monolith)**  
+  - **Structure:** Django project with well-scoped apps: `accounts`, `profiles`, `couples`, `gigs`, `payments`, `ai`, `notifications`, `analytics`, `audit`.  
+  - **Runtime:** ASGI server (Daphne/uvicorn) for long-lived connections (Channels) + Gunicorn WSGI workers for synchronous workloads. Containerized using Docker; hosted in Azure App Service (or optionally AKS for future scaling).  
+  - **Concurrency:** Use ASGI for WebSocket endpoints (Channels + Redis channel layer). WSGI for standard REST workloads. Keep CPU-bound work in background workers.
+
+- **Background processing**  
+  - **Celery** with **Redis** as broker and result backend (or RabbitMQ if stronger delivery semantics are required).  
+  - **Tasks:** notification sending, scheduled reminders, AI orchestration, payment reconciliations, periodic audits, CSV imports (bulk ETL).  
+  - Workers run in separate containers with limited privileges (no direct access to production secrets beyond scoped service identities).
+
+- **Database**  
+  - **PostgreSQL (managed)** on Azure with TLS enforced, encryption at rest (AES-256), automated backups and point-in-time recovery.  
+  - Use `pgbouncer` when under heavy concurrency to reduce DB connection churn. Optionally add read replicas for analytics and reporting workloads to isolate them from transactional load.
+
+- **Secrets & Keys**  
+  - **Azure Key Vault** for API keys, JWT signing keys, envelope encryption keys. Backend uses Managed Identity to fetch secrets at runtime; CI uses ephemeral deploy secrets from pipeline-integrated vault.
+
+- **Third-party integrations**  
+  - **Payments:** Stripe (PaymentIntents, webhooks); do not store PAN/CVV. Store `stripe_customer_id`, `payment_method_id` tokens and transaction metadata. Use idempotency keys on create flows.  
+  - **AI provider(s):** external LLM + ASR providers (audio + text). All calls authenticated with Key Vault keys; worker proxies audio to provider to keep PII out of direct client→provider paths.  
+  - **Notifications:** Twilio / SendGrid or equivalent; webhook verification and retry logic for delivery.
+
+---
+
+### API design (examples & conventions)
+
+- **Versioning:** `/api/v1/...` — increment major versions for breaking changes.  
+- **Auth:** Bearer JWT short lived + refresh token (rotating). Admin actions require `admin` scope and step-up MFA.  
+- **Response envelope:**
+  ```json
+  {
+    "status": "ok|error",
+    "data": {...},
+    "error": {"code": "...", "message":"..."}
+  }
+  ```
+- **Key endpoints (examples):**
+  - `POST /api/v1/auth/login` — credentials → returns `access_token`, `refresh_token`.  
+  - `POST /api/v1/auth/refresh` — rotates refresh token.  
+  - `GET /api/v1/profile` — returns profile (obeys privacy flags).  
+  - `POST /api/v1/gigs` — create gig (validates budget, tokenizes payment intent).  
+  - `POST /api/v1/ai/sessions` — start audio coaching session (returns session id, WebSocket URL).  
+  - `POST /webhooks/stripe` — verified webhook handler (idempotent).
+- **Real-time:** `/ws/ai-session/:id` for audio + coaching stream (ASGI Channels).  
+- **Error handling:** idempotency keys for payment endpoints; 4xx for client errors with machine-readable codes; 5xx for server errors with correlation id logged. Include `retry-after` headers where rate-limiting is applied.
+
+---
+
+### Data model (high level schema & notes)
+
+Primary tables (suggested, abbreviated). Use UUID PKs and timestamps (`timestamptz`) for auditability.
+
+- **users**  
+  - `id UUID pk`, `email text unique`, `password_hash text`, `role enum(dater,cupid,manager)`, `dob date`, `is_active bool`, `created_at timestamptz`  
+  - Indexes: `email (unique)`, `created_at`, partial index on `is_active`.
+
+- **profiles**  
+  - `user_id FK`, `display_name`, `bio text`, `interests jsonb`, `search_vector tsvector` (for full-text).
+
+- **couples**  
+  - `id UUID`, `partner_a UUID`, `partner_b UUID`, `consent_flags jsonb`, `timeline jsonb`.
+
+- **gigs**  
+  - `id UUID`, `dater_id FK`, `cupid_id FK`, `status enum`, `budget_cents int`, `address_encrypted bytea`, `scheduled_at timestamptz`.
+
+- **transactions**  
+  - `id UUID`, `user_id FK`, `amount_cents int`, `currency text`, `processor_id text`, `status enum`, `metadata jsonb`.
+
+- **ai_interactions**  
+  - `id UUID`, `user_id FK`, `session_id UUID`, `transcript jsonb`, `response jsonb`, `confidence float`, `created_at`.
+
+- **notifications**  
+  - `id`, `user_id`, `type`, `payload jsonb`, `sent_at`, `status`.
+
+- **audit_logs**  
+  - `id`, `actor_id`, `action text`, `target_type`, `target_id`, `details jsonb`, `created_at`.
+
+**Notes & practices:**  
+- Use `JSONB` for flexible metadata and to avoid frequent schema migrations for small AI metadata changes.  
+- Encrypt `address_encrypted` with envelope encryption keys from Key Vault; store the key id or key version metadata.  
+- Use Postgres `row-level security (RLS)` for selective privacy enforcement (useful for couple-specific data).  
+- Add `pg_trgm` / `tsvector` indexes for profile searching and `GIN` indexes for JSONB queries.
+
+---
+
+### Operational & infra details (CI/CD, runbooks, scaling)
+
+- **CI/CD:** GitHub Actions or Azure DevOps pipelines:
+  - Steps: lint → unit tests → integration tests → build frontend → publish artifacts → stage deploy → smoke tests → manual approval → prod deploy.  
+  - Use environment-specific secrets from pipeline vault integration (do not commit secrets).
+
+- **Containers / Runtime:** build Docker images for backend and workers; push to Azure Container Registry. Use Azure App Service for initial deployment; migrate to AKS if Kubernetes orchestration becomes necessary.
+
+- **Scaling:** horizontal scaling for backend containers; Redis & DB sized per concurrency; autoscale rules on CPU/queue depth.
+
+- **Connection pooling:** recommended `pgbouncer` between app and Postgres to manage many short DB connections (Azure Postgres has connection limits).
+
+- **Backups & DR:** daily automated DB backups, point-in-time recovery enabled, weekly snapshot exports to cold storage. Define RTO & RPO in runbook.
+
+- **Monitoring:** Azure Monitor + Application Insights for metrics/traces; centralized logs (JSON) forwarded to SIEM (Azure Sentinel advisable).
+
+- **Secrets rotation & key management:** use vault rotation policies and secret versioning; CI uses short-lived tokens.
+
+---
+
+### Alternatives considered (and why rejected)
+
+#### Monolith (Django) vs Microservices
+**Monolith (chosen):**  
+- **Pros:** faster feature development and iteration (single repo, unified test environment); simpler deployment pipeline and fewer operational components; lower cognitive overhead for a small team.  
+- **Cons:** risk of a single large deploy causing cross-cutting regressions; scaling particular hot paths requires coarse-grained scaling.  
+- **Mitigation:** modular app boundaries, clear contracts, and ability to extract services later.
+
+**Microservices (not chosen now):**  
+- **Pros:** each domain scales independently; language/tech heterogeneity allowed; failure isolation per service.  
+- **Cons:** higher operational burden (service discovery, distributed tracing, CI/CD complexity), cross-service transactions become harder, increased latency and cost. Requires larger ops maturity.  
+- **Decision:** postpone microservices until traffic or organizational needs justify the operational cost. Maintain clean modular code to enable extraction later.
+
+---
+
+#### SQLite vs PostgreSQL
+**SQLite (rejected for production):**  
+- **Pros:** extremely simple, zero-config, great for local dev and tests.  
+- **Cons:** not suitable for concurrent writes at scale, lacks advanced security, replication, read replicas, and enterprise features (RLS, JSONB performance, extensions).  
+- **Decision:** use SQLite for local dev and tests but **Postgres** for staging/production.
+
+**PostgreSQL (chosen):**  
+- **Pros:** robust concurrency, advanced indexing (GIN/pg_trgm), JSONB support, RLS, managed instances on Azure, point-in-time recovery, encryption, and proven performance for expected patterns (transactions, analytics).  
+- **Cons:** slightly more operational complexity than SQLite, but handled by managed services.
+
+---
+
+### Decision rationale (summary & justification)
+
+**Why a Django monolith + Postgres is the best fit now**
+
+1. **Team size & velocity:** team is small and focused on quickly turning the partially-complete prototype (Cupid Code) into a working MVP. A Django monolith lets developers iterate quickly—one repo, one deployment, and Django’s “batteries included” approach reduces the number of decisions and boilerplate required to ship features like authentication, admin tooling, migrations, and ORM models.
+
+2. **Complex features with shared state:** the product mixes tight transactional flows (payments, transactions, gig assignment) with real-time interactions (AI listening, WebSockets). In a monolith, coordinating these flows and keeping transactional consistency is simpler than across networked microservices. Postgres gives strong transactional guarantees, JSONB flexibility for AI metadata, and features like RLS that map directly to the privacy model (couple consent flags). Managed Postgres also reduces ops burden (backups, patching, encryption at rest).
+
+Together, this combination minimizes operational overhead while providing a clear, supported path to split components into services later if traffic patterns and organizational capacity demand it. The modular Django app layout and carefully-documented API contracts ensure the architecture is *evolutionary* rather than *entrenched*.
+
+---
+
+### Operational concerns & next sprint actions (practical LLD checklist)
+- Finalize `settings/` per environment (`settings.dev`, `settings.staging`, `settings.prod`) and integrate Key Vault for secrets retrieval at startup.  
+- Implement `Django Channels` + ASGI config for WebSocket endpoints and ensure worker containers run Daphne/uvicorn.  
+- Add `pgbouncer` config for production to manage DB connections.  
+- Implement `envelope encryption` for address fields with Key Vault-managed keys (KMS).  
+- Create idempotent webhook handlers for Stripe and add idempotency key usage in payment flows.  
+- Add rate-limiting middleware (Azure API Management + Django rate limit) and circuit-breakers for AI provider calls.  
+- Add `row-level security` policy for couple data to enforce privacy constraints at the DB level.  
+- Add CI SAST (bandit/pylint), secret scanning, and dependency checking. Schedule a pen-test before public alpha.
+
+---
+
+### Sequence Diagram (component interaction example)
+
+```mermaid
+sequenceDiagram
+    participant Browser as "Vue SPA (Browser)"
+    participant CDN as "CDN / Static"
+    participant Backend as "Django Backend (ASGI/WGSI)"
+    participant Postgres as "Postgres (Azure)"
+    participant Celery as "Celery + Redis"
+    participant AI as "AI Provider"
+    participant Stripe as "Stripe/PayPal"
+    participant Notify as "Notification"
+
+    Browser->>CDN: GET / (static)
+    Browser->>Backend: POST /api/v1/auth/login (creds)
+    Backend->>Postgres: SELECT user
+    Postgres-->>Backend: user
+    Backend-->>Browser: 200 + access_token
+
+    Browser->>Backend: WS /ws/ai-session (auth)
+    Backend->>Celery: enqueue job (audio session start)
+    Browser->>Backend: send audio chunks via WS
+    Backend->>Celery: forward chunks
+    Celery->>AI: send audio frames (TLS)
+    AI-->>Celery: transcription + suggestions
+    Celery->>Postgres: INSERT ai_interactions
+    Postgres-->>Celery: ack
+    Celery->>Backend: push suggestions
+    Backend-->>Browser: WS message (coaching)
+
+    Browser->>Backend: POST /api/v1/gigs (create)
+    Backend->>Stripe: create PaymentIntent
+    Stripe-->>Backend: PaymentIntent client secret
+    Backend-->>Browser: 201 + payment info
+    Stripe-->>Backend: webhook /payment_intent.succeeded
+    Backend->>Postgres: record transaction
+    Backend->>Notify: queue SMS/email
+    Notify-->>Browser: push/SMS
+```
+---
 
 ## 3. Subsystems & Class Design
 
@@ -1040,13 +1315,215 @@ Scaling plan (load increases: DB vertical/horizontal scaling, queueing).
 
 ## 6. Security Design
 
-Threat model (specific to Cupid Code).
+> **Purpose:** expand the high level security section into a concrete low-level design (LLD). The LLD defines the threat model, concrete mitigations (passwords, payments, PII, TLS), an authentication token design (JWT + refresh), alternatives considered, detection & logging, key operational practices, a security threat table, and a diagram showing how data is protected *in transit* and *at rest*.
 
-Mitigations (auth hardening, encryption at rest/in transit, RBAC, tokenization).
+---
 
-Alternatives considered (e.g., JWT vs session cookies).
+### Threat model (summary)
+We define the threat model by listing the most relevant attack classes for Cupid Code and where they can appear in our stack:
 
-Justification of final approach.
+- **Auth bypass / credential compromise / session hijack** — attackers obtain or guess credentials, steal tokens, or abuse OAuth flows.
+- **Injection (SQL / command / template)** — crafted user input executed at the DB or in shell/templating contexts.
+- **Cross-Site Scripting (XSS)** — malicious script injected into pages viewed by users, enabling token theft or UI manipulation.
+- **Cross-Site Request Forgery (CSRF)** — cross-origin requests that use user cookies to perform state-changing actions.
+- **Sensitive data leakage** — exposure of PII, addresses, payment data, transcripts, or keys via code, logs, backups, or misconfigured storage.
+- **Secrets leakage / key compromise** — app secrets (API keys, DB passwords, encryption keys) leaked from source or CI/CD.
+- **Denial of Service (DoS) / resource exhaustion** — large numbers of requests or heavy third-party calls (AI) causing outage or runaway costs.
+- **Privilege escalation / insider misuse** — misuse of admin privileges or compromised operator accounts.
+- **Supply-chain / dependency vulnerabilities** — vulnerabilities in third-party libraries, containers, or CI tooling.
+
+---
+
+### Security threat table (concise, actionable)
+
+| Threat | Example attack | Impact | Primary mitigations | Detection |
+|---|---:|---|---|---|
+| Auth bypass | Credential stuffing, stolen tokens | Account takeover, fundraiser abuse | Argon2id password hashing; MFA for admins; short access tokens + refresh rotation; device/IP heuristics; login throttling | Auth logs, failed login rate alerts, impossible travel detection |
+| SQL injection | User input placed into raw SQL | Data exfiltration/modification | Django ORM only; static analysis, input validation, DB least privilege | WAF alerts, DB audit logs |
+| XSS | Rich text comment contains `<script>` | Token theft, CSRF bypass | Vue auto-escaping; CSP; sanitize rich text server-side | CSP violation reports, WAF |
+| CSRF | Forged POST from malicious site | Unauthorized state changes | CSRF tokens; use Authorization headers for APIs; SameSite cookies | CSRF token mismatches logged |
+| Sensitive data leak | Logs containing addresses/transcripts | Privacy breach, regulatory fines | Field-level/envelope encryption; redact logs; limit PII retention | SIEM, data access audit |
+| Secrets leakage | Secret in repo, CI leak | Third-party abuse, data compromise | Azure Key Vault; secret scanning; ephemeral CI creds | Git scanning alerts, Key Vault access logs |
+| DoS / runaway AI cost | Flood of audio sessions | Service outage, bill spikes | Rate limiting, circuit breakers, quota/chargeback | API gateway metrics, cost alerts |
+| Privilege misuse | Admin exports data | Severe privacy/financial risks | RBAC, 2-person approval, MFA, audit logs | Admin action audit trail + alerts |
+| Dependency exploit | Vulnerable package in backend | RCE or data leak | SAST/DAST, dependency scanning, pinning | Dependency alerts, pentest |
+
+---
+
+### Concrete mitigations — low level details
+
+#### Passwords — Argon2
+- **Algorithm:** **Argon2id** (resistant to side-channel and GPU attacks).  
+- **Storage:** store `hash = Argon2id(password, salt, params)` and keep the `salt` per account. Do **not** store raw passwords.  
+- **Recommended starting parameters:** *benchmark on your production-like hardware and tune; example starting point*:
+  - `time_cost = 3` (iterations),
+  - `memory_cost = 64 MiB` (65536 KiB),
+  - `parallelism = 4`.
+- **Other controls:**
+  - Use per-user random salts (>= 16 bytes).
+  - Optionally apply a server-wide **pepper** (extra secret) read from Key Vault — stored separately from DB, rotated rarely.
+  - Enforce strong password rules + rate limiting + fuzzy matching against breached password lists (e.g., HaveIBeenPwned).
+  - Password reset flow: one-time token with short TTL, single-use, store hashed reset tokens, log reset events.
+  - On algorithm or parameter updates, rehash on next successful login (rehash on verify).
+
+#### Authentication tokens — chosen pattern: **JWT access tokens + rotating refresh tokens**
+**Why JWT + refresh?**  
+- JWTs are stateless, compact, and convenient for APIs and SPAs. Combined with very short-lifetime access tokens + a secure refresh mechanism you get excellent UX and security.
+- We mitigate JWT downsides by: *short access TTL, refresh token rotation, server side refresh token revocation, and storing refresh tokens hashed*.
+
+**Implementation details**
+- **Access token (JWT):**
+  - Lifetime: **5–15 minutes** (conservative starting point; tune for UX).
+  - Signed with asymmetric key (ES256 or RS256) stored in **Key Vault**. Include `kid` header for key rotation.
+  - Include claims: `sub`, `iat`, `exp`, `scope`, `jti` (unique id), limited set of claims (no PII).
+  - Validate signature, `exp`, `iss`, `aud`.
+- **Refresh token:**
+  - Long-lived but **rotating** (on each use, issue a new refresh token and invalidate the previous).
+  - Store refresh tokens hashed in DB (e.g., bcrypt/Argon2 hash of refresh token) + `jti`/session id, user id, device fingerprint, expiry, and `revoked` flag.
+  - On refresh: verify hashed token, issue new JWT + rotated refresh token; mark old refresh token used/invalidated.
+  - Support immediate revocation (logout, password change, account deletion).
+- **Storage in SPA:**
+  - **Access token**: keep in memory (avoid `localStorage`).  
+  - **Refresh token**: store in **HttpOnly, Secure, SameSite=strict/lax cookie** (to prevent XSS access). If you store refresh in cookie, ensure CSRF protections (CSRF tokens for cookie flows).
+  - **Alternative:** keep both tokens in memory and rely on a refresh endpoint that requires reauthentication — tradeoffs exist.
+- **Revocation / blacklisting:** store `jti` of revoked tokens or maintain a revocation list keyed by `session id`. Access tokens are short so blacklist size is manageable.
+- **Token scopes:** use OAuth2-like scopes (`read:profile`, `write:gigs`, `admin:billing`) and validate scopes on every endpoint.
+
+> **Note:** For endpoints used by third parties (webhooks, server-to-server), use client credentials with short-lived certs or OAuth2 client tokens — never reuse user tokens.
+
+#### Payments — Stripe (no raw cards)
+- **Card capture:** use **Stripe Elements** or Payment Intents flow; card data is collected by Stripe client SDK and never touches our servers.  
+- **Server side:** store only `stripe_customer_id`, `payment_method_id`, and `payment_intent_id`. No PAN/CVV stored.  
+- **Webhooks:** validate signatures (use Stripe webhook signing secret), verify event type and idempotency to avoid double processing. Use idempotency keys on payment creation.  
+- **PCI scope:** by delegating capture and storage to Stripe we reduce PCI obligations; still follow Stripe recommended server hardening. Log only non-sensitive metadata.  
+- **Refunds / disputes:** require admin authorization workflows (two-person approval or step-up MFA) and record audit events.
+
+#### PII & Field-level encryption (addresses, calendar entries)
+- **Pattern:** **Envelope encryption** (DEK wrapped by KEK).
+  - For each sensitive field (e.g., `address`, `calendar_note`), generate a random Data Encryption Key (DEK) and encrypt the plaintext with an authenticated algorithm (AES-256-GCM) producing ciphertext + associated tag and IV.
+  - Encrypt (wrap) each DEK with a Key Encryption Key (KEK) stored in **Azure Key Vault** using the Key Vault wrap/unwrap API.
+  - Store in DB: `ciphertext`, `wrapped_dek_id` (key id / key version), `iv`, `aad` (if used), and metadata (consent flags).
+- **Decryption:** performed in server memory only when explicit business permission exists (e.g., user viewing their own address; when sharing with a Cupid, verify consent). Do not log decrypted values.
+- **Key management:**
+  - KEKs in Key Vault rotated per policy (e.g., 90 days). When rotating, re-wrap DEKs or use key versioning with a rewrap process.
+  - Use Key Vault access policies and Managed Identity (no static credentials).
+- **Search & indexing:** avoid storing plaintext. For required searches use hashed or tokenized indexes (e.g., salted HMAC for dedupe), or store a derived search token hashed with a separate key. Document privacy tradeoffs.
+- **Retention and deletion:** support complete deletion by removing both ciphertext rows and wrapped DEK metadata; when requested, sanitize backups as feasible.
+
+#### TLS everywhere
+- **Enforce TLS 1.3** for all external and internal connections where supported: client ↔ App, App ↔ DB, App ↔ Key Vault, App ↔ third parties (Stripe, AI).
+- **Server configuration:** prefer ciphers supporting forward secrecy — ECDHE with AES-GCM or ChaCha20-Poly1305.
+- **HSTS:** set `Strict-Transport-Security` with `includeSubDomains` and `preload` (after careful testing).
+- **Certificate management:** use Azure-managed certificates or Key Vault to store certs, automate renewal, use OCSP stapling when applicable.
+- **Internal encryption:** where TLS offload occurs (Application Gateway), maintain TLS from gateway → backend or use private networking to reduce exposure. For DB and Key Vault always TLS.
+
+---
+
+### Alternatives considered (JWT vs Session tokens) — short analysis
+
+#### Cookie-based server sessions (stateful) — pros & cons
+- **Pros:**
+  - Server holds session state; immediate revocation is trivial (remove session).
+  - Simpler CSRF mitigations when combined with SameSite cookies and CSRF tokens.
+- **Cons:**
+  - Harder to scale across microservices unless session store is centralized (Redis).
+  - SPA + cross-origin setups are more complex; cookies need careful SameSite handling.
+  - Increased server state and storage overhead for many concurrent sessions.
+
+#### JWT + refresh tokens (chosen)
+- **Pros:**
+  - Stateless access tokens simplify horizontal scaling and microservice auth verification (no central session lookup required for token validation).
+  - Works well with APIs and bearer auth in headers.
+  - Short-lived JWTs reduce the attack window when stolen.
+  - Refresh token rotation + server validation combines benefits of stateful revocation with JWT convenience.
+- **Cons:**
+  - Token revocation is more complex (requires refresh token storage and revocation lists).
+  - Careful design required to mitigate theft (XSS, long-lived tokens).
+
+**Decision / Justification:** **JWT + rotating refresh tokens** are chosen for Cupid Code because:
+- We operate an SPA that calls an API; JWTs are natural for Authorization headers and microservices in the future.
+- We require scale and low-latency auth checks (JWT signature validation is local).
+- We implement refresh token rotation + hashed storage + short access TTL to address primary JWT weaknesses (revocation and long attack windows).
+- To minimize XSS risk, refresh tokens will be stored in **HttpOnly Secure cookies** while access tokens remain memory-only; CSRF protections applied for cookie flows.
+
+---
+
+### Detection, logging, monitoring & alerting (low level)
+- **Audit logs:** write immutable logs for auth events, admin actions, payments, PII access, and key unwraps. Store logs in append-only store with integrity measures (write-once blob or SIEM ingest).
+- **Application logs:** structured JSON logs with correlation IDs (not containing PII). Redact or hash PII before logging.
+- **Monitoring:** Application Insights / Azure Monitor for traces, metrics, latency, exception rates.
+- **SIEM:** forward logs to Azure Sentinel (or equivalent). Create correlation rules:
+  - Multiple failed logins per account → alert.
+  - Unusual refresh token usage (rotation anomalies) → alert.
+  - High rate of AI calls from single user → cost/dos alert.
+- **Alerting:** integrate with PagerDuty / Slack for high severity incidents. Define runbooks.
+
+---
+
+### Operational security & SDLC (practical controls)
+- **Secure SDLC:** require code reviews, SAST (bandit/semgrep), DAST scans on staging, dependency scanning (Dependabot/renovate), and secret scanning in CI.
+- **CI/CD:** separate pipelines for dev/staging/prod. Use ephemeral deploy tokens and require approvals for production deploys. CI reads secrets from Key Vault using managed identity.
+- **Access management:** enforce Azure AD SSO for developers and admins; require MFA; regularly audit access lists and roles.
+- **Pen testing:** annual pentest and ad hoc tests before major releases. Consider a bug bounty for mature product.
+- **Incident response:** maintain playbook for containment, forensics, user notification (timelines per law), regulatory reporting, and a post-mortem process.
+
+---
+
+### Security threat mitigations checklist (next actions)
+- Enforce Argon2id with tuned parameters and pepper in Key Vault.
+- Implement JWT + rotating refresh token flows and refresh token storage hashed.
+- Move secrets to Azure Key Vault; remove any `.env` secrets from repo history.
+- Implement envelope encryption for address/calendar fields with DEKs wrapped in Key Vault KEKs.
+- Configure TLS 1.3 everywhere and enable HSTS and OCSP stapling.
+- Add CSP, subresource integrity, and X-Content-Type-Options headers in frontend.
+- Protect webhook endpoints (verify provider signatures) and implement idempotency keys.
+- Implement RLS for couple data where reasonable and apply row-level permissions.
+- Add SAST/DAST in CI; schedule pentest; enable dependency scanning.
+
+---
+
+### Data protection diagram (in transit, at rest)
+
+```mermaid
+flowchart LR
+  Client[Client Browser] -->|TLS 1.3| App[App Server - Django]
+  App -->|TLS 1.3| KeyVault["Azure Key Vault (KEKs)"]
+  App -->|TLS 1.3| DBProxy[DB Proxy / pgbouncer]
+  DBProxy -->|TLS 1.3| DB[Postgres - Encrypted at Rest]
+  App -->|TLS 1.3| Stripe["Stripe (tokenized)"]
+  App -->|TLS 1.3| AI[AI Provider]
+  DB -->|Encrypted Backups| BackupVault["Blob Storage (encrypted)"]
+  subgraph Encryption
+    App -->|unwrap KEK & DEK| DEKProcess["Envelope Encryption (DEK unwrap via KeyVault)"]
+    DEKProcess --> DB
+  end
+```
+
+**Notes on the diagram**
+- **TLS 1.3** is enforced on every arrow.  
+- **Key Vault** contains KEKs and signing keys. App requests unwrap/wrap operations via Key Vault-managed identity — keys never leave the vault in plaintext.  
+- **Envelope encryption**: App uses Key Vault to unwrap a KEK, which is used to decrypt a DEK (or to unwrap a stored wrapped DEK). DEK decrypts field ciphertext in memory only.  
+- **Stripe / AI** calls are TLS authenticated using keys in Key Vault; Stripe handles card data tokenization.
+
+---
+
+### Justification (short summary)
+- **Argon2id** is modern, GPU-resistant, and appropriate for protecting passwords given current threat models. Tunable memory/time parameters allow balancing security and performance.  
+- **Stripe tokenization** keeps our PCI scope minimal and lets us avoid storing PANs/CVVs — a strong privacy and compliance decision.  
+- **Field-level envelope encryption** for addresses and calendar items protects PII even if DB backups are compromised and enables fine-grained consent logic for couples.  
+- **TLS 1.3 everywhere** ensures strong transport protection and forward secrecy; combined with Key Vault and HSM-backed keys this reduces exposure to typical network-level attacks.  
+- **JWT + rotating refresh** is chosen for SPA/API friendliness and scalability while we mitigate JWT downfalls via short TTLs and server-side refresh token controls.
+
+---
+
+### Additional references & next steps
+- **Benchmark Argon2** on your CI/bench environment; pick `memory`/`time` params and document them in `SECURITY.md`.  
+- **Implement encryption helper library** (Python) encapsulating envelope encryption patterns, key wrap/unwrap, and consent checks to centralize complexity.  
+- **Add monitoring rules** for abnormal token refresh patterns and for Key Vault access spikes.  
+- **Schedule** a DAST scan and an external pentest before public alpha.  
+- **Operationalize:** include the security checklist items into sprint tasks (Argon2 rollout, Key Vault migration, envelope encryption for addresses, token flow implementation, CSP/HSTS, webhook hardening, RLS policies).
+
+---
 
 ## 7. User Interface & Experience
 
