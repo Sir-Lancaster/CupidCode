@@ -456,7 +456,7 @@ The Gig Scheduling subsystem is responsible for finding and managing local event
 
 **UML case diagrams**
 
-[To be added]
+![gigs](images/gigs_uml.png)
 
 **Design choices/alternatives**
 
@@ -505,6 +505,9 @@ The gig system handles location-based filtering to prevent cupids from seeing gi
       Handles audio format validation and response generation
 
   UML case diagrams
+
+![messaging](images/messaging_uml.png)
+
   Design choices/alternatives
     The messaging system uses a simple Message model with from_ai boolean flag rather than separate UserMessage and AIMessage tables to minimize complexity for MVP, though this approach limits advanced features like message threading and conversation branching. Speech-to-text processing is handled synchronously in the API view rather than asynchronously to provide immediate feedback during live conversations, accepting potential latency issues for better user experience. The system stores all conversation history without automatic expiration to maintain context for AI responses, though the database design document proposes AISession separation for better retention management. Browser-based audio recording is used instead of native mobile recording to maintain web-first architecture, limiting audio quality but ensuring cross-platform compatibility. AI responses are generated on-demand rather than cached to provide personalized context, trading performance for response relevance but increasing API costs and latency.
   Edge cases
@@ -600,6 +603,9 @@ Payments
       Currently handle raw payment data validation
 
   UML case diagrams
+
+ ![payments](images/payments_uml.png)
+
   Design choices/alternatives
     The payment system currently stores raw payment card data directly in the database for rapid MVP development, though this creates significant PCI compliance risks that require immediate migration to Stripe/PayPal tokenization before production deployment. Balance tracking uses simple decimal fields on user profiles rather than a separate transaction ledger to minimize complexity, though this approach limits audit capabilities and transaction history. Payment processing is handled synchronously in API views rather than using background jobs to provide immediate user feedback, accepting potential timeout risks for better user experience. The system uses separate dater and cupid balance fields rather than a unified wallet system to maintain clear separation between user types and prevent accidental cross-role transactions. Payment provider selection prioritizes Stripe over PayPal due to superior developer experience and webhook reliability, though both remain viable options for user choice and payment method diversity.
   Edge cases
@@ -639,6 +645,9 @@ Notifications
       Provides notification history and status updates
 
   UML case diagrams
+
+  ![notifications](images/notifications_uml.png)
+
   Design choices/alternatives
     The notification system uses Twilio as the primary provider for SMS and email delivery rather than implementing multiple providers to reduce integration complexity for MVP, though this creates vendor lock-in risks. Notifications are sent synchronously from API views rather than using a background queue system to ensure immediate delivery feedback, accepting potential performance impacts for simpler error handling. The system lacks persistent notification storage, instead relying on immediate delivery or failure, which limits retry capabilities and notification history but reduces database complexity. Template management is handled through simple string formatting rather than a sophisticated template engine to minimize dependencies and maintain rapid development pace. In-app notifications are integrated directly into the NavSuite component rather than using a dedicated notification service to leverage existing UI patterns and reduce frontend complexity, though this limits notification customization and advanced features like notification categories or priority levels.
   Edge cases
@@ -695,7 +704,10 @@ Admin/Manager Dashboard
       Handles chart and data export formatting
       Manages download functionality for management reports
 
-  UML case diagrams
+  UML case diagram
+
+  ![manager](images/manager_uml.png)
+
   Design choices/alternatives
     The admin dashboard uses Django's IsAdminUser permission class rather than custom role checking to leverage built-in Django admin patterns and ensure consistent security enforcement. Statistics are calculated on-demand in API views rather than pre-computed and cached to ensure real-time accuracy for administrative decisions, accepting performance costs for data freshness. The dashboard uses separate Vue components for different user management pages rather than a single unified interface to maintain clear separation of concerns and enable independent development of Dater and Cupid management features. PDF generation is handled client-side using jsPDF rather than server-side rendering to reduce backend complexity and enable immediate download without additional API calls. User lists are loaded without pagination for the MVP to simplify implementation, though this approach limits scalability as user counts grow and will require pagination implementation for production use.
   Edge cases
@@ -861,7 +873,9 @@ UI (Frontend Vue)
       Manages logout API calls and state clearing
       Ensures proper session termination across the application
 
-  UML case diagrams
+  UML case diagram
+
+  ![UI](images/UI_uml.png)
 
   Design choices/alternatives
     The frontend uses Vue 3 with Composition API rather than Options API to provide better TypeScript support and improved component reusability, though this requires more modern JavaScript knowledge from developers. Hash-based routing is used instead of history mode to avoid server configuration requirements for SPA deployment, accepting less clean URLs for simpler deployment. The system employs role-specific Vue component directories (DaterVues, CupidVues, ManagerVues) rather than feature-based organization to maintain clear role separation and enable independent development of user type interfaces. Session-based authentication with cookies is used instead of token-based authentication to leverage Django's CSRF protection and simplify logout handling, though this limits mobile app compatibility. The application uses a centralized makeRequest utility rather than a full state management library like Vuex to minimize complexity for MVP, accepting manual state synchronization challenges for faster development and smaller bundle size.
