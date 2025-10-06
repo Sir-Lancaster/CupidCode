@@ -24,3 +24,6 @@ npm-debug.log
 **.sqlite3
 
 .DS_Store
+
+# Ignore HLD checklist
+/Documentation/Design/HighLevel/high_level_design_checklist.md
