@@ -893,6 +893,8 @@ The current state uses SQLite for the database containers and Django models popu
 - unsafe financial storage. Needs to be switched to Stripe third party.
 
 ### 4.2 Target Model (MVP)
+#### Entity Relationship Diagram
+![ERD](./images/cupidERD_LLD.png)
 **Keep/rename**
 - User: 
   - built-in auth
