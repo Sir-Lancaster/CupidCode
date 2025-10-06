@@ -392,7 +392,7 @@ The authentication system manages user registration through the create_user() en
 
 **UML case diagrams**
 
-[Auth](images/auth_UML.png)
+![Auth](images/auth_UML.png)
 
 **Design choices/alternatives**
 
