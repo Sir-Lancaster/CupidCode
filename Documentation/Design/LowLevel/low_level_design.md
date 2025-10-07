@@ -9,12 +9,9 @@ Team: Zac Cunningham, Greg Steele, Dallin Tew, Carter Johnson
 - [System Architecture](#2-system-architecture-detailed-view)
 - [Subsystem & Class Design](#3-subsystems--class-design)
 - [Database Design](#4-database-design)
-- [Performance Considerations](#5-performance-considerations)
-- [Security Design](#6-security-design)
-- [User Interface & Experience](#7-user-interface--experience)
-- [Technology Stack](#8-technology-stack)
-- [Deployment Plan](#9-deployment-plan)
-- [Testing & Monitoring](#10-testing--monitoring)
+- [Security Design](#5-security-design)
+- [User Interface & Experience](#6-user-interface--experience)
+- [Testing & Monitoring](#7-testing--monitoring)
 
 ## 1. Introduction
 
@@ -392,7 +389,7 @@ The authentication system manages user registration through the create_user() en
 
 **UML case diagrams**
 
-[Auth](images/auth_UML.png)
+![Auth](images/auth_UML.png)
 
 **Design choices/alternatives**
 
@@ -456,7 +453,7 @@ The Gig Scheduling subsystem is responsible for finding and managing local event
 
 **UML case diagrams**
 
-[To be added]
+![gigs](images/gigs_uml.png)
 
 **Design choices/alternatives**
 
@@ -505,6 +502,9 @@ The gig system handles location-based filtering to prevent cupids from seeing gi
       Handles audio format validation and response generation
 
   UML case diagrams
+
+![messaging](images/messaging_uml.png)
+
   Design choices/alternatives
     The messaging system uses a simple Message model with from_ai boolean flag rather than separate UserMessage and AIMessage tables to minimize complexity for MVP, though this approach limits advanced features like message threading and conversation branching. Speech-to-text processing is handled synchronously in the API view rather than asynchronously to provide immediate feedback during live conversations, accepting potential latency issues for better user experience. The system stores all conversation history without automatic expiration to maintain context for AI responses, though the database design document proposes AISession separation for better retention management. Browser-based audio recording is used instead of native mobile recording to maintain web-first architecture, limiting audio quality but ensuring cross-platform compatibility. AI responses are generated on-demand rather than cached to provide personalized context, trading performance for response relevance but increasing API costs and latency.
   Edge cases
@@ -600,6 +600,9 @@ Payments
       Currently handle raw payment data validation
 
   UML case diagrams
+
+ ![payments](images/payments_uml.png)
+
   Design choices/alternatives
     The payment system currently stores raw payment card data directly in the database for rapid MVP development, though this creates significant PCI compliance risks that require immediate migration to Stripe/PayPal tokenization before production deployment. Balance tracking uses simple decimal fields on user profiles rather than a separate transaction ledger to minimize complexity, though this approach limits audit capabilities and transaction history. Payment processing is handled synchronously in API views rather than using background jobs to provide immediate user feedback, accepting potential timeout risks for better user experience. The system uses separate dater and cupid balance fields rather than a unified wallet system to maintain clear separation between user types and prevent accidental cross-role transactions. Payment provider selection prioritizes Stripe over PayPal due to superior developer experience and webhook reliability, though both remain viable options for user choice and payment method diversity.
   Edge cases
@@ -639,6 +642,9 @@ Notifications
       Provides notification history and status updates
 
   UML case diagrams
+
+  ![notifications](images/notifications_uml.png)
+
   Design choices/alternatives
     The notification system uses Twilio as the primary provider for SMS and email delivery rather than implementing multiple providers to reduce integration complexity for MVP, though this creates vendor lock-in risks. Notifications are sent synchronously from API views rather than using a background queue system to ensure immediate delivery feedback, accepting potential performance impacts for simpler error handling. The system lacks persistent notification storage, instead relying on immediate delivery or failure, which limits retry capabilities and notification history but reduces database complexity. Template management is handled through simple string formatting rather than a sophisticated template engine to minimize dependencies and maintain rapid development pace. In-app notifications are integrated directly into the NavSuite component rather than using a dedicated notification service to leverage existing UI patterns and reduce frontend complexity, though this limits notification customization and advanced features like notification categories or priority levels.
   Edge cases
@@ -695,7 +701,10 @@ Admin/Manager Dashboard
       Handles chart and data export formatting
       Manages download functionality for management reports
 
-  UML case diagrams
+  UML case diagram
+
+  ![manager](images/manager_uml.png)
+
   Design choices/alternatives
     The admin dashboard uses Django's IsAdminUser permission class rather than custom role checking to leverage built-in Django admin patterns and ensure consistent security enforcement. Statistics are calculated on-demand in API views rather than pre-computed and cached to ensure real-time accuracy for administrative decisions, accepting performance costs for data freshness. The dashboard uses separate Vue components for different user management pages rather than a single unified interface to maintain clear separation of concerns and enable independent development of Dater and Cupid management features. PDF generation is handled client-side using jsPDF rather than server-side rendering to reduce backend complexity and enable immediate download without additional API calls. User lists are loaded without pagination for the MVP to simplify implementation, though this approach limits scalability as user counts grow and will require pagination implementation for production use.
   Edge cases
@@ -861,7 +870,9 @@ UI (Frontend Vue)
       Manages logout API calls and state clearing
       Ensures proper session termination across the application
 
-  UML case diagrams
+  UML case diagram
+
+  ![UI](images/UI_uml.png)
 
   Design choices/alternatives
     The frontend uses Vue 3 with Composition API rather than Options API to provide better TypeScript support and improved component reusability, though this requires more modern JavaScript knowledge from developers. Hash-based routing is used instead of history mode to avoid server configuration requirements for SPA deployment, accepting less clean URLs for simpler deployment. The system employs role-specific Vue component directories (DaterVues, CupidVues, ManagerVues) rather than feature-based organization to maintain clear role separation and enable independent development of user type interfaces. The application uses a centralized makeRequest utility rather than a full state management library like Vuex to minimize complexity for MVP, accepting manual state synchronization challenges for faster development and smaller bundle size.
@@ -893,6 +904,8 @@ The current state uses SQLite for the database containers and Django models popu
 - unsafe financial storage. Needs to be switched to Stripe third party.
 
 ### 4.2 Target Model (MVP)
+#### Entity Relationship Diagram
+![ERD](./images/cupidERD_LLD.png)
 **Keep/rename**
 - User: 
   - built-in auth
@@ -1305,15 +1318,7 @@ Implementation notes:
 - No PAN/CVV/bank numbers in DB; only provider tokens.
 - Prefer hard deletes except where audit/compliance requires retention.
 
-## 5. Performance Considerations
-
-Potential bottlenecks (AI latency, payments, notifications, DB joins).
-
-Mitigation strategies (caching, indexing, async jobs, autoscaling).
-
-Scaling plan (load increases: DB vertical/horizontal scaling, queueing).
-
-## 6. Security Design
+## 5. Security Design
 
 > **Purpose:** expand the high level security section into a concrete low-level design (LLD). The LLD defines the threat model, concrete mitigations (passwords, payments, PII, TLS), an authentication token design (JWT + refresh), alternatives considered, detection & logging, key operational practices, a security threat table, and a diagram showing how data is protected *in transit* and *at rest*.
 
@@ -1525,9 +1530,9 @@ flowchart LR
 
 ---
 
-## 7. User Interface & Experience
+## 6. User Interface & Experience
 
-### 7.1 Accessibility
+### 6.1 Accessibility
 
 Cupid Code’s interface is designed to ensure that every user—regardless of visual, motor, or cognitive differences—can comfortably interact with the app. Accessibility is a core part of the redesign 
 and is integrated across all roles (Dater, Cupid, and Manager).
@@ -1561,15 +1566,15 @@ The **Accessibility Mode toggle** will be visible on every page through:
 When toggled, the interface updates instantly without requiring a page reload, ensuring users can switch modes seamlessly. The chosen setting is saved in the user’s profile so that 
 it remains active across future sessions.
 
-### 7.2 Navigation Flow
+### 6.2 Navigation Flow
 
 Cupid Code uses a predictable, mobile-first navigation model that minimizes friction and guarantees that core tasks are within two taps from the Home screen for every role.
 
-#### 7.2.1 Two-Click Rule
+#### 6.2.1 Two-Click Rule
 - From each role’s **Home** screen (Dater, Cupid, Manager), all primary tasks (AI help, Plan/Find Gigs, Payments, Profile, Notifications; and for Manager: Cupid Info, Dater Info) are reachable in **≤ 2 taps**.
 - Success toasts and notifications provide **deep links** back to the relevant record (e.g., a specific gig, payment receipt, or rating modal) without breaking the two-click expectation when returning to Home.
 
-#### 7.2.2 Constant Navigation Bars
+#### 6.2.2 Constant Navigation Bars
 - **Top Bar (all pages):** Centered logo; left **hamburger menu**; optional quick actions (Profile, Payment) when appropriate to the role.
 - **Bottom Navigation (mobile-first):** Persistent 4–5 items max; active route is clearly indicated (icon + label + underline).  
   - **Dater:** Home, AI, Payment, Profile, Notifications  
@@ -1577,24 +1582,24 @@ Cupid Code uses a predictable, mobile-first navigation model that minimizes fric
   - **Manager:** Home (Dashboard), Cupid Info, Dater Info, Notifications
 - The **current page’s** nav item is visually disabled or marked active to avoid redundant taps.
 
-#### 7.2.3 Hamburger (Role-Aware Shortcuts)
+#### 6.2.3 Hamburger (Role-Aware Shortcuts)
 - Opens a left drawer with role-specific shortcuts and secondary actions (e.g., Accessibility Mode toggle, Logout).
   - **Dater:** Profile, Payment, Calendar, Accessibility Mode, Logout
   - **Cupid:** Profile, Find Gigs, Completed Gigs, Feedback, Accessibility Mode, Logout
   - **Manager:** Dashboard, Cupid Info, Dater Info, Accessibility Mode, Logout
 - The **Accessibility Mode toggle** is duplicated here for universal availability.
 
-#### 7.2.4 Responsive Behavior (Screen Size Changes)
+#### 6.2.4 Responsive Behavior (Screen Size Changes)
 - **Mobile (default)**: Bottom nav is pinned; scrolling content lives beneath it; Top Bar remains fixed.
 - **Tablet / Desktop**: Bottom nav moves to a **top secondary nav** (beneath the Top Bar) to leverage horizontal space; multi-column card grids are enabled where applicable.
 
-### 7.3 Page Wireframes & Descriptions
+### 6.3 Page Wireframes & Descriptions
 
 # $`\textcolor{red}{\textbf{WARNING: PROTOTYPE SCREENS ONLY}}`$
 
 The images referenced in this section are **non-functional prototypes** created in **Figma** to illustrate layout, flow, and component placement. They are not connected to live data or services, and **buttons/inputs do not work**. Final implementation details (spacing, copy, and micro-interactions) may change during development.
 
-#### 7.3.1 Common Screens (Create Account, Login, Notifications)
+#### 6.3.1 Common Screens (Create Account, Login, Notifications)
 
 ---
 
@@ -1720,7 +1725,7 @@ Provide users with an organized list of updates and alerts related to their acti
 - Use the **bottom navigation bar** to quickly access other app areas.  
 - Access the **hamburger menu** to toggle accessibility mode or log out.  
 
-#### 7.3.2 Dater Screens 
+#### 6.3.2 Dater Screens 
 
 ---
 
@@ -1758,6 +1763,13 @@ Serve as the **central hub** for Dater users, allowing quick access to all major
 - Scroll down to view **Upcoming Events**; tap an event card for more details or follow-up actions (e.g., rating, editing).  
 - Use the **Bottom Nav Bar** or **Hamburger Menu** for quick navigation to other app sections.  
 - The Dater can return to this Home Page from any other screen in **two taps or fewer**, maintaining the user experience standard defined in the High-Level Design.
+
+**Responsive Behavior**
+
+Below is an example of what the home page would look like from a large tablet/ desktop. 
+
+![desktop dater home](images/LargeScreen.png)
+
 
 ![AI chat](images/DaterAIChat.png)
 
@@ -2092,7 +2104,7 @@ Allow Dater users to **view, edit, and update their personal and dating-related 
 - Access the **Update Password Section** to reset credentials securely.  
 - Navigate to other app areas via the **Bottom Navigation Bar** or **Hamburger Menu**.  
 
-#### 7.3.3 Cupid Screens
+#### 6.3.3 Cupid Screens
 
 ---
 
@@ -2353,7 +2365,7 @@ Provide Cupids with an editable view of their personal information, work statist
 - Observe confirmation toasts for profile and password updates.  
 - Return to active gig tracking or feedback pages with a single tap, maintaining two-click navigation across the interface.
 
-#### 7.3.4 Manager Screens
+#### 6.3.4 Manager Screens
 
 ---
 
@@ -2510,36 +2522,69 @@ Allow Managers to view, monitor, and manage all **Dater accounts** within the Cu
 - Regularly monitor this section to maintain a safe and respectful community environment across the platform. 
 
 
-## 8. Technology Stack
+## 7. Testing & Monitoring
 
-Languages, frameworks, libraries (Vue, Django, DRF, Celery, Redis, Stripe SDK).
+### Automated Testing Strategy with Playwright
+To ensure quality and reliability across user flows, Cupid Code adopts Playwright as the core end-to-end (E2E) testing framework. Playwright will be used to:
 
-Justification of choices (community support, scalability, team skillset).
+* #### Test UI flows across all roles:
+  Auth, gig creation, AI chat, notifications, payments, and feedback are exercised via simulated user scenarios.
 
-Alternatives considered (React vs Vue, Flask vs Django, etc.).
+* #### Cross-browser and device coverage:
+  CI pipelines execute tests in Chromium, Firefox, and WebKit, across desktop and mobile viewports to ensure layout and accessibility consistency.
 
-## 9. Deployment Plan
+* #### Role/fake account management:
+  Playwright scripts automate login/setup of Daters, Cupids, and Manager accounts, tracking state transitions (e.g., claiming gigs, rating).
 
-Environments (Dev, Staging, Prod).
+* #### Data validation:
+  Before and after key events, test steps will assert on DB state when feasible (with backend test hooks), confirming business rules for gig lifecycle, payments, and feedback.
 
-Deployment pipeline (CI/CD, Azure App Services, containers).
+* #### Accessibility:
+  Integration with Playwright’s accessibility auditing tools to check for ARIA role coverage, contrast, and navigation issues.
 
-Secrets management (Azure Key Vault).
+#### Sample Playwright test scenarios:
 
-Monitoring/logging strategy.
+* “Dater requests gig, CUPID claims, completes, both leave ratings”
 
-## 10. Testing & Monitoring
+* “Guest cannot access Manager dashboard”
 
-Unit test strategy (per subsystem).
+* “User receives notification for upcoming date and gig status change”
 
-Integration and E2E testing (Selenium, API tests).
+Test artifacts (screenshots, logs, videos) will be retained for failed runs to assist debugging.
 
-Automated test coverage goals.
+### Continuous Integration / Quality Gates
+* #### Runs on every PR and main branch push:
+  GitHub Actions or Azure Pipelines triggers Playwright E2E suites, flagging regressions before code merges.
 
-Monitoring (Azure Sentinel, alerting, log aggregation).
+* #### Minimum thresholds:
+  Require all critical paths to pass (auth flow, payment attempt, gig lifecycle, notifications).
+Coverage reporting will be monitored with tools like Codecov or Playwright’s own coverage plugins.
 
-## 11. Appendices
+### Monitoring and System Health in Production
+* #### Front-end session monitoring:
+  Integrate JavaScript error tracking (e.g., Sentry) to capture uncaught exceptions, UI failures, and latency stats.
 
-UML diagrams (class, sequence, ER).
+* #### Backend/API monitoring:
+  Use Azure App Insights and Django logging to track API error rates, response times, and failed external service integrations (Stripe, AI, Twilio).
 
-Wireframes and user flow diagrams.
+* #### Notification and Payment job tracking:
+  Celery job events are audited for queue delays, failures, or retries. Critical notification or payment errors trigger alerts to ops channels (PagerDuty/email/SMS).
+
+* #### Synthetic probes:
+  Automated Playwright health checks (“can login as test user,” “can create gig and get confirmation”) run at regular intervals, verifying app and API liveness.
+
+### Alerting and Dashboarding
+* #### Real-time dashboards:
+  Aggregate session, API, and job metrics in Azure Monitor dashboards. Trigger alerts for elevated failure/latency; escalation procedure defined in runbooks.
+
+* #### Key metrics:
+
+  * End-to-end response time (UI + API)
+
+  * Uncaught JS errors per hour
+
+  * API error rate (>2% triggers alert)
+
+  * Notification delivery lag/failures
+
+  * Payment webhook success
