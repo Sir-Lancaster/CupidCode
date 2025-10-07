@@ -174,16 +174,16 @@ The following diagram illustrates Cupid Code’s architecture and external integ
 
 ```mermaid
 graph TD
-    A["User Browser\n(Vue.js SPA)"] -->|HTTPS API Calls| B["Django Backend\n(Monolithic Core)"]
-    B --> C["PostgreSQL Database\n(Managed Azure Instance)"]
-    B --> D["Celery + Redis\n(Background Tasks)"]
-    B --> E["Payment Gateway\n(Stripe/PayPal)"]
-    B --> F["AI Services\n(Chat/Coaching APIs)"]
-    B --> G["Notification Services\n(Email/SMS Providers)"]
-    H["Azure Key Vault\n(Secrets Storage)"] --> B
-    I["Azure App Service\n(Hosting Backend)"] --> B
-    J["CDN / Static Hosting\n(Serving Vue Assets)"] --> A
-    K["Azure DNS + TLS\n(Custom Domain + HTTPS)"] --> A
+    A["User Browser (Vue.js SPA)"] -->|HTTPS API Calls| B["Django Backend (Monolithic Core)"]
+    B --> C["PostgreSQL Database (Managed Azure Instance)"]
+    B --> D["Celery + Redis (Background Tasks)"]
+    B --> E["Payment Gateway (Stripe/PayPal)"]
+    B --> F["AI Services (Chat/Coaching APIs)"]
+    B --> G["Notification Services (Email/SMS Providers)"]
+    H["Azure Key Vault (Secrets Storage)"] --> B
+    I["Azure App Service (Hosting Backend)"] --> B
+    J["CDN / Static Hosting (Serving Vue Assets)"] --> A
+    K["Azure DNS + TLS (Custom Domain + HTTPS)"] --> A
 ```
 
 ## 4. Major Components
