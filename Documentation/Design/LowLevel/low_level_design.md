@@ -2553,13 +2553,70 @@ Monitoring/logging strategy.
 
 ## 10. Testing & Monitoring
 
-Unit test strategy (per subsystem).
+### Automated Testing Strategy with Playwright
+To ensure quality and reliability across user flows, Cupid Code adopts Playwright as the core end-to-end (E2E) testing framework. Playwright will be used to:
 
-Integration and E2E testing (Selenium, API tests).
+* #### Test UI flows across all roles:
+  Auth, gig creation, AI chat, notifications, payments, and feedback are exercised via simulated user scenarios.
 
-Automated test coverage goals.
+* #### Cross-browser and device coverage:
+  CI pipelines execute tests in Chromium, Firefox, and WebKit, across desktop and mobile viewports to ensure layout and accessibility consistency.
 
-Monitoring (Azure Sentinel, alerting, log aggregation).
+* #### Role/fake account management:
+  Playwright scripts automate login/setup of Daters, Cupids, and Manager accounts, tracking state transitions (e.g., claiming gigs, rating).
+
+* #### Data validation:
+  Before and after key events, test steps will assert on DB state when feasible (with backend test hooks), confirming business rules for gig lifecycle, payments, and feedback.
+
+* #### Accessibility:
+  Integration with Playwright’s accessibility auditing tools to check for ARIA role coverage, contrast, and navigation issues.
+
+#### Sample Playwright test scenarios:
+
+* “Dater requests gig, CUPID claims, completes, both leave ratings”
+
+* “Guest cannot access Manager dashboard”
+
+* “User receives notification for upcoming date and gig status change”
+
+Test artifacts (screenshots, logs, videos) will be retained for failed runs to assist debugging.
+
+### Continuous Integration / Quality Gates
+* #### Runs on every PR and main branch push:
+  GitHub Actions or Azure Pipelines triggers Playwright E2E suites, flagging regressions before code merges.
+
+* #### Minimum thresholds:
+  Require all critical paths to pass (auth flow, payment attempt, gig lifecycle, notifications).
+Coverage reporting will be monitored with tools like Codecov or Playwright’s own coverage plugins.
+
+### Monitoring and System Health in Production
+* #### Front-end session monitoring:
+  Integrate JavaScript error tracking (e.g., Sentry) to capture uncaught exceptions, UI failures, and latency stats.
+
+* #### Backend/API monitoring:
+  Use Azure App Insights and Django logging to track API error rates, response times, and failed external service integrations (Stripe, AI, Twilio).
+
+* #### Notification and Payment job tracking:
+  Celery job events are audited for queue delays, failures, or retries. Critical notification or payment errors trigger alerts to ops channels (PagerDuty/email/SMS).
+
+* #### Synthetic probes:
+  Automated Playwright health checks (“can login as test user,” “can create gig and get confirmation”) run at regular intervals, verifying app and API liveness.
+
+### Alerting and Dashboarding
+* #### Real-time dashboards:
+  Aggregate session, API, and job metrics in Azure Monitor dashboards. Trigger alerts for elevated failure/latency; escalation procedure defined in runbooks.
+
+* #### Key metrics:
+
+  * End-to-end response time (UI + API)
+
+  * Uncaught JS errors per hour
+
+  * API error rate (>2% triggers alert)
+
+  * Notification delivery lag/failures
+
+  * Payment webhook success
 
 ## 11. Appendices
 
