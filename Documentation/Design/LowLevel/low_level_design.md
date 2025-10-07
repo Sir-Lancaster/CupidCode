@@ -9,12 +9,9 @@ Team: Zac Cunningham, Greg Steele, Dallin Tew, Carter Johnson
 - [System Architecture](#2-system-architecture-detailed-view)
 - [Subsystem & Class Design](#3-subsystems--class-design)
 - [Database Design](#4-database-design)
-- [Performance Considerations](#5-performance-considerations)
-- [Security Design](#6-security-design)
-- [User Interface & Experience](#7-user-interface--experience)
-- [Technology Stack](#8-technology-stack)
-- [Deployment Plan](#9-deployment-plan)
-- [Testing & Monitoring](#10-testing--monitoring)
+- [Security Design](#5-security-design)
+- [User Interface & Experience](#6-user-interface--experience)
+- [Testing & Monitoring](#7-testing--monitoring)
 
 ## 1. Introduction
 
@@ -1321,15 +1318,7 @@ Implementation notes:
 - No PAN/CVV/bank numbers in DB; only provider tokens.
 - Prefer hard deletes except where audit/compliance requires retention.
 
-## 5. Performance Considerations
-
-Potential bottlenecks (AI latency, payments, notifications, DB joins).
-
-Mitigation strategies (caching, indexing, async jobs, autoscaling).
-
-Scaling plan (load increases: DB vertical/horizontal scaling, queueing).
-
-## 6. Security Design
+## 5. Security Design
 
 > **Purpose:** expand the high level security section into a concrete low-level design (LLD). The LLD defines the threat model, concrete mitigations (passwords, payments, PII, TLS), an authentication token design (JWT + refresh), alternatives considered, detection & logging, key operational practices, a security threat table, and a diagram showing how data is protected *in transit* and *at rest*.
 
@@ -1541,9 +1530,9 @@ flowchart LR
 
 ---
 
-## 7. User Interface & Experience
+## 6. User Interface & Experience
 
-### 7.1 Accessibility
+### 6.1 Accessibility
 
 Cupid Code’s interface is designed to ensure that every user—regardless of visual, motor, or cognitive differences—can comfortably interact with the app. Accessibility is a core part of the redesign 
 and is integrated across all roles (Dater, Cupid, and Manager).
@@ -1577,15 +1566,15 @@ The **Accessibility Mode toggle** will be visible on every page through:
 When toggled, the interface updates instantly without requiring a page reload, ensuring users can switch modes seamlessly. The chosen setting is saved in the user’s profile so that 
 it remains active across future sessions.
 
-### 7.2 Navigation Flow
+### 6.2 Navigation Flow
 
 Cupid Code uses a predictable, mobile-first navigation model that minimizes friction and guarantees that core tasks are within two taps from the Home screen for every role.
 
-#### 7.2.1 Two-Click Rule
+#### 6.2.1 Two-Click Rule
 - From each role’s **Home** screen (Dater, Cupid, Manager), all primary tasks (AI help, Plan/Find Gigs, Payments, Profile, Notifications; and for Manager: Cupid Info, Dater Info) are reachable in **≤ 2 taps**.
 - Success toasts and notifications provide **deep links** back to the relevant record (e.g., a specific gig, payment receipt, or rating modal) without breaking the two-click expectation when returning to Home.
 
-#### 7.2.2 Constant Navigation Bars
+#### 6.2.2 Constant Navigation Bars
 - **Top Bar (all pages):** Centered logo; left **hamburger menu**; optional quick actions (Profile, Payment) when appropriate to the role.
 - **Bottom Navigation (mobile-first):** Persistent 4–5 items max; active route is clearly indicated (icon + label + underline).  
   - **Dater:** Home, AI, Payment, Profile, Notifications  
@@ -1593,24 +1582,24 @@ Cupid Code uses a predictable, mobile-first navigation model that minimizes fric
   - **Manager:** Home (Dashboard), Cupid Info, Dater Info, Notifications
 - The **current page’s** nav item is visually disabled or marked active to avoid redundant taps.
 
-#### 7.2.3 Hamburger (Role-Aware Shortcuts)
+#### 6.2.3 Hamburger (Role-Aware Shortcuts)
 - Opens a left drawer with role-specific shortcuts and secondary actions (e.g., Accessibility Mode toggle, Logout).
   - **Dater:** Profile, Payment, Calendar, Accessibility Mode, Logout
   - **Cupid:** Profile, Find Gigs, Completed Gigs, Feedback, Accessibility Mode, Logout
   - **Manager:** Dashboard, Cupid Info, Dater Info, Accessibility Mode, Logout
 - The **Accessibility Mode toggle** is duplicated here for universal availability.
 
-#### 7.2.4 Responsive Behavior (Screen Size Changes)
+#### 6.2.4 Responsive Behavior (Screen Size Changes)
 - **Mobile (default)**: Bottom nav is pinned; scrolling content lives beneath it; Top Bar remains fixed.
 - **Tablet / Desktop**: Bottom nav moves to a **top secondary nav** (beneath the Top Bar) to leverage horizontal space; multi-column card grids are enabled where applicable.
 
-### 7.3 Page Wireframes & Descriptions
+### 6.3 Page Wireframes & Descriptions
 
 # $`\textcolor{red}{\textbf{WARNING: PROTOTYPE SCREENS ONLY}}`$
 
 The images referenced in this section are **non-functional prototypes** created in **Figma** to illustrate layout, flow, and component placement. They are not connected to live data or services, and **buttons/inputs do not work**. Final implementation details (spacing, copy, and micro-interactions) may change during development.
 
-#### 7.3.1 Common Screens (Create Account, Login, Notifications)
+#### 6.3.1 Common Screens (Create Account, Login, Notifications)
 
 ---
 
@@ -1736,7 +1725,7 @@ Provide users with an organized list of updates and alerts related to their acti
 - Use the **bottom navigation bar** to quickly access other app areas.  
 - Access the **hamburger menu** to toggle accessibility mode or log out.  
 
-#### 7.3.2 Dater Screens 
+#### 6.3.2 Dater Screens 
 
 ---
 
@@ -2115,7 +2104,7 @@ Allow Dater users to **view, edit, and update their personal and dating-related 
 - Access the **Update Password Section** to reset credentials securely.  
 - Navigate to other app areas via the **Bottom Navigation Bar** or **Hamburger Menu**.  
 
-#### 7.3.3 Cupid Screens
+#### 6.3.3 Cupid Screens
 
 ---
 
@@ -2376,7 +2365,7 @@ Provide Cupids with an editable view of their personal information, work statist
 - Observe confirmation toasts for profile and password updates.  
 - Return to active gig tracking or feedback pages with a single tap, maintaining two-click navigation across the interface.
 
-#### 7.3.4 Manager Screens
+#### 6.3.4 Manager Screens
 
 ---
 
@@ -2533,25 +2522,7 @@ Allow Managers to view, monitor, and manage all **Dater accounts** within the Cu
 - Regularly monitor this section to maintain a safe and respectful community environment across the platform. 
 
 
-## 8. Technology Stack
-
-Languages, frameworks, libraries (Vue, Django, DRF, Celery, Redis, Stripe SDK).
-
-Justification of choices (community support, scalability, team skillset).
-
-Alternatives considered (React vs Vue, Flask vs Django, etc.).
-
-## 9. Deployment Plan
-
-Environments (Dev, Staging, Prod).
-
-Deployment pipeline (CI/CD, Azure App Services, containers).
-
-Secrets management (Azure Key Vault).
-
-Monitoring/logging strategy.
-
-## 10. Testing & Monitoring
+## 7. Testing & Monitoring
 
 ### Automated Testing Strategy with Playwright
 To ensure quality and reliability across user flows, Cupid Code adopts Playwright as the core end-to-end (E2E) testing framework. Playwright will be used to:
@@ -2617,9 +2588,3 @@ Coverage reporting will be monitored with tools like Codecov or Playwright’s o
   * Notification delivery lag/failures
 
   * Payment webhook success
-
-## 11. Appendices
-
-UML diagrams (class, sequence, ER).
-
-Wireframes and user flow diagrams.
