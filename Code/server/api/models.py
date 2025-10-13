@@ -16,7 +16,7 @@ class Dater(models.Model):
     class Communication(models.IntegerChoices):
         EMAIL = 0
         TEXT = 1
-
+        # PUSH = 2   Not implemented
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.user.role = User.Role.DATER
@@ -82,15 +82,19 @@ class Quest(models.Model):
     items_requested = models.TextField()
     pickup_location = models.TextField()
 
-
+# Need to refactor gig so that it's not just a hard coded list.
 class Gig(models.Model):
     class Status(models.IntegerChoices):
-        UNCLAIMED = 0
+        # Need to refactor so that these aren't hard coded
+        UNCLAIMED = 0   
         CLAIMED = 1
         COMPLETE = 2
-
+    
+    # detailsJson = models.TextField()
+    # location = models.TextField()
+    # budget = models.DecimalField(max_digits=10, decimal_places=2)
     dater = models.ForeignKey(Dater, on_delete=models.CASCADE)
-    cupid = models.ForeignKey(Cupid, on_delete=models.CASCADE, null=True)
+    cupid = models.ForeignKey(Cupid, on_delete=models.CASCADE, null=True) # Move to GigAssignment
     status = models.IntegerField(choices=Status.choices)
     date_time_of_request = models.DateTimeField(auto_now_add=True)
     date_time_of_claim = models.DateTimeField(null=True)
@@ -123,7 +127,7 @@ class Feedback(models.Model):
     star_rating = models.IntegerField()
     date_time = models.DateTimeField()
 
-
+# REMOVE FOR STRIPE INTEGRATION
 class PaymentCard(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name_on_card = models.TextField()
@@ -131,8 +135,39 @@ class PaymentCard(models.Model):
     cvv = models.TextField()
     expiration = models.TextField()
 
-
+# REMOVE FOR STRIPE INTEGRATION
 class BankAccount(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     routing_number = models.TextField()
     account_number = models.TextField()
+
+# ----------------------------------------
+# Future features below
+# ----------------------------------------
+
+# class PaymentMethodToken(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     provider = models.TextField()
+#     provider_token = models.TextField()
+#     brand = models.TextField()
+#     last4 = models.TextField()
+#     exp_month = models.IntegerField()
+#     exp_year = models.IntegerField()
+
+# class PaymentIntent(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     provider = models.TextField()
+#     intent_id = models.TextField()
+#     amount = models.DecimalField(max_digits=10, decimal_places=2)
+#     currency = models.TextField()
+#     status = models.TextField()
+#     metadataJson
+
+# class gigAssignment(models.Model):
+#     gig = models.ForeignKey(Gig, on_delete=models.CASCADE)
+#     cupid = models.ForeignKey(Cupid, on_delete=models.CASCADE)
+#     date_time_of_claim = models.DateTimeField(auto_now_add=True)
+#     date_time_of_completion = models.DateTimeField(null=True)
+#     date_time_of_drop = models.DateTimeField(null=True)
+#     cancel_reason = models.TextField(null=True)
+#     detailsJson = models.TextField()    # Inherited from gig
