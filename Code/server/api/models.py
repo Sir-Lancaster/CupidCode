@@ -91,7 +91,8 @@ class Gig(models.Model):
         COMPLETE = 2
     
     # detailsJson = models.TextField()
-    # location = models.TextField()
+    # pickUplocation = models.TextField()
+    # dropOffLocation = models.TextField() needs to be nullable to work with a checkbox in the frontend.
     # budget = models.DecimalField(max_digits=10, decimal_places=2)
     dater = models.ForeignKey(Dater, on_delete=models.CASCADE)
     cupid = models.ForeignKey(Cupid, on_delete=models.CASCADE, null=True) # Move to GigAssignment
