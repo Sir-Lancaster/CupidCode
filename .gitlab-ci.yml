@@ -7,6 +7,8 @@ stages:
 
 before_script:
   - apt-get update && apt-get install -y openssh-client
+  # Navigate to the client directory where package.json is located
+  - cd Code/client
   - npm install
   - |
     PEM_KEY_PATH=~/key.pem
@@ -21,10 +23,11 @@ before_script:
 test:
   stage: test
   script:
+    - cd Code/client
     - npm run test -- --coverage
   artifacts:
     paths:
-      - coverage/
+      - Code/client/coverage/
     expire_in: 1 week
   only:
     - master
@@ -34,10 +37,11 @@ build:
   dependencies:
     - test
   script:
+    - cd Code/client
     - npm run build
   artifacts:
     paths:
-      - build/
+      - Code/client/build/
     expire_in: 1 week
   only:
     - master
@@ -48,7 +52,7 @@ deploy:
     - build
   script:
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo rm -rf /var/www/html/*"
-    - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r build/* azureuser@$VM_PUBLIC_IP:/var/www/html/
+    - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/client/build/* azureuser@$VM_PUBLIC_IP:/var/www/html/
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo systemctl restart apache2"
   only:
     - master
