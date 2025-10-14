@@ -26,17 +26,15 @@ build:
   script:
     - cd Code/client
     - npm install
-    # Build for production deployment (not Django)
-    - npm run build -- --outDir dist
+    - npm run build
     - echo "Build completed, checking output:"
-    - ls -la dist/
-    - echo "Contents of dist directory:"
-    - find dist/ -type f | head -10
-    # Verify index.html exists
-    - test -f dist/index.html && echo "index.html found" || echo "ERROR: index.html not found"
+    - ls -la ../server/core/static/core/
+    - echo "Contents of build directory:"
+    - find ../server/core/static/core/ -type f | head -10
+    - test -f ../server/core/static/core/index.html && echo "index.html found" || echo "ERROR: index.html not found"
   artifacts:
     paths:
-      - Code/client/dist/
+      - Code/server/core/static/core/
     expire_in: 1 week
   only:
     - master
@@ -48,21 +46,16 @@ deploy:
   script:
     - echo "Deploying artifacts..."
     - echo "Files to deploy:"
-    - ls -la Code/client/dist/
+    - ls -la Code/server/core/static/core/
     - echo "Checking for index.html:"
-    - test -f Code/client/dist/index.html && echo "index.html ready for deployment" || echo "ERROR: No index.html to deploy"
-    # Clear existing files
+    - test -f Code/server/core/static/core/index.html && echo "index.html ready for deployment" || echo "ERROR: No index.html to deploy"
     - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo rm -rf /var/www/html/*"
-    # Deploy the built files
-    - scp -o StrictHostKeyChecking=no -r Code/client/dist/* azureuser@$VM_PUBLIC_IP:/var/www/html/
-    # Set proper permissions
+    - scp -o StrictHostKeyChecking=no -r Code/server/core/static/core/* azureuser@$VM_PUBLIC_IP:/var/www/html/
     - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chown -R www-data:www-data /var/www/html/"
     - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chmod -R 755 /var/www/html/"
-    # Verify deployment
     - echo "Verifying deployment:"
     - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "ls -la /var/www/html/ | head -10"
     - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "test -f /var/www/html/index.html && echo 'index.html deployed successfully' || echo 'ERROR: index.html not found on server'"
-    # Restart Apache
     - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo systemctl restart apache2"
   only:
     - master
