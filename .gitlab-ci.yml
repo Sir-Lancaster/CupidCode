@@ -6,8 +6,6 @@ stages:
 
 before_script:
   - apt-get update && apt-get install -y openssh-client
-  - cd Code/client
-  - npm install
   - |
     # Setup SSH key
     mkdir -p ~/.ssh
@@ -27,6 +25,7 @@ build:
   stage: build
   script:
     - cd Code/client
+    - npm install
     - npm run build
   artifacts:
     paths:
