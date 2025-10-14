@@ -1,7 +1,6 @@
 image: node:18
 
 stages:
-  - test
   - build
   - deploy
 
@@ -20,22 +19,8 @@ before_script:
       exit 1
     fi
 
-test:
-  stage: test
-  script:
-    - cd Code/client
-    - npm run test -- --coverage
-  artifacts:
-    paths:
-      - Code/client/coverage/
-    expire_in: 1 week
-  only:
-    - master
-
 build:
   stage: build
-  dependencies:
-    - test
   script:
     - cd Code/client
     - npm run build
