@@ -27,9 +27,13 @@ build:
     - cd Code/client
     - npm install
     - npm run build
+    - echo "Build completed, checking output directory:"
+    - ls -la
+    - ls -la dist/ || echo "dist directory not found"
+    - ls -la ../server/core/static/core/ || echo "server static directory not found"
   artifacts:
     paths:
-      - Code/client/dist/
+      - Code/server/core/static/core/
     expire_in: 1 week
   only:
     - master
@@ -39,8 +43,10 @@ deploy:
   dependencies:
     - build
   script:
+    - echo "Deploying artifacts..."
+    - ls -la Code/server/core/static/core/ || echo "No build artifacts found"
     - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo rm -rf /var/www/html/*"
-    - scp -o StrictHostKeyChecking=no -r Code/client/dist/* azureuser@$VM_PUBLIC_IP:/var/www/html/
+    - scp -o StrictHostKeyChecking=no -r Code/server/core/static/core/* azureuser@$VM_PUBLIC_IP:/var/www/html/
     - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo systemctl restart apache2"
   only:
     - master
