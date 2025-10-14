@@ -5,7 +5,7 @@ stages:
   - deploy
 
 before_script:
-  - apt-get update && apt-get install -y openssh-client
+  - apt-get update && apt-get install -y openssh-client python3-pip
   - |
     mkdir -p ~/.ssh
     chmod 700 ~/.ssh
@@ -22,6 +22,7 @@ before_script:
 build:
   stage: build
   script:
+    - echo "Building Vue frontend..."
     - cd Code/client
     - npm install
     - npm run build
@@ -29,13 +30,12 @@ build:
     - ls -la ../server/core/static/core/
     - echo "Contents of build directory:"
     - find ../server/core/static/core/ -type f | head -10
-    - |
-      test -f ../server/core/static/core/index.html && 
-      echo "index.html found" || 
-      echo "ERROR: index.html not found"
+    - echo "Django project structure:"
+    - cd ../server
+    - find . -name "*.py" -o -name "*.html" -o -name "requirements.txt" | head -10
   artifacts:
     paths:
-      - Code/server/core/static/core/
+      - Code/server/
     expire_in: 1 week
   only:
     - master
@@ -45,25 +45,88 @@ deploy:
   dependencies:
     - build
   script:
-    - echo "Deploying artifacts..."
+    - echo "Deploying Django application..."
     - echo "Files to deploy:"
-    - ls -la Code/server/core/static/core/
-    - echo "Checking for index.html:"
+    - ls -la Code/server/
+    
+    # Create Django app directory on server if it doesn't exist
+    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo mkdir -p /var/www/django-app"
+    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chown -R azureuser:azureuser /var/www/django-app"
+    
+    # Deploy Django application files
+    - scp -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/django-app/
+    
+    # Set up Python environment and install dependencies on server
     - |
-      test -f Code/server/core/static/core/index.html && 
-      echo "index.html ready for deployment" || 
-      echo "ERROR: No index.html to deploy"
-    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo rm -rf /var/www/html/*"
-    - scp -o StrictHostKeyChecking=no -r Code/server/core/static/core/* azureuser@$VM_PUBLIC_IP:/var/www/html/
-    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chown -R www-data:www-data /var/www/html/"
-    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chmod -R 755 /var/www/html/"
+      ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      cd /var/www/django-app &&
+      sudo apt-get update &&
+      sudo apt-get install -y python3-pip python3-venv &&
+      python3 -m venv venv &&
+      source venv/bin/activate &&
+      pip install -r requirements.txt
+      "
+    
+    # Collect static files
+    - |
+      ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      cd /var/www/django-app &&
+      source venv/bin/activate &&
+      python manage.py collectstatic --noinput
+      "
+    
+    # Set proper permissions
+    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chown -R www-data:www-data /var/www/django-app"
+    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chmod -R 755 /var/www/django-app"
+    
+    # Configure Apache for Django (create/update virtual host)
+    - |
+      ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      sudo tee /etc/apache2/sites-available/django-app.conf > /dev/null << 'EOF'
+      <VirtualHost *:80>
+          ServerName $VM_PUBLIC_IP
+          DocumentRoot /var/www/django-app
+          
+          WSGIDaemonProcess djangoapp python-path=/var/www/django-app python-home=/var/www/django-app/venv
+          WSGIProcessGroup djangoapp
+          WSGIScriptAlias / /var/www/django-app/cupid_code/wsgi.py
+          
+          <Directory /var/www/django-app>
+              WSGIApplicationGroup %{GLOBAL}
+              Require all granted
+          </Directory>
+          
+          Alias /static /var/www/django-app/staticfiles
+          <Directory /var/www/django-app/staticfiles>
+              Require all granted
+          </Directory>
+          
+          ErrorLog \${APACHE_LOG_DIR}/django_error.log
+          CustomLog \${APACHE_LOG_DIR}/django_access.log combined
+      </VirtualHost>
+      EOF
+      "
+    
+    # Enable mod_wsgi and configure Apache
+    - |
+      ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      sudo apt-get install -y libapache2-mod-wsgi-py3 &&
+      sudo a2enmod wsgi &&
+      sudo a2dissite 000-default &&
+      sudo a2ensite django-app &&
+      sudo systemctl restart apache2
+      "
+    
+    # Verify deployment
     - echo "Verifying deployment:"
-    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "ls -la /var/www/html/ | head -10"
+    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "ls -la /var/www/django-app/ | head -10"
+    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo systemctl status apache2 --no-pager -l"
+    
+    # Test if the application is responding
     - |
-      ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP 
-      "test -f /var/www/html/index.html && 
-      echo 'index.html deployed successfully' || 
-      echo 'ERROR: index.html not found on server'"
-    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo systemctl restart apache2"
+      ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      curl -s -o /dev/null -w '%{http_code}' http://localhost/ || echo 'Failed to test local connection'
+      "
+    
   only:
     - master
