@@ -6,26 +6,21 @@ stages:
 
 before_script:
   - apt-get update && apt-get install -y openssh-client
-  # Debug: Show what directories exist in the GitLab runner
-  - echo "=== Current directory contents ==="
-  - ls -la
-  - echo "=== Looking for Code directory ==="
-  - ls -la Code/ || echo "Code directory not found"
-  - echo "=== Looking for Code/client directory ==="
-  - ls -la Code/client/ || echo "Code/client directory not found"
-  - echo "=== Git status ==="
-  - git status || echo "Not in a git repository"
-  # Try to navigate to the client directory
   - cd Code/client
   - npm install
   - |
-    PEM_KEY_PATH=~/key.pem
-    echo "$AZURE_PRIVATE_KEY_B64" | base64 -d > $PEM_KEY_PATH
-    chmod 600 $PEM_KEY_PATH
+    # Setup SSH key
+    mkdir -p ~/.ssh
+    chmod 700 ~/.ssh
+    echo "$AZURE_PRIVATE_KEY_B64" | base64 -d > ~/.ssh/id_rsa
+    chmod 600 ~/.ssh/id_rsa
+    ssh-keyscan -H $VM_PUBLIC_IP >> ~/.ssh/known_hosts 2>/dev/null
 
-    if ! ssh-keygen -yf $PEM_KEY_PATH > /dev/null; then
+    if ! ssh-keygen -y -f ~/.ssh/id_rsa > /dev/null 2>&1; then
       echo "ERROR: Private key is invalid or not in a supported format."
       exit 1
+    else
+      echo "SSH key setup successful"
     fi
 
 build:
@@ -35,7 +30,7 @@ build:
     - npm run build
   artifacts:
     paths:
-      - Code/client/build/
+      - Code/client/dist/
     expire_in: 1 week
   only:
     - master
@@ -45,8 +40,8 @@ deploy:
   dependencies:
     - build
   script:
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo rm -rf /var/www/html/*"
-    - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/client/build/* azureuser@$VM_PUBLIC_IP:/var/www/html/
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo systemctl restart apache2"
+    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo rm -rf /var/www/html/*"
+    - scp -o StrictHostKeyChecking=no -r Code/client/dist/* azureuser@$VM_PUBLIC_IP:/var/www/html/
+    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo systemctl restart apache2"
   only:
     - master
