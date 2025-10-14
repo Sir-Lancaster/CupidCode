@@ -6,7 +6,16 @@ stages:
 
 before_script:
   - apt-get update && apt-get install -y openssh-client
-  # Navigate to the client directory where package.json is located
+  # Debug: Show what directories exist in the GitLab runner
+  - echo "=== Current directory contents ==="
+  - ls -la
+  - echo "=== Looking for Code directory ==="
+  - ls -la Code/ || echo "Code directory not found"
+  - echo "=== Looking for Code/client directory ==="
+  - ls -la Code/client/ || echo "Code/client directory not found"
+  - echo "=== Git status ==="
+  - git status || echo "Not in a git repository"
+  # Try to navigate to the client directory
   - cd Code/client
   - npm install
   - |
