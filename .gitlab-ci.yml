@@ -27,7 +27,7 @@ test:
       - coverage/
     expire_in: 1 week
   only:
-    - main
+    - master
 
 build:
   stage: build
@@ -40,7 +40,7 @@ build:
       - build/
     expire_in: 1 week
   only:
-    - main
+    - master
 
 deploy:
   stage: deploy
@@ -51,4 +51,4 @@ deploy:
     - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r build/* azureuser@$VM_PUBLIC_IP:/var/www/html/
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo systemctl restart apache2"
   only:
-    - main
+    - master
