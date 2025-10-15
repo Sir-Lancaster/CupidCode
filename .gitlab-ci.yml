@@ -102,7 +102,31 @@ deploy:
       pip install -r requirements.txt &&
       mkdir -p staticfiles &&
       python manage.py migrate --noinput &&
-      python manage.py collectstatic --noinput
+      python manage.py collectstatic --noinput &&
+      cat > server/wsgi.py << 'WSGI_EOF'
+      import os
+      import sys
+      import traceback
+      
+      try:
+          sys.path.insert(0, '/var/www/cupid-app')
+          sys.path.insert(0, '/var/www/cupid-app/server')
+          os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings')
+          import django
+          from django.core.wsgi import get_wsgi_application
+          django.setup()
+          application = get_wsgi_application()
+      except Exception as e:
+          import sys
+          sys.stderr.write("WSGI Error: %s\n" % str(e))
+          sys.stderr.write("Traceback: %s\n" % traceback.format_exc())
+          sys.stderr.flush()
+          def application(environ, start_response):
+              status = '500 Internal Server Error'
+              headers = [('Content-type', 'text/plain')]
+              start_response(status, headers)
+              return [b'WSGI Configuration Error - Check Apache error logs']
+      WSGI_EOF
       "
     
     # Configure Apache with mod_wsgi for Django
@@ -110,14 +134,19 @@ deploy:
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       sudo apt-get install -y libapache2-mod-wsgi-py3 &&
       sudo a2enmod wsgi &&
+      sudo tee /etc/apache2/conf-available/wsgi.conf > /dev/null << 'EOF'
+      WSGIPythonPath /var/www/cupid-app:/var/www/cupid-app/venv/lib/python3.12/site-packages
+      EOF
+      sudo a2enconf wsgi &&
       sudo tee /etc/apache2/sites-available/cupid-app.conf > /dev/null << 'EOF'
       <VirtualHost *:80>
           ServerName localhost
           DocumentRoot /var/www/cupid-app
           
-          WSGIDaemonProcess cupidapp python-path=/var/www/cupid-app python-home=/var/www/cupid-app/venv
-          WSGIProcessGroup cupidapp
+          # Use embedded mode instead of daemon mode for NumPy compatibility
           WSGIScriptAlias / /var/www/cupid-app/server/wsgi.py
+          WSGIApplicationGroup %{GLOBAL}
+          WSGIScriptReloading Off
           
           <Directory /var/www/cupid-app/server>
               <Files wsgi.py>
