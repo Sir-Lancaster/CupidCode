@@ -94,7 +94,7 @@ deploy:
       EOF
       "
     
-    # Setup Django with proper environment
+    # Setup Django with explicit environment variables
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       cd /var/www/cupid-app &&
@@ -102,11 +102,20 @@ deploy:
       mkdir -p staticfiles &&
       mkdir -p core/static &&
       mkdir -p media &&
+      export DEBUG=False &&
+      export SECRET_KEY=your-production-secret-key-here-change-this-in-production &&
+      export ALLOWED_HOSTS=* &&
+      export DATABASE_URL=sqlite:///db.sqlite3 &&
+      export STATIC_ROOT=/var/www/cupid-app/staticfiles &&
+      export STATIC_URL=/static/ &&
+      export ASSET_URL= &&
+      export FILE_EXTENSION=png &&
+      export VAULT_PATH=/var/www/cupid-app/core/static/ &&
       python manage.py migrate --noinput &&
       python manage.py collectstatic --noinput --clear
       "
     
-    # Configure Apache with mod_wsgi for Django with correct WSGI path
+    # Configure Apache with mod_wsgi for Django with correct WSGI path and environment
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       sudo apt-get install -y libapache2-mod-wsgi-py3 &&
@@ -115,6 +124,17 @@ deploy:
       <VirtualHost *:80>
           ServerName localhost
           DocumentRoot /var/www/cupid-app
+          
+          # Set environment variables for Django
+          SetEnv DEBUG False
+          SetEnv SECRET_KEY your-production-secret-key-here-change-this-in-production
+          SetEnv ALLOWED_HOSTS *
+          SetEnv DATABASE_URL sqlite:///db.sqlite3
+          SetEnv STATIC_ROOT /var/www/cupid-app/staticfiles
+          SetEnv STATIC_URL /static/
+          SetEnv ASSET_URL 
+          SetEnv FILE_EXTENSION png
+          SetEnv VAULT_PATH /var/www/cupid-app/core/static/
           
           WSGIDaemonProcess cupidapp python-path=/var/www/cupid-app python-home=/var/www/cupid-app/venv
           WSGIProcessGroup cupidapp
@@ -160,14 +180,28 @@ deploy:
       sudo systemctl restart apache2
       "
     
-    # Verify deployment and check for errors
+    # Verify deployment and test environment variables
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       echo 'Deployment verification:' &&
       ls -la /var/www/cupid-app/ &&
       echo '' &&
-      echo 'Checking .env file location:' &&
-      ls -la /var/www/cupid-app/.env &&
+      echo 'Checking .env file location and content:' &&
+      cat /var/www/cupid-app/.env &&
+      echo '' &&
+      echo 'Testing Django settings with environment variables:' &&
+      cd /var/www/cupid-app &&
+      source venv/bin/activate &&
+      export DEBUG=False &&
+      export SECRET_KEY=test-key &&
+      export ALLOWED_HOSTS=* &&
+      export DATABASE_URL=sqlite:///db.sqlite3 &&
+      export STATIC_ROOT=/var/www/cupid-app/staticfiles &&
+      export STATIC_URL=/static/ &&
+      export ASSET_URL= &&
+      export FILE_EXTENSION=png &&
+      export VAULT_PATH=/var/www/cupid-app/core/static/ &&
+      python -c 'import django; import os; os.environ.setdefault(\"DJANGO_SETTINGS_MODULE\", \"server.settings\"); django.setup(); from django.conf import settings; print(\"STATIC_ROOT:\", settings.STATIC_ROOT)' &&
       echo '' &&
       echo 'Checking WSGI file exists:' &&
       ls -la /var/www/cupid-app/server/wsgi.py &&
@@ -186,10 +220,7 @@ deploy:
       echo '' &&
       echo 'Testing local connection:' &&
       sleep 5 &&
-      curl -s -o /dev/null -w 'HTTP Status: %{http_code}\n' http://localhost/ || echo 'Connection test failed' &&
-      echo '' &&
-      echo 'Environment variables check:' &&
-      cd /var/www/cupid-app && cat .env | head -5
+      curl -s -o /dev/null -w 'HTTP Status: %{http_code}\n' http://localhost/ || echo 'Connection test failed'
       "
     
     - echo "Complete Django + Vue deployment finished!"
