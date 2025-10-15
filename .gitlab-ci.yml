@@ -65,7 +65,19 @@ deploy:
     # Upload Django application
     - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/cupid-app/
     
-    # Create production .env file with all required environment variables
+    # Install Python dependencies first
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      cd /var/www/cupid-app &&
+      sudo apt-get update &&
+      sudo apt-get install -y python3-pip python3-venv &&
+      python3 -m venv venv &&
+      source venv/bin/activate &&
+      pip install django python-dotenv &&
+      pip install -r requirements.txt
+      "
+    
+    # Create production .env file in the correct location (same directory as manage.py)
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       cd /var/www/cupid-app &&
@@ -82,21 +94,16 @@ deploy:
       EOF
       "
     
-    # Install Python dependencies and setup Django
+    # Setup Django with proper environment
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       cd /var/www/cupid-app &&
-      sudo apt-get update &&
-      sudo apt-get install -y python3-pip python3-venv &&
-      python3 -m venv venv &&
       source venv/bin/activate &&
-      pip install django python-dotenv &&
-      pip install -r requirements.txt &&
       mkdir -p staticfiles &&
       mkdir -p core/static &&
       mkdir -p media &&
       python manage.py migrate --noinput &&
-      python manage.py collectstatic --noinput
+      python manage.py collectstatic --noinput --clear
       "
     
     # Configure Apache with mod_wsgi for Django with correct WSGI path
@@ -159,8 +166,14 @@ deploy:
       echo 'Deployment verification:' &&
       ls -la /var/www/cupid-app/ &&
       echo '' &&
+      echo 'Checking .env file location:' &&
+      ls -la /var/www/cupid-app/.env &&
+      echo '' &&
       echo 'Checking WSGI file exists:' &&
       ls -la /var/www/cupid-app/server/wsgi.py &&
+      echo '' &&
+      echo 'Checking static files:' &&
+      ls -la /var/www/cupid-app/staticfiles/ | head -5 &&
       echo '' &&
       echo 'Apache configuration test:' &&
       sudo apache2ctl configtest &&
