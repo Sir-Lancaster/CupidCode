@@ -3,19 +3,16 @@ import {ref, computed} from 'vue';
 import router from '../router/index.js'
 import { makeRequest } from '../utils/make_request';
 
-import NavSuite from '../components/NavSuite.vue';
+import Banner from '../components/Banner.vue';
+import CupidNavBar from './components/CupidNavBar.vue';
 
 const user_id  = parseInt(window.location.hash.split('/')[3])
 
 </script>
 
 <template>
-    <NavSuite title='Home' profile='CupidDetails'>
-        <router-link class="link" :to="{name: 'CupidDetails', params: {id: user_id}}"> Profile </router-link>
-        <router-link class="link" :to="{name: 'GigDetails', params: {id: user_id}}"> Gigs Available </router-link>
-        <router-link class="link" :to="{name: 'GigComplete', params: {id: user_id}}"> Gigs Completed </router-link>
-        <router-link class="link" :to="{name: 'CupidFeedback', params: {id: user_id}}"> Feedback </router-link>
-    </NavSuite>
+    <Banner />
+    <CupidNavBar currentPage="CupidHome" />
 
 
     <div class="container">
