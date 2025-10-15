@@ -49,14 +49,12 @@ build:
     - npm install
     - npm run build
     - echo "Build completed, checking output directories:"
-    - ls -la
-    - ls -la dist/ 2>/dev/null || echo "No dist directory"
-    - ls -la build/ 2>/dev/null || echo "No build directory"
-    - find . -name "*.html" -o -name "*.js" -o -name "*.css" | head -10
+    - ls -la ../server/core/static/core/
+    - echo "Files built:"
+    - find ../server/core/static/core/ -name "*.html" -o -name "*.js" -o -name "*.css"
   artifacts:
     paths:
-      - Code/client/dist/
-      - Code/client/build/
+      - Code/server/core/static/core/
     expire_in: 1 week
   only:
     - master
@@ -68,20 +66,9 @@ deploy:
   script:
     - echo "Deploying to Azure VM..."
     - echo "Checking available files:"
-    - ls -la Code/client/
-    - |
-      if [ -d "Code/client/dist" ]; then
-        BUILD_DIR="Code/client/dist"
-      elif [ -d "Code/client/build" ]; then
-        BUILD_DIR="Code/client/build"
-      else
-        echo "ERROR: No build output directory found"
-        exit 1
-      fi
-      echo "Using build directory: $BUILD_DIR"
-      ls -la $BUILD_DIR/
+    - ls -la Code/server/core/static/core/
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo rm -rf /var/www/html/*"
-    - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r $BUILD_DIR/* azureuser@$VM_PUBLIC_IP:/var/www/html/
+    - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/core/static/core/* azureuser@$VM_PUBLIC_IP:/var/www/html/
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo systemctl restart apache2"
     - echo "Deployment completed"
   only:
