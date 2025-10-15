@@ -115,9 +115,11 @@ deploy:
           ServerName localhost
           DocumentRoot /var/www/cupid-app
           
-          WSGIDaemonProcess cupidapp python-path=/var/www/cupid-app python-home=/var/www/cupid-app/venv
+          WSGIDaemonProcess cupidapp python-path=/var/www/cupid-app python-home=/var/www/cupid-app/venv display-name=%{GROUP}
           WSGIProcessGroup cupidapp
           WSGIScriptAlias / /var/www/cupid-app/server/wsgi.py
+          WSGIApplicationGroup %{GLOBAL}
+          WSGIPassAuthorization On
           
           <Directory /var/www/cupid-app/server>
               <Files wsgi.py>
