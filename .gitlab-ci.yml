@@ -42,6 +42,17 @@ build:
     - cd ../server
     - echo "Django files:"
     - ls -la
+    # Generate requirements.txt from pyproject.toml if it doesn't exist
+    - |
+      if [ ! -f requirements.txt ]; then
+        echo "Generating requirements.txt from pyproject.toml..."
+        pip install poetry
+        cd ..
+        poetry export -f requirements.txt --output server/requirements.txt --without-hashes
+        cd server
+        echo "Generated requirements.txt:"
+        cat requirements.txt
+      fi
   artifacts:
     paths:
       - Code/server/
@@ -74,7 +85,12 @@ deploy:
       python3 -m venv venv &&
       source venv/bin/activate &&
       pip install django python-dotenv &&
-      pip install -r requirements.txt
+      if [ -f requirements.txt ]; then
+        pip install -r requirements.txt
+      else
+        echo 'No requirements.txt found, installing basic packages'
+        pip install djangorestframework pillow requests
+      fi
       "
     
     # Create production .env file in the correct location (same directory as manage.py)
@@ -91,6 +107,7 @@ deploy:
       ASSET_URL=
       FILE_EXTENSION=png
       VAULT_PATH=/var/www/cupid-app/core/static/
+      DJANGO_SETTINGS_MODULE=server.settings
       EOF
       "
     
@@ -102,6 +119,9 @@ deploy:
       mkdir -p staticfiles &&
       mkdir -p core/static &&
       mkdir -p media &&
+      # Copy built Vue files to static directory
+      cp -r core/static/* staticfiles/ 2>/dev/null || echo 'No core static files found' &&
+      export DJANGO_SETTINGS_MODULE=server.settings &&
       export DEBUG=False &&
       export SECRET_KEY=your-production-secret-key-here-change-this-in-production &&
       export ALLOWED_HOSTS=* &&
@@ -111,6 +131,7 @@ deploy:
       export ASSET_URL= &&
       export FILE_EXTENSION=png &&
       export VAULT_PATH=/var/www/cupid-app/core/static/ &&
+      cd server &&
       python manage.py migrate --noinput &&
       python manage.py collectstatic --noinput --clear
       "
@@ -135,17 +156,18 @@ deploy:
           SetEnv ASSET_URL 
           SetEnv FILE_EXTENSION png
           SetEnv VAULT_PATH /var/www/cupid-app/core/static/
+          SetEnv DJANGO_SETTINGS_MODULE server.settings
           
           WSGIDaemonProcess cupidapp python-path=/var/www/cupid-app python-home=/var/www/cupid-app/venv
           WSGIProcessGroup cupidapp
-          WSGIScriptAlias / /var/www/cupid-app/server/wsgi.py
+          WSGIScriptAlias / /var/www/cupid-app/server/server/wsgi.py
           
           <Directory /var/www/cupid-app>
               WSGIApplicationGroup %{GLOBAL}
               Require all granted
           </Directory>
           
-          <Directory /var/www/cupid-app/server>
+          <Directory /var/www/cupid-app/server/server>
               <Files wsgi.py>
                   Require all granted
               </Files>
@@ -176,8 +198,26 @@ deploy:
       sudo a2ensite cupid-app.conf &&
       sudo chown -R www-data:www-data /var/www/cupid-app &&
       sudo chmod -R 755 /var/www/cupid-app &&
-      sudo chmod 644 /var/www/cupid-app/db.sqlite3 2>/dev/null || echo 'Database file not found, will be created' &&
+      # Create database if it doesn't exist and set permissions
+      sudo -u www-data touch /var/www/cupid-app/server/db.sqlite3 &&
+      sudo chmod 664 /var/www/cupid-app/server/db.sqlite3 &&
       sudo systemctl restart apache2
+      "
+    
+    # Debug and verify deployment
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      echo 'Directory structure check:' &&
+      find /var/www/cupid-app -name '*.py' | grep -E '(wsgi|settings)' &&
+      echo '' &&
+      echo 'Environment check:' &&
+      cd /var/www/cupid-app/server &&
+      source ../venv/bin/activate &&
+      python -c 'import sys; print(sys.path)' &&
+      echo '' &&
+      echo 'Django check:' &&
+      export DJANGO_SETTINGS_MODULE=server.settings &&
+      python manage.py check --deploy 2>&1 || echo 'Django check failed'
       "
     
     # Verify deployment and test environment variables
@@ -204,7 +244,7 @@ deploy:
       python -c 'import django; import os; os.environ.setdefault(\"DJANGO_SETTINGS_MODULE\", \"server.settings\"); django.setup(); from django.conf import settings; print(\"STATIC_ROOT:\", settings.STATIC_ROOT)' &&
       echo '' &&
       echo 'Checking WSGI file exists:' &&
-      ls -la /var/www/cupid-app/server/wsgi.py &&
+      ls -la /var/www/cupid-app/server/server/wsgi.py &&
       echo '' &&
       echo 'Checking static files:' &&
       ls -la /var/www/cupid-app/staticfiles/ | head -5 &&
