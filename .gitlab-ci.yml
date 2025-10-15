@@ -73,7 +73,7 @@ import os
 # Security settings
 DEBUG = False
 SECRET_KEY = 'cupid-production-key-change-in-real-deployment'
-ALLOWED_HOSTS = ['*', '$VM_IP', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*', '20.66.30.49', 'localhost', '127.0.0.1']
 
 # Static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -147,31 +147,31 @@ WSGI_EOF
         sudo a2enmod wsgi &&
         sudo tee /etc/apache2/sites-available/cupid-app.conf > /dev/null << 'APACHE_EOF'
 <VirtualHost *:80>
-    ServerName $VM_IP
-    DocumentRoot $APP_DIR
+    ServerName 20.66.30.49
+    DocumentRoot /var/www/cupid-app
     
-    WSGIDaemonProcess cupidapp python-path=$APP_DIR python-home=$APP_DIR/venv
+    WSGIDaemonProcess cupidapp python-path=/var/www/cupid-app python-home=/var/www/cupid-app/venv
     WSGIProcessGroup cupidapp
-    WSGIScriptAlias / $APP_DIR/server/wsgi_production.py
+    WSGIScriptAlias / /var/www/cupid-app/server/wsgi_production.py
     
-    <Directory $APP_DIR>
+    <Directory /var/www/cupid-app>
         WSGIApplicationGroup %{GLOBAL}
         Require all granted
     </Directory>
     
-    <Directory $APP_DIR/server>
+    <Directory /var/www/cupid-app/server>
         <Files wsgi_production.py>
             Require all granted
         </Files>
     </Directory>
     
-    Alias /static $APP_DIR/staticfiles
-    <Directory $APP_DIR/staticfiles>
+    Alias /static /var/www/cupid-app/staticfiles
+    <Directory /var/www/cupid-app/staticfiles>
         Require all granted
     </Directory>
     
-    Alias /media $APP_DIR/media
-    <Directory $APP_DIR/media>
+    Alias /media /var/www/cupid-app/media
+    <Directory /var/www/cupid-app/media>
         Require all granted
     </Directory>
     
@@ -205,6 +205,6 @@ APACHE_EOF
         curl -s -w 'HTTP Status: %{http_code}\n' http://localhost/ || echo 'Connection test failed'
       "
     
-    - echo "Deployment completed! Visit http://$VM_IP"
+    - echo "Deployment completed! Visit http://20.66.30.49"
   only:
     - master
