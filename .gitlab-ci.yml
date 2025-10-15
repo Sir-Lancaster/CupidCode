@@ -47,9 +47,9 @@ test:
     - npm install
     # Run test suite (gracefully handle missing test script)
     - npm run test 2>/dev/null || echo "No test script found, skipping tests"
-  # Only run this job when changes are made to the 'yaml' branch
+  # Only run this job when changes are made to the 'master' branch
   only:
-    - yaml
+    - master
 
 # BUILD STAGE: Compile Vue.js frontend and prepare Django backend
 build:
@@ -79,9 +79,9 @@ build:
       - Code/server/  # Include entire Django server directory with Vue.js build
     expire_in: 1 week   # Keep artifacts for 1 week for debugging/rollback
   
-  # Only run this job when changes are made to the 'yaml' branch
+  # Only run this job when changes are made to the 'master' branch
   only:
-    - yaml
+    - master
 
 # DEPLOY STAGE: Deploy complete application to Azure VM with HTTPS support
 deploy:
@@ -210,6 +210,6 @@ deploy:
     - echo "Complete Django + Vue deployment with HTTPS finished!"
     - echo "Your application should be available at https://cupidcode.zapto.org"
   
-  # Only run this job when changes are made to the 'yaml' branch
+  # Only run this job when changes are made to the 'master' branch
   only:
-    - yaml
+    - master
