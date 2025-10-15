@@ -65,15 +65,17 @@ deploy:
     # Upload Django application
     - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/cupid-app/
     
-    # Create production .env file
+    # Create production .env file with proper static files configuration
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       cd /var/www/cupid-app &&
       cat > .env << 'EOF'
       DEBUG=False
-      SECRET_KEY=your-production-secret-key-here
+      SECRET_KEY=your-production-secret-key-here-change-this-in-production
       ALLOWED_HOSTS=*
       DATABASE_URL=sqlite:///db.sqlite3
+      STATIC_ROOT=/var/www/cupid-app/staticfiles
+      STATIC_URL=/static/
       EOF
       "
     
@@ -86,6 +88,7 @@ deploy:
       python3 -m venv venv &&
       source venv/bin/activate &&
       pip install -r requirements.txt &&
+      mkdir -p staticfiles &&
       python manage.py migrate --noinput &&
       python manage.py collectstatic --noinput
       "
@@ -110,8 +113,8 @@ deploy:
               </Files>
           </Directory>
           
-          Alias /static /var/www/cupid-app/core/static
-          <Directory /var/www/cupid-app/core/static>
+          Alias /static /var/www/cupid-app/staticfiles
+          <Directory /var/www/cupid-app/staticfiles>
               Require all granted
           </Directory>
           
