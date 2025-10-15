@@ -27,8 +27,7 @@ test:
     - npm install
     - npm run test 2>/dev/null || echo "No test script found, skipping tests"
   only:
-    #- master
-    - yaml
+    - master
 
 build:
   stage: build
@@ -48,8 +47,7 @@ build:
       - Code/server/
     expire_in: 1 week
   only:
-    #- master
-    - yaml
+    - master
 
 deploy:
   stage: deploy
@@ -89,12 +87,8 @@ deploy:
       echo '# Production settings' >> server/settings.py &&
       echo 'import os' >> server/settings.py &&
       echo 'STATIC_ROOT = os.path.join(BASE_DIR, \"staticfiles\")' >> server/settings.py &&
-      echo 'ALLOWED_HOSTS = [\"cupidcode.duckdns.org\", \"20.66.30.49\", \"localhost\", \"127.0.0.1\"]' >> server/settings.py &&
-      echo 'DEBUG = False' >> server/settings.py &&
-      echo 'SECURE_SSL_REDIRECT = True' >> server/settings.py &&
-      echo 'SECURE_PROXY_SSL_HEADER = (\"HTTP_X_FORWARDED_PROTO\", \"https\")' >> server/settings.py &&
-      echo 'SESSION_COOKIE_SECURE = True' >> server/settings.py &&
-      echo 'CSRF_COOKIE_SECURE = True' >> server/settings.py
+      echo 'ALLOWED_HOSTS = [\"*\", \"20.66.30.49\", \"localhost\", \"127.0.0.1\"]' >> server/settings.py &&
+      echo 'DEBUG = False' >> server/settings.py
       "
     
     # Install Python dependencies and setup Django
@@ -182,23 +176,10 @@ deploy:
       sudo a2enconf wsgi &&
       sudo tee /etc/apache2/sites-available/cupid-app.conf > /dev/null << 'EOF'
       <VirtualHost *:80>
-          ServerName cupidcode.duckdns.org
+          ServerName localhost
           DocumentRoot /var/www/cupid-app
           
-          # Redirect all HTTP to HTTPS
-          RewriteEngine On
-          RewriteCond %{HTTPS} off
-          RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
-      </VirtualHost>
-
-      <VirtualHost *:443>
-          ServerName cupidcode.duckdns.org
-          DocumentRoot /var/www/cupid-app
-          
-          # SSL Configuration (will be populated by certbot)
-          SSLEngine on
-          
-          # Django WSGI configuration
+          # Use embedded mode instead of daemon mode for NumPy compatibility
           WSGIScriptAlias / /var/www/cupid-app/server/wsgi.py
           WSGIApplicationGroup %{GLOBAL}
           WSGIScriptReloading Off
@@ -222,45 +203,17 @@ deploy:
           ErrorLog \${APACHE_LOG_DIR}/cupid_error.log
           CustomLog \${APACHE_LOG_DIR}/cupid_access.log combined
       </VirtualHost>
-      EOF
       "
     
-    # Install and configure SSL with Let's Encrypt
-    - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      # Install snapd and certbot
-      sudo apt-get install -y snapd &&
-      sudo snap install core; sudo snap refresh core &&
-      sudo snap install --classic certbot &&
-      sudo ln -sf /snap/bin/certbot /usr/bin/certbot &&
-      
-      # Enable SSL module
-      sudo a2enmod ssl &&
-      sudo a2enmod rewrite &&
-      
-      # Test Apache configuration before enabling site
-      sudo apache2ctl configtest &&
-      
-      # Enable the site
-      sudo a2ensite cupid-app.conf &&
-      sudo systemctl restart apache2 &&
-      
-      # Get SSL certificate (non-interactive)
-      sudo certbot --apache -d cupidcode.duckdns.org --non-interactive --agree-tos --email dallinctew@gmail.com --redirect &&
-      
-      # Enable automatic renewal
-      sudo systemctl enable snap.certbot.renew.timer &&
-      sudo systemctl start snap.certbot.renew.timer
-      "
-
     # Enable the site and restart Apache
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       sudo a2dissite 000-default.conf 2>/dev/null || echo 'Default site already disabled' &&
       sudo a2dissite django-app.conf 2>/dev/null || echo 'Previous django site not found' &&
-      sudo systemctl restart apache2 &&
+      sudo a2ensite cupid-app.conf &&
       sudo chown -R www-data:www-data /var/www/cupid-app &&
-      sudo chmod -R 755 /var/www/cupid-app
+      sudo chmod -R 755 /var/www/cupid-app &&
+      sudo systemctl restart apache2
       "
     
     # Verify deployment
@@ -277,5 +230,4 @@ deploy:
     
     - echo "Complete Django + Vue deployment finished!"
   only:
-    #- master
-    - yaml
+    - master
