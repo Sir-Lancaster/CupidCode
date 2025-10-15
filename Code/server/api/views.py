@@ -767,7 +767,7 @@ def create_gig(request):
     data = request.data
     helpers.update_user_location(request.user, request.META['REMOTE_ADDR'])
     dater = get_object_or_404(Dater, user_id=request.user.id)
-    quest = Quest(budget=data['budget'], pickup_location=data['pickup_location'], items_requested=data['items_requested'])
+    quest = Quest(budget=data['budget'], pickup_location=data['pickup_location'], items_requested=data['items_requested'], dropoff_location=data['dropoff_location'])
     quest.save()
     gig = Gig(dater=dater, quest=quest, status=Gig.Status.UNCLAIMED, dropped_count=0, accepted_count=0)
     gig.save()
