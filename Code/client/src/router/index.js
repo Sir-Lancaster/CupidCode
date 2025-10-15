@@ -27,6 +27,7 @@ import GigComplete from '../CupidVues/GigComplete.vue'
 // Manager Specific
 import Cupid from '../ManagerVues/Cupid.vue'
 import Daters from '../ManagerVues/Daters.vue'
+import CreateGig from '../DaterVues/CreateGig.vue';
 
 const routes = [
     {
@@ -84,7 +85,12 @@ const routes = [
         name: 'DaterFeedback',
         component: DaterFeedback
     },
-
+    {
+        path: '/dater/CreateGig/:id',
+        name: 'CreateGig',
+        component: CreateGig
+    },
+    
     {
         path: '/dater/calendar/:id',
         name: 'Calendar',

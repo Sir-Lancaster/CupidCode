@@ -10,22 +10,43 @@
 </template>
 <style scoped>
     .heart {
-        background-color: #0000;
-        margin: auto;
-        width: 60px;
-        height: 60px;
-        display:flex;
+        /* New color scheme variables - same as other components */
+        --new-primary: #09A129;     /* Green for text */
+        --new-secondary: #1F487E;   /* Dark blue for buttons */
+        --new-background: #000000;  /* Black for backgrounds */
+        --new-accent: #FB3640;      /* Red */
+        --new-light-blue: #00CCFF;  /* Light blue */
+        
+        background-color: transparent;
+        margin: 4px;
+        width: 50px;
+        height: 50px;
+        display: flex;
         justify-content: center;
         align-content: center;
-        transition: all 0.8s ease;
-        fill: var(--secondary-red);
+        cursor: pointer;
         transition: all 0.3s ease;
+        fill: var(--new-background);
     }
 
-    .heart[data-active=true]{
-        fill: var(--primary-red);
+    .heart:hover {
+        transform: scale(1.1);
+        fill: var(--new-accent);
     }
-    .heart[data-active=true] > path{
-        stroke: #FFCCFF;
+
+    .heart[data-active=true] {
+        fill: var(--new-accent);
+        transform: scale(1.05);
+    }
+    
+    .heart[data-active=true] > path {
+        stroke: var(--new-primary);
+        stroke-width: 2.5;
+    }
+
+    .heart > path {
+        stroke: var(--new-primary);
+        stroke-width: 2;
+        transition: all 0.3s ease;
     }
 </style>
