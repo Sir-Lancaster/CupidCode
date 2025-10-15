@@ -1,47 +1,39 @@
 image: node:18
 
+variables:
+  VM_IP: "20.66.30.49"
+  APP_DIR: "/var/www/cupid-app"
+
 stages:
   - test
   - build
   - deploy
 
 before_script:
-  - apt-get update && apt-get install -y openssh-client python3-pip
-  - |
-    mkdir -p ~/.ssh
-    chmod 700 ~/.ssh
-    PEM_KEY_PATH=~/key.pem
-    echo "$AZURE_PRIVATE_KEY_B64" | base64 -d > $PEM_KEY_PATH
-    chmod 600 $PEM_KEY_PATH
-    ssh-keyscan -H $VM_PUBLIC_IP >> ~/.ssh/known_hosts 2>/dev/null || echo "Could not scan host, continuing..."
-    if ! ssh-keygen -yf $PEM_KEY_PATH > /dev/null 2>&1; then
-      echo "ERROR: Private key is invalid or not in a supported format."
-      exit 1
-    fi
+  - apt-get update -qq && apt-get install -y -qq openssh-client python3-pip
+  - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+  - echo "$AZURE_PRIVATE_KEY_B64" | base64 -d > ~/.ssh/id_rsa
+  - chmod 600 ~/.ssh/id_rsa
+  - ssh-keyscan -H $VM_IP >> ~/.ssh/known_hosts 2>/dev/null
 
 test:
   stage: test
   script:
-    - echo "Running tests..."
+    - echo "Running frontend tests..."
     - cd Code/client
     - npm install
-    - npm run test 2>/dev/null || echo "No test script found, skipping tests"
+    - npm run test 2>/dev/null || echo "No tests found, skipping"
   only:
     - master
 
 build:
   stage: build
   script:
-    - echo "Building Vue frontend..."
+    - echo "Building Vue.js frontend..."
     - cd Code/client
     - npm install
     - npm run build
-    - echo "Build completed"
-    - ls -la ../server/core/static/core/
-    - echo "Preparing complete Django application..."
-    - cd ../server
-    - echo "Django files:"
-    - ls -la
+    - echo "Frontend build complete"
   artifacts:
     paths:
       - Code/server/
@@ -54,117 +46,165 @@ deploy:
   dependencies:
     - build
   script:
-    - echo "Deploying complete Django + Vue application to Azure VM..."
+    - echo "Starting deployment to Azure VM..."
     
-    # Create application directory
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo mkdir -p /var/www/cupid-app && sudo chown azureuser:azureuser /var/www/cupid-app"
-    
-    # Clean previous deployment with proper permissions
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chown -R azureuser:azureuser /var/www/cupid-app && sudo rm -rf /var/www/cupid-app/*"
-    
-    # Upload Django application
-    - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/cupid-app/
-    
-    # Create production .env file with proper static files configuration
+    # Prepare deployment directory
     - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      cd /var/www/cupid-app &&
-      cat > .env << 'EOF'
-      DEBUG=False
-      SECRET_KEY=your-production-secret-key-here-change-this-in-production
-      ALLOWED_HOSTS=*
-      DATABASE_URL=sqlite:///db.sqlite3
-      STATIC_ROOT=/var/www/cupid-app/staticfiles
-      STATIC_URL=/static/
-      EOF
+      ssh -o StrictHostKeyChecking=no azureuser@$VM_IP "
+        sudo mkdir -p $APP_DIR &&
+        sudo chown -R azureuser:azureuser $APP_DIR &&
+        sudo rm -rf $APP_DIR/* 2>/dev/null || true
       "
     
-    # Add production settings to Django settings file
+    # Upload application files
+    - echo "Uploading Django application..."
+    - scp -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_IP:$APP_DIR/
+    
+    # Create production Django settings
+    - echo "Configuring Django settings..."
     - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      cd /var/www/cupid-app &&
-      echo '' >> server/settings.py &&
-      echo '# Production settings' >> server/settings.py &&
-      echo 'import os' >> server/settings.py &&
-      echo 'STATIC_ROOT = os.path.join(BASE_DIR, \"staticfiles\")' >> server/settings.py &&
-      echo 'ALLOWED_HOSTS = [\"*\", \"20.66.30.49\", \"localhost\", \"127.0.0.1\"]' >> server/settings.py &&
-      echo 'DEBUG = False' >> server/settings.py
+      ssh -o StrictHostKeyChecking=no azureuser@$VM_IP "
+        cd $APP_DIR
+        cat > production_settings.py << 'SETTINGS_EOF'
+# Production settings for Cupid Code
+from .settings import *
+import os
+
+# Security settings
+DEBUG = False
+SECRET_KEY = 'cupid-production-key-change-in-real-deployment'
+ALLOWED_HOSTS = ['*', '$VM_IP', 'localhost', '127.0.0.1']
+
+# Static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+
+# Database (keeping SQLite for simplicity)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+# Disable debug toolbar in production
+if 'debug_toolbar' in INSTALLED_APPS:
+    INSTALLED_APPS.remove('debug_toolbar')
+    
+MIDDLEWARE = [m for m in MIDDLEWARE if 'debug_toolbar' not in m]
+SETTINGS_EOF
       "
     
-    # Install Python dependencies and setup Django
+    # Setup Python environment and Django
+    - echo "Setting up Python environment..."
     - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      cd /var/www/cupid-app &&
-      sudo apt-get update &&
-      sudo apt-get install -y python3-pip python3-venv &&
-      python3 -m venv venv &&
-      source venv/bin/activate &&
-      pip install -r requirements.txt &&
-      mkdir -p staticfiles &&
-      python manage.py migrate --noinput &&
-      python manage.py collectstatic --noinput
+      ssh -o StrictHostKeyChecking=no azureuser@$VM_IP "
+        cd $APP_DIR &&
+        sudo apt-get update -qq &&
+        sudo apt-get install -y -qq python3-pip python3-venv libapache2-mod-wsgi-py3 &&
+        python3 -m venv venv &&
+        source venv/bin/activate &&
+        pip install --upgrade pip &&
+        pip install -r requirements.txt &&
+        mkdir -p staticfiles media
       "
     
-    # Configure Apache with mod_wsgi for Django
+    # Configure WSGI to use production settings
+    - echo "Configuring WSGI..."
     - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      sudo apt-get install -y libapache2-mod-wsgi-py3 &&
-      sudo a2enmod wsgi &&
-      sudo tee /etc/apache2/sites-available/cupid-app.conf > /dev/null << 'EOF'
-      <VirtualHost *:80>
-          ServerName localhost
-          DocumentRoot /var/www/cupid-app
-          
-          WSGIDaemonProcess cupidapp python-path=/var/www/cupid-app python-home=/var/www/cupid-app/venv
-          WSGIProcessGroup cupidapp
-          WSGIScriptAlias / /var/www/cupid-app/server/wsgi.py
-          
-          <Directory /var/www/cupid-app/server>
-              <Files wsgi.py>
-                  Require all granted
-              </Files>
-          </Directory>
-          
-          Alias /static /var/www/cupid-app/staticfiles
-          <Directory /var/www/cupid-app/staticfiles>
-              Require all granted
-          </Directory>
-          
-          Alias /media /var/www/cupid-app/media
-          <Directory /var/www/cupid-app/media>
-              Require all granted
-          </Directory>
-          
-          ErrorLog \${APACHE_LOG_DIR}/cupid_error.log
-          CustomLog \${APACHE_LOG_DIR}/cupid_access.log combined
-      </VirtualHost>
-      EOF
+      ssh -o StrictHostKeyChecking=no azureuser@$VM_IP "
+        cd $APP_DIR
+        cat > server/wsgi_production.py << 'WSGI_EOF'
+import os
+import sys
+from django.core.wsgi import get_wsgi_application
+
+# Add the project directory to Python path
+sys.path.insert(0, '/var/www/cupid-app')
+
+# Use production settings
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'production_settings')
+
+application = get_wsgi_application()
+WSGI_EOF
       "
     
-    # Enable the site and restart Apache
+    # Run Django management commands
+    - echo "Running Django setup..."
     - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      sudo a2dissite 000-default.conf 2>/dev/null || echo 'Default site already disabled' &&
-      sudo a2dissite django-app.conf 2>/dev/null || echo 'Previous django site not found' &&
-      sudo a2ensite cupid-app.conf &&
-      sudo chown -R www-data:www-data /var/www/cupid-app &&
-      sudo chmod -R 755 /var/www/cupid-app &&
-      sudo systemctl restart apache2
+      ssh -o StrictHostKeyChecking=no azureuser@$VM_IP "
+        cd $APP_DIR &&
+        source venv/bin/activate &&
+        export DJANGO_SETTINGS_MODULE=production_settings &&
+        python manage.py migrate --noinput &&
+        python manage.py collectstatic --noinput
       "
     
-    # Verify deployment
+    # Configure Apache
+    - echo "Configuring Apache..."
     - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      echo 'Deployment verification:' &&
-      ls -la /var/www/cupid-app/ &&
-      echo 'Apache status:' &&
-      sudo systemctl status apache2 --no-pager -l | head -10 &&
-      echo 'Testing local connection:' &&
-      sleep 3 &&
-      curl -s -o /dev/null -w '%{http_code}' http://localhost/ || echo 'Connection test failed'
+      ssh -o StrictHostKeyChecking=no azureuser@$VM_IP "
+        sudo a2enmod wsgi &&
+        sudo tee /etc/apache2/sites-available/cupid-app.conf > /dev/null << 'APACHE_EOF'
+<VirtualHost *:80>
+    ServerName $VM_IP
+    DocumentRoot $APP_DIR
+    
+    WSGIDaemonProcess cupidapp python-path=$APP_DIR python-home=$APP_DIR/venv
+    WSGIProcessGroup cupidapp
+    WSGIScriptAlias / $APP_DIR/server/wsgi_production.py
+    
+    <Directory $APP_DIR>
+        WSGIApplicationGroup %{GLOBAL}
+        Require all granted
+    </Directory>
+    
+    <Directory $APP_DIR/server>
+        <Files wsgi_production.py>
+            Require all granted
+        </Files>
+    </Directory>
+    
+    Alias /static $APP_DIR/staticfiles
+    <Directory $APP_DIR/staticfiles>
+        Require all granted
+    </Directory>
+    
+    Alias /media $APP_DIR/media
+    <Directory $APP_DIR/media>
+        Require all granted
+    </Directory>
+    
+    ErrorLog \${APACHE_LOG_DIR}/cupid_error.log
+    CustomLog \${APACHE_LOG_DIR}/cupid_access.log combined
+    LogLevel info
+</VirtualHost>
+APACHE_EOF
       "
     
-    - echo "Complete Django + Vue deployment finished!"
+    # Enable site and restart Apache
+    - echo "Starting Apache..."
+    - |
+      ssh -o StrictHostKeyChecking=no azureuser@$VM_IP "
+        sudo a2dissite 000-default 2>/dev/null || true &&
+        sudo a2ensite cupid-app &&
+        sudo chown -R www-data:www-data $APP_DIR &&
+        sudo chmod -R 755 $APP_DIR &&
+        sudo systemctl restart apache2 &&
+        sudo systemctl enable apache2
+      "
+    
+    # Verification
+    - echo "Verifying deployment..."
+    - |
+      ssh -o StrictHostKeyChecking=no azureuser@$VM_IP "
+        echo 'Apache status:' &&
+        sudo systemctl is-active apache2 &&
+        echo 'Testing application:' &&
+        sleep 5 &&
+        curl -s -w 'HTTP Status: %{http_code}\n' http://localhost/ || echo 'Connection test failed'
+      "
+    
+    - echo "Deployment completed! Visit http://$VM_IP"
   only:
     - master
-    #test
