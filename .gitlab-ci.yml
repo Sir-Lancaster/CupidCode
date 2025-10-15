@@ -59,8 +59,8 @@ deploy:
     # Create application directory
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo mkdir -p /var/www/cupid-app && sudo chown azureuser:azureuser /var/www/cupid-app"
     
-    # Clean previous deployment
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "rm -rf /var/www/cupid-app/*"
+    # Clean previous deployment with proper permissions
+    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chown -R azureuser:azureuser /var/www/cupid-app && sudo rm -rf /var/www/cupid-app/*"
     
     # Upload Django application
     - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/cupid-app/
