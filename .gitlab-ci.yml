@@ -27,7 +27,8 @@ test:
     - npm install
     - npm run test 2>/dev/null || echo "No test script found, skipping tests"
   only:
-    - master
+    #- master
+    - yaml
 
 build:
   stage: build
@@ -47,7 +48,8 @@ build:
       - Code/server/
     expire_in: 1 week
   only:
-    - master
+    #- master
+    - yaml
 
 deploy:
   stage: deploy
@@ -196,7 +198,7 @@ deploy:
           # SSL Configuration (will be populated by certbot)
           SSLEngine on
           
-          # Use embedded mode instead of daemon mode for NumPy compatibility
+          # Django WSGI configuration
           WSGIScriptAlias / /var/www/cupid-app/server/wsgi.py
           WSGIApplicationGroup %{GLOBAL}
           WSGIScriptReloading Off
@@ -236,9 +238,12 @@ deploy:
       sudo a2enmod ssl &&
       sudo a2enmod rewrite &&
       
-      # Enable the site first
+      # Test Apache configuration before enabling site
+      sudo apache2ctl configtest &&
+      
+      # Enable the site
       sudo a2ensite cupid-app.conf &&
-      sudo systemctl reload apache2 &&
+      sudo systemctl restart apache2 &&
       
       # Get SSL certificate (non-interactive)
       sudo certbot --apache -d cupidcode.duckdns.org --non-interactive --agree-tos --email dallinctew@gmail.com --redirect &&
@@ -253,10 +258,9 @@ deploy:
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       sudo a2dissite 000-default.conf 2>/dev/null || echo 'Default site already disabled' &&
       sudo a2dissite django-app.conf 2>/dev/null || echo 'Previous django site not found' &&
-      sudo a2ensite cupid-app.conf &&
+      sudo systemctl restart apache2 &&
       sudo chown -R www-data:www-data /var/www/cupid-app &&
-      sudo chmod -R 755 /var/www/cupid-app &&
-      sudo systemctl restart apache2
+      sudo chmod -R 755 /var/www/cupid-app
       "
     
     # Verify deployment
@@ -273,4 +277,5 @@ deploy:
     
     - echo "Complete Django + Vue deployment finished!"
   only:
-    - master
+    #- master
+    - yaml
