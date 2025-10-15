@@ -23,8 +23,8 @@ def index(req):
         'asset_url': os.environ.get('ASSET_URL', ''),
         'debug': settings.DEBUG,
         'manifest': MANIFEST,
-        'js_file': '' if settings.DEBUG else MANIFEST['src/main.ts']['file'],
-        'css_file': '' if settings.DEBUG else MANIFEST['src/main.ts']['css'][0]
+        'js_file': '' if settings.DEBUG else MANIFEST.get('src/main.js', {}).get('file', ''),
+        'css_file': '' if settings.DEBUG else MANIFEST.get('src/main.js', {}).get('css', [''])[0]
     }
     return render(req, 'core/index.html', context)
 

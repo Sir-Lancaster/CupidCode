@@ -103,6 +103,11 @@ deploy:
       mkdir -p staticfiles &&
       python manage.py migrate --noinput &&
       python manage.py collectstatic --noinput &&
+      
+      # Fix static file structure for Vue assets
+      mkdir -p staticfiles/assets/ &&
+      cp staticfiles/core/assets/* staticfiles/assets/ 2>/dev/null || echo 'No Vue assets to copy' &&
+      
       cat > server/wsgi.py << 'WSGI_EOF'
       import os
       import sys
