@@ -65,6 +65,18 @@ deploy:
     # Upload Django application
     - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/cupid-app/
     
+    # Create production .env file
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      cd /var/www/cupid-app &&
+      cat > .env << 'EOF'
+      DEBUG=False
+      SECRET_KEY=your-production-secret-key-here
+      ALLOWED_HOSTS=*
+      DATABASE_URL=sqlite:///db.sqlite3
+      EOF
+      "
+    
     # Install Python dependencies and setup Django
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
