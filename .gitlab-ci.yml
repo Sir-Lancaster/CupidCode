@@ -79,6 +79,16 @@ deploy:
       EOF
       "
     
+    # Add STATIC_ROOT to Django settings temporarily for collectstatic
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      cd /var/www/cupid-app &&
+      echo '' >> server/settings.py &&
+      echo '# Production static files setting' >> server/settings.py &&
+      echo 'import os' >> server/settings.py &&
+      echo 'STATIC_ROOT = os.path.join(BASE_DIR, \"staticfiles\")' >> server/settings.py
+      "
+    
     # Install Python dependencies and setup Django
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
