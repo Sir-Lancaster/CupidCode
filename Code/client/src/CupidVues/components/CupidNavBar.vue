@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import router from '../router'
+import router from '../../router'
 
 const props = defineProps(['currentPage'])
 
