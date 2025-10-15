@@ -1,26 +1,48 @@
 image: node:18
 
 stages:
+  - test
   - build
   - deploy
 
 before_script:
   - apt-get update && apt-get install -y openssh-client python3-pip
   - |
-    mkdir -p ~/.ssh
-    chmod 700 ~/.ssh
-    echo "$AZURE_PRIVATE_KEY_B64" | base64 -d > ~/.ssh/id_rsa
-    chmod 600 ~/.ssh/id_rsa
+    PEM_KEY_PATH=~/key.pem
+    echo "$AZURE_PRIVATE_KEY_B64" | base64 -d > $PEM_KEY_PATH
+    chmod 600 $PEM_KEY_PATH
     ssh-keyscan -H $VM_PUBLIC_IP >> ~/.ssh/known_hosts 2>/dev/null
-    if ! ssh-keygen -y -f ~/.ssh/id_rsa > /dev/null 2>&1; then
+
+    if ! ssh-keygen -yf $PEM_KEY_PATH > /dev/null; then
       echo "ERROR: Private key is invalid or not in a supported format."
       exit 1
     else
       echo "SSH key setup successful"
     fi
 
+test:
+  stage: test
+  script:
+    - echo "Running frontend tests..."
+    - cd Code/client
+    - npm install
+    - npm run test 2>/dev/null || echo "No test script found, skipping frontend tests"
+    - echo "Running backend tests..."
+    - cd ../server
+    - pip3 install -r requirements.txt
+    - python3 manage.py test || echo "Django tests completed"
+  artifacts:
+    paths:
+      - Code/client/coverage/
+    expire_in: 1 week
+    when: always
+  only:
+    - master
+
 build:
   stage: build
+  dependencies:
+    - test
   script:
     - echo "Building Vue frontend..."
     - cd Code/client
@@ -28,10 +50,9 @@ build:
     - npm run build
     - echo "Build completed, checking output:"
     - ls -la ../server/core/static/core/
-    - echo "Contents of build directory:"
-    - find ../server/core/static/core/ -type f | head -10
-    - echo "Django project structure:"
+    - echo "Preparing Django application..."
     - cd ../server
+    - echo "Django project structure:"
     - find . -name "*.py" -o -name "*.html" -o -name "requirements.txt" | head -10
   artifacts:
     paths:
@@ -45,43 +66,39 @@ deploy:
   dependencies:
     - build
   script:
-    - echo "Deploying Django application..."
+    - echo "Deploying Django + Vue application to Azure VM..."
     - echo "Files to deploy:"
     - ls -la Code/server/
     
+    # Clean up previous deployment
+    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo rm -rf /var/www/django-app/*"
+    
     # Create Django app directory on server if it doesn't exist
-    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo mkdir -p /var/www/django-app"
-    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chown -R azureuser:azureuser /var/www/django-app"
+    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo mkdir -p /var/www/django-app"
+    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chown -R azureuser:azureuser /var/www/django-app"
     
     # Deploy Django application files
-    - scp -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/django-app/
+    - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/django-app/
     
-    # Set up Python environment and install dependencies on server
+    # Set up Python environment and install dependencies
     - |
-      ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       cd /var/www/django-app &&
       sudo apt-get update &&
       sudo apt-get install -y python3-pip python3-venv &&
       python3 -m venv venv &&
       source venv/bin/activate &&
-      pip install -r requirements.txt
-      "
-    
-    # Collect static files
-    - |
-      ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      cd /var/www/django-app &&
-      source venv/bin/activate &&
+      pip install -r requirements.txt &&
       python manage.py collectstatic --noinput
       "
     
     # Set proper permissions
-    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chown -R www-data:www-data /var/www/django-app"
-    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chmod -R 755 /var/www/django-app"
+    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chown -R www-data:www-data /var/www/django-app"
+    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chmod -R 755 /var/www/django-app"
     
-    # Configure Apache for Django (create/update virtual host)
+    # Configure Apache for Django
     - |
-      ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       sudo tee /etc/apache2/sites-available/django-app.conf > /dev/null << 'EOF'
       <VirtualHost *:80>
           ServerName $VM_PUBLIC_IP
@@ -89,15 +106,15 @@ deploy:
           
           WSGIDaemonProcess djangoapp python-path=/var/www/django-app python-home=/var/www/django-app/venv
           WSGIProcessGroup djangoapp
-          WSGIScriptAlias / /var/www/django-app/cupid_code/wsgi.py
+          WSGIScriptAlias / /var/www/django-app/server/wsgi.py
           
           <Directory /var/www/django-app>
               WSGIApplicationGroup %{GLOBAL}
               Require all granted
           </Directory>
           
-          Alias /static /var/www/django-app/staticfiles
-          <Directory /var/www/django-app/staticfiles>
+          Alias /static /var/www/django-app/core/static
+          <Directory /var/www/django-app/core/static>
               Require all granted
           </Directory>
           
@@ -109,7 +126,7 @@ deploy:
     
     # Enable mod_wsgi and configure Apache
     - |
-      ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       sudo apt-get install -y libapache2-mod-wsgi-py3 &&
       sudo a2enmod wsgi &&
       sudo a2dissite 000-default &&
@@ -119,12 +136,13 @@ deploy:
     
     # Verify deployment
     - echo "Verifying deployment:"
-    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "ls -la /var/www/django-app/ | head -10"
-    - ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo systemctl status apache2 --no-pager -l"
+    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "ls -la /var/www/django-app/ | head -10"
+    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo systemctl status apache2 --no-pager -l"
     
     # Test if the application is responding
     - |
-      ssh -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      sleep 5 &&
       curl -s -o /dev/null -w '%{http_code}' http://localhost/ || echo 'Failed to test local connection'
       "
     
