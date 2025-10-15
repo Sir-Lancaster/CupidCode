@@ -51,7 +51,7 @@ build:
 
 deploy_setup:
   stage: deploy
-  dependencies:
+  needs:
     - build
   script:
     - echo "Setting up deployment environment..."
@@ -63,9 +63,8 @@ deploy_setup:
 
 deploy_configure:
   stage: deploy
-  dependencies:
-    - build
   needs:
+    - build
     - deploy_setup
   script:
     - echo "Configuring environment and Django settings..."
@@ -90,9 +89,8 @@ deploy_configure:
 
 deploy_django:
   stage: deploy
-  dependencies:
-    - build
   needs:
+    - build
     - deploy_configure
   script:
     - echo "Installing Django dependencies and setting up application..."
@@ -105,9 +103,8 @@ deploy_django:
 
 deploy_wsgi:
   stage: deploy
-  dependencies:
-    - build
   needs:
+    - build
     - deploy_django
   script:
     - echo "Configuring WSGI application..."
@@ -172,9 +169,8 @@ deploy_wsgi:
 
 deploy_apache_config:
   stage: deploy
-  dependencies:
-    - build
   needs:
+    - build
     - deploy_wsgi
   script:
     - echo "Configuring Apache with SSL support..."
@@ -189,9 +185,8 @@ deploy_apache_config:
 
 deploy_apache_http:
   stage: deploy
-  dependencies:
-    - build
   needs:
+    - build
     - deploy_apache_config
   script:
     - echo "Configuring HTTP virtual host..."
@@ -216,9 +211,8 @@ deploy_apache_http:
 
 deploy_apache_https:
   stage: deploy
-  dependencies:
-    - build
   needs:
+    - build
     - deploy_apache_http
   script:
     - echo "Configuring HTTPS virtual host..."
@@ -279,9 +273,8 @@ deploy_apache_https:
 
 deploy_finalize:
   stage: deploy
-  dependencies:
-    - build
   needs:
+    - build
     - deploy_apache_https
   script:
     - echo "Finalizing deployment and starting services..."
@@ -297,9 +290,8 @@ deploy_finalize:
 
 deploy_verify:
   stage: deploy
-  dependencies:
-    - build
   needs:
+    - build
     - deploy_finalize
   script:
     - echo "Verifying deployment..."
