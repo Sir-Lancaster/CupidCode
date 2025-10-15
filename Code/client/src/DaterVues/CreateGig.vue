@@ -12,6 +12,7 @@ const user_id  = parseInt(window.location.hash.split('/')[3])
 const date = ref('')
 const item = ref('')
 const budget = ref('')
+const sameAsPickup = ref(false)
 const pickupAddress = ref({
   street: '',
   apt: '',
@@ -26,6 +27,22 @@ const dropoffAddress = ref({
   state: '',
   zipCode: ''
 })
+
+// Function to copy pickup address to dropoff when checkbox is checked
+function handleSameAsPickup() {
+  if (sameAsPickup.value) {
+    dropoffAddress.value = { ...pickupAddress.value }
+  } else {
+    // Clear dropoff address when unchecked
+    dropoffAddress.value = {
+      street: '',
+      apt: '',
+      city: '',
+      state: '',
+      zipCode: ''
+    }
+  }
+}
 
 </script>
 
@@ -84,33 +101,68 @@ const dropoffAddress = ref({
             <div class="address-section">
                 <h3>Drop-off Address</h3>
                 
+                <!-- Same as pickup checkbox -->
+                <label class="checkbox-field">
+                    <input 
+                        type="checkbox" 
+                        v-model="sameAsPickup" 
+                        @change="handleSameAsPickup"
+                        class="checkbox-input"
+                    >
+                    <span class="checkbox-text">Same as pickup address</span>
+                </label>
+                
                 <div class="street-row">
                     <label class="form-field flex-grow">
                         Street Address
-                        <input type="text" v-model="dropoffAddress.street" required>
+                        <input 
+                            type="text" 
+                            v-model="dropoffAddress.street" 
+                            :disabled="sameAsPickup"
+                            required
+                        >
                     </label>
                     
                     <label class="form-field apt-field">
                         APT/Unit (Optional)
-                        <input type="text" v-model="dropoffAddress.apt">
+                        <input 
+                            type="text" 
+                            v-model="dropoffAddress.apt"
+                            :disabled="sameAsPickup"
+                        >
                     </label>
                 </div>
 
                 <div class="city-state-row">
                     <label class="form-field flex-grow">
                         City
-                        <input type="text" v-model="dropoffAddress.city" required>
+                        <input 
+                            type="text" 
+                            v-model="dropoffAddress.city" 
+                            :disabled="sameAsPickup"
+                            required
+                        >
                     </label>
                     
                     <label class="form-field state-field">
                         State
-                        <input type="text" v-model="dropoffAddress.state" required>
+                        <input 
+                            type="text" 
+                            v-model="dropoffAddress.state" 
+                            :disabled="sameAsPickup"
+                            required
+                        >
                     </label>
                 </div>
 
                 <label class="form-field">
                     Zip Code
-                    <input type="text" v-model="dropoffAddress.zipCode" required>
+                    <input 
+                        type="text" 
+                        v-model="dropoffAddress.zipCode" 
+                        :disabled="sameAsPickup"
+                        required
+                    >
                 </label>
             </div>
 
@@ -183,7 +235,99 @@ const dropoffAddress = ref({
     color: var(--new-primary);
   }
 
+  .form-field input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: rgba(31, 72, 126, 0.2);
+  }
+
+  /* Checkbox styling */
+  .checkbox-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: var(--new-primary);
+    cursor: pointer;
+  }
+
+  .checkbox-input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--new-primary);
+    cursor: pointer;
+    background-color: var(--new-background);
+    border: 2px solid var(--new-primary);
+    border-radius: 3px;
+    appearance: none;
+    position: relative;
+  }
+
+  .checkbox-input:checked {
+    background-color: var(--new-primary);
+  }
+
+  .checkbox-input:checked::after {
+    content: '✓';
+    position: absolute;
+    top: -2px;
+    left: 2px;
+    color: var(--new-background);
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .checkbox-text {
+    font-size: 16px;
+    user-select: none;
+  }
+
+  /* Specific styling for date input */
+  .form-field input[type="date"] {
+    padding: 10px;
+    border: 1px solid var(--new-primary);
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: var(--new-background);
+    color: var(--new-primary);
+    cursor: pointer;
+    position: relative;
+    color-scheme: dark; /* Forces dark mode for the date picker */
+  }
+
+  /* Style the calendar icon */
+  .form-field input[type="date"]::-webkit-calendar-picker-indicator {
+    background-color: var(--new-primary);
+    border-radius: 3px;
+    padding: 2px;
+    cursor: pointer;
+    filter: invert(1);
+  }
+
+  /* Firefox date input styling */
+  .form-field input[type="date"]::-moz-focus-inner {
+    border: 0;
+  }
+
+  /* Date input hover and focus states */
+  .form-field input[type="date"]:hover {
+    border-color: var(--new-light-blue);
+  }
+
+  .form-field input[type="date"]:focus {
+    outline: 2px solid var(--new-primary);
+    border-color: var(--new-primary);
+    box-shadow: 0 0 0 2px rgba(9, 161, 41, 0.2);
+  }
+
   .form-field input:focus {
+    outline: 2px solid var(--new-primary);
+    border-color: var(--new-primary);
+  }
+
+  /* Ensure date input doesn't get the general input focus styles doubled */
+  .form-field input:not([type="date"]):focus {
     outline: 2px solid var(--new-primary);
     border-color: var(--new-primary);
   }
