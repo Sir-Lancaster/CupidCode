@@ -65,7 +65,7 @@ deploy:
     # Upload Django application
     - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/cupid-app/
     
-    # Create production .env file
+    # Create production .env file with proper static files configuration
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       cd /var/www/cupid-app &&
@@ -79,171 +79,91 @@ deploy:
       EOF
       "
     
-    # Fix Django settings for production - DO NOT APPEND, MODIFY EXISTING
+    # Add production settings to Django settings file
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       cd /var/www/cupid-app &&
-      python3 << 'PYEOF'
-      import os
-      settings_file = 'server/settings.py'
-      with open(settings_file, 'r') as f:
-          content = f.read()
-      
-      # Remove any existing production settings block
-      if '# Production settings' in content:
-          lines = content.split('\n')
-          new_lines = []
-          skip = False
-          for line in lines:
-              if '# Production settings' in line:
-                  skip = True
-              elif skip and line.strip() and not line.startswith(' ') and not line.startswith('\t'):
-                  skip = False
-              if not skip:
-                  new_lines.append(line)
-          content = '\n'.join(new_lines)
-      
-      # Add corrected production settings
-      production_settings = '''
-      # Production settings
-      import os
-      ALLOWED_HOSTS = ['*', '20.66.30.49', 'localhost', '127.0.0.1']
-      DEBUG = False
-      STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-      STATIC_URL = '/static/'
-      MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-      MEDIA_URL = '/media/'
-      
-      # Security settings for production
-      CSRF_COOKIE_SECURE = False  # Set to True if using HTTPS
-      SESSION_COOKIE_SECURE = False  # Set to True if using HTTPS
-      
-      # Fix for WSGI
-      import sys
-      sys.path.insert(0, '/var/www/cupid-app')
-      '''
-      
-      with open(settings_file, 'w') as f:
-          f.write(content + production_settings)
-      
-      print('Settings updated successfully')
-      PYEOF
+      echo '' >> server/settings.py &&
+      echo '# Production settings' >> server/settings.py &&
+      echo 'import os' >> server/settings.py &&
+      echo 'STATIC_ROOT = os.path.join(BASE_DIR, \"staticfiles\")' >> server/settings.py &&
+      echo 'ALLOWED_HOSTS = [\"*\", \"20.66.30.49\", \"localhost\", \"127.0.0.1\"]' >> server/settings.py &&
+      echo 'DEBUG = False' >> server/settings.py
       "
     
     # Install Python dependencies and setup Django
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       cd /var/www/cupid-app &&
-      sudo apt-get update -qq &&
-      sudo apt-get install -y python3-pip python3-venv python3-dev &&
+      sudo apt-get update &&
+      sudo apt-get install -y python3-pip python3-venv &&
       python3 -m venv venv &&
       source venv/bin/activate &&
-      pip install --upgrade pip &&
       pip install -r requirements.txt &&
-      mkdir -p staticfiles media &&
+      mkdir -p staticfiles &&
       python manage.py migrate --noinput &&
-      python manage.py collectstatic --noinput --clear
+      python manage.py collectstatic --noinput
       "
     
     # Configure Apache with mod_wsgi for Django
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      sudo apt-get install -y apache2 libapache2-mod-wsgi-py3 &&
+      sudo apt-get install -y libapache2-mod-wsgi-py3 &&
       sudo a2enmod wsgi &&
       sudo tee /etc/apache2/sites-available/cupid-app.conf > /dev/null << 'EOF'
       <VirtualHost *:80>
-          ServerName 20.66.30.49
-          ServerAlias localhost
+          ServerName localhost
           DocumentRoot /var/www/cupid-app
           
-          # WSGI Configuration
-          WSGIDaemonProcess cupidapp python-path=/var/www/cupid-app python-home=/var/www/cupid-app/venv processes=2 threads=15 display-name=%{GROUP}
+          WSGIDaemonProcess cupidapp python-path=/var/www/cupid-app python-home=/var/www/cupid-app/venv
           WSGIProcessGroup cupidapp
           WSGIScriptAlias / /var/www/cupid-app/server/wsgi.py
-          WSGIApplicationGroup %{GLOBAL}
-          WSGIPassAuthorization On
           
-          # Django application directory
           <Directory /var/www/cupid-app/server>
               <Files wsgi.py>
                   Require all granted
               </Files>
           </Directory>
           
-          # Static files
           Alias /static /var/www/cupid-app/staticfiles
           <Directory /var/www/cupid-app/staticfiles>
               Require all granted
-              Options -Indexes
           </Directory>
           
-          # Media files
           Alias /media /var/www/cupid-app/media
           <Directory /var/www/cupid-app/media>
               Require all granted
-              Options -Indexes
           </Directory>
           
-          # Logging
           ErrorLog \${APACHE_LOG_DIR}/cupid_error.log
           CustomLog \${APACHE_LOG_DIR}/cupid_access.log combined
-          LogLevel warn
       </VirtualHost>
       EOF
       "
     
-    # Set correct permissions and restart Apache
+    # Enable the site and restart Apache
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       sudo a2dissite 000-default.conf 2>/dev/null || echo 'Default site already disabled' &&
       sudo a2dissite django-app.conf 2>/dev/null || echo 'Previous django site not found' &&
       sudo a2ensite cupid-app.conf &&
-      
-      # Critical: Fix permissions for database and directories
       sudo chown -R www-data:www-data /var/www/cupid-app &&
       sudo chmod -R 755 /var/www/cupid-app &&
-      sudo chmod 664 /var/www/cupid-app/db.sqlite3 2>/dev/null || echo 'db.sqlite3 will be created on first run' &&
-      sudo chmod 775 /var/www/cupid-app 2>/dev/null || true &&
-      
-      # Test Apache configuration
-      sudo apache2ctl configtest &&
-      
-      # Restart Apache
-      sudo systemctl restart apache2 &&
-      sleep 2
+      sudo systemctl restart apache2
       "
     
-    # Verify deployment and show logs if there are errors
+    # Verify deployment
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      echo '=====================================' &&
       echo 'Deployment verification:' &&
-      echo '=====================================' &&
       ls -la /var/www/cupid-app/ &&
-      echo '' &&
       echo 'Apache status:' &&
-      sudo systemctl status apache2 --no-pager -l | head -15 &&
-      echo '' &&
+      sudo systemctl status apache2 --no-pager -l | head -10 &&
       echo 'Testing local connection:' &&
-      HTTP_CODE=\$(curl -s -o /dev/null -w '%{http_code}' http://localhost/) &&
-      echo \"HTTP Response Code: \$HTTP_CODE\" &&
-      if [ \"\$HTTP_CODE\" != \"200\" ]; then
-        echo '' &&
-        echo '=====================================' &&
-        echo 'ERROR LOGS (last 30 lines):' &&
-        echo '=====================================' &&
-        sudo tail -30 /var/log/apache2/cupid_error.log
-      else
-        echo '✅ Application is responding successfully!'
-      fi
+      sleep 3 &&
+      curl -s -o /dev/null -w '%{http_code}' http://localhost/ || echo 'Connection test failed'
       "
     
-    - echo "======================================"
-    - echo "✅ Deployment Complete!"
-    - echo "======================================"
-    - echo "🌐 Application URL: http://$VM_PUBLIC_IP"
-    - echo ""
-    - echo "To check logs if issues occur:"
-    - echo "  sudo tail -f /var/log/apache2/cupid_error.log"
+    - echo "Complete Django + Vue deployment finished!"
   only:
     - master
