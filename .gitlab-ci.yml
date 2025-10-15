@@ -49,27 +49,27 @@ build:
   only:
     - yaml
 
-deploy_setup:
+deploy:
   stage: deploy
-  needs:
+  dependencies:
     - build
   script:
-    - echo "Setting up deployment environment..."
+    - echo "Deploying complete Django + Vue application to Azure VM with HTTPS support..."
+    
+    # Create application directory
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo mkdir -p /var/www/cupid-app && sudo chown azureuser:azureuser /var/www/cupid-app"
+    
+    # Clean previous deployment with proper permissions
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chown -R azureuser:azureuser /var/www/cupid-app && sudo rm -rf /var/www/cupid-app/*"
+    
+    # Upload Django application
     - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/cupid-app/
-  only:
-    - yaml
-
-deploy_configure:
-  stage: deploy
-  needs:
-    - build
-    - deploy_setup
-  script:
-    - echo "Configuring environment and Django settings..."
+    
+    # Create production .env file with HTTPS configuration
     - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && cat > .env << 'EOF'
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      cd /var/www/cupid-app &&
+      cat > .env << 'EOF'
       DEBUG=False
       SECRET_KEY=your-production-secret-key-here-change-this-in-production
       ALLOWED_HOSTS=cupidcode.zapto.org,www.cupidcode.zapto.org,localhost,127.0.0.1
@@ -80,36 +80,46 @@ deploy_configure:
       SECURE_PROXY_SSL_HEADER=('HTTP_X_FORWARDED_PROTO', 'https')
       SESSION_COOKIE_SECURE=True
       CSRF_COOKIE_SECURE=True
-      EOF"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && echo '' >> server/settings.py && echo '# Production HTTPS settings' >> server/settings.py && echo 'import os' >> server/settings.py && echo 'STATIC_ROOT = os.path.join(BASE_DIR, \"staticfiles\")' >> server/settings.py"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && echo 'ALLOWED_HOSTS = [\"cupidcode.zapto.org\", \"www.cupidcode.zapto.org\", \"localhost\", \"127.0.0.1\"]' >> server/settings.py && echo 'DEBUG = False' >> server/settings.py"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && echo 'SECURE_SSL_REDIRECT = True' >> server/settings.py && echo 'SECURE_PROXY_SSL_HEADER = (\"HTTP_X_FORWARDED_PROTO\", \"https\")' >> server/settings.py && echo 'SESSION_COOKIE_SECURE = True' >> server/settings.py && echo 'CSRF_COOKIE_SECURE = True' >> server/settings.py"
-  only:
-    - yaml
-
-deploy_django:
-  stage: deploy
-  needs:
-    - build
-    - deploy_configure
-  script:
-    - echo "Installing Django dependencies and setting up application..."
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && sudo apt-get update && sudo apt-get install -y python3-pip python3-venv"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && mkdir -p staticfiles && source venv/bin/activate && python manage.py migrate --noinput && python manage.py collectstatic --noinput"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && mkdir -p staticfiles/assets/ && cp staticfiles/core/assets/* staticfiles/assets/ 2>/dev/null || echo 'No Vue assets to copy'"
-  only:
-    - yaml
-
-deploy_wsgi:
-  stage: deploy
-  needs:
-    - build
-    - deploy_django
-  script:
-    - echo "Configuring WSGI application..."
+      EOF
+      "
+    
+    # Add production settings to Django settings file with HTTPS security
     - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && cat > server/wsgi.py << 'WSGI_EOF'
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      cd /var/www/cupid-app &&
+      echo '' >> server/settings.py &&
+      echo '# Production HTTPS settings' >> server/settings.py &&
+      echo 'import os' >> server/settings.py &&
+      echo 'STATIC_ROOT = os.path.join(BASE_DIR, \"staticfiles\")' >> server/settings.py &&
+      echo 'ALLOWED_HOSTS = [\"cupidcode.zapto.org\", \"www.cupidcode.zapto.org\", \"localhost\", \"127.0.0.1\"]' >> server/settings.py &&
+      echo 'DEBUG = False' >> server/settings.py &&
+      echo '# HTTPS Security Settings' >> server/settings.py &&
+      echo 'SECURE_SSL_REDIRECT = True' >> server/settings.py &&
+      echo 'SECURE_PROXY_SSL_HEADER = (\"HTTP_X_FORWARDED_PROTO\", \"https\")' >> server/settings.py &&
+      echo 'SESSION_COOKIE_SECURE = True' >> server/settings.py &&
+      echo 'CSRF_COOKIE_SECURE = True' >> server/settings.py &&
+      echo 'SECURE_BROWSER_XSS_FILTER = True' >> server/settings.py &&
+      echo 'SECURE_CONTENT_TYPE_NOSNIFF = True' >> server/settings.py
+      "
+    
+    # Install Python dependencies and setup Django
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      cd /var/www/cupid-app &&
+      sudo apt-get update &&
+      sudo apt-get install -y python3-pip python3-venv &&
+      python3 -m venv venv &&
+      source venv/bin/activate &&
+      pip install -r requirements.txt &&
+      mkdir -p staticfiles &&
+      python manage.py migrate --noinput &&
+      python manage.py collectstatic --noinput &&
+      
+      # Fix static file structure for Vue assets
+      mkdir -p staticfiles/assets/ &&
+      cp staticfiles/core/assets/* staticfiles/assets/ 2>/dev/null || echo 'No Vue assets to copy' &&
+      
+      cat > server/wsgi.py << 'WSGI_EOF'
       import os
       import sys
       import traceback
@@ -163,35 +173,24 @@ deploy_wsgi:
               return [error_msg.encode('utf-8')]
           
           application = error_application
-      WSGI_EOF"
-  only:
-    - yaml
-
-deploy_apache_config:
-  stage: deploy
-  needs:
-    - build
-    - deploy_wsgi
-  script:
-    - echo "Configuring Apache with SSL support..."
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo apt-get install -y libapache2-mod-wsgi-py3 && sudo a2enmod wsgi && sudo a2enmod ssl && sudo a2enmod headers && sudo a2enmod rewrite"
+      WSGI_EOF
+      "
+    
+    # Configure Apache with SSL support and ensure mod_ssl is enabled
     - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo tee /etc/apache2/conf-available/wsgi.conf > /dev/null << 'EOF'
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      sudo apt-get install -y libapache2-mod-wsgi-py3 &&
+      sudo a2enmod wsgi &&
+      sudo a2enmod ssl &&
+      sudo a2enmod headers &&
+      sudo a2enmod rewrite &&
+      sudo tee /etc/apache2/conf-available/wsgi.conf > /dev/null << 'EOF'
       WSGIPythonPath /var/www/cupid-app:/var/www/cupid-app/venv/lib/python3.12/site-packages
-      EOF"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo a2enconf wsgi"
-  only:
-    - yaml
-
-deploy_apache_http:
-  stage: deploy
-  needs:
-    - build
-    - deploy_apache_config
-  script:
-    - echo "Configuring HTTP virtual host..."
-    - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo tee /etc/apache2/sites-available/cupid-app.conf > /dev/null << 'EOF'
+      EOF
+      sudo a2enconf wsgi &&
+      
+      # Update HTTP virtual host (port 80) - this will redirect to HTTPS
+      sudo tee /etc/apache2/sites-available/cupid-app.conf > /dev/null << 'EOF'
       <VirtualHost *:80>
           ServerName cupidcode.zapto.org
           ServerAlias www.cupidcode.zapto.org
@@ -205,19 +204,10 @@ deploy_apache_http:
           ErrorLog \${APACHE_LOG_DIR}/cupid_error.log
           CustomLog \${APACHE_LOG_DIR}/cupid_access.log combined
       </VirtualHost>
-      EOF"
-  only:
-    - yaml
-
-deploy_apache_https:
-  stage: deploy
-  needs:
-    - build
-    - deploy_apache_http
-  script:
-    - echo "Configuring HTTPS virtual host..."
-    - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo tee /etc/apache2/sites-available/cupid-app-le-ssl.conf > /dev/null << 'EOF'
+      EOF
+      
+      # Update/Create HTTPS virtual host (port 443)
+      sudo tee /etc/apache2/sites-available/cupid-app-le-ssl.conf > /dev/null << 'EOF'
       <VirtualHost *:443>
           ServerName cupidcode.zapto.org
           ServerAlias www.cupidcode.zapto.org
@@ -248,6 +238,7 @@ deploy_apache_https:
           Alias /static /var/www/cupid-app/staticfiles
           <Directory /var/www/cupid-app/staticfiles>
               Require all granted
+              # Cache static files for better performance
               ExpiresActive On
               ExpiresByType text/css \"access plus 1 month\"
               ExpiresByType application/javascript \"access plus 1 month\"
@@ -267,38 +258,45 @@ deploy_apache_https:
           ErrorLog \${APACHE_LOG_DIR}/cupid_ssl_error.log
           CustomLog \${APACHE_LOG_DIR}/cupid_ssl_access.log combined
       </VirtualHost>
-      EOF"
-  only:
-    - yaml
-
-deploy_finalize:
-  stage: deploy
-  needs:
-    - build
-    - deploy_apache_https
-  script:
-    - echo "Finalizing deployment and starting services..."
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo a2dissite 000-default.conf 2>/dev/null || echo 'Default site already disabled'"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo a2ensite cupid-app.conf && sudo a2ensite cupid-app-le-ssl.conf"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chown -R www-data:www-data /var/www/cupid-app && sudo chmod -R 755 /var/www/cupid-app"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo apache2ctl configtest && sudo systemctl restart apache2 && sudo systemctl status apache2 --no-pager"
+      EOF
+      "
+    
+    # Enable sites and restart Apache
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      sudo a2dissite 000-default.conf 2>/dev/null || echo 'Default site already disabled' &&
+      sudo a2ensite cupid-app.conf &&
+      sudo a2ensite cupid-app-le-ssl.conf &&
+      sudo chown -R www-data:www-data /var/www/cupid-app &&
+      sudo chmod -R 755 /var/www/cupid-app &&
+      
+      # Test Apache configuration before restart
+      sudo apache2ctl configtest &&
+      sudo systemctl restart apache2 &&
+      sudo systemctl status apache2 --no-pager
+      "
+    
+    # Verify deployment with both HTTP and HTTPS
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      echo 'Deployment verification:' &&
+      ls -la /var/www/cupid-app/ &&
+      echo 'Apache SSL modules:' &&
+      sudo apache2ctl -M | grep ssl &&
+      echo 'Virtual hosts configuration:' &&
+      sudo apache2ctl -S &&
+      echo 'Testing connections:' &&
+      sleep 5 &&
+      echo 'HTTP test (should redirect):' &&
+      curl -I http://localhost/ 2>/dev/null | head -5 &&
+      echo 'HTTPS test:' &&
+      curl -I -k https://localhost/ 2>/dev/null | head -5 || echo 'HTTPS localhost test failed - check certificate configuration' &&
+      echo 'SSL certificate verification:' &&
+      sudo certbot certificates | grep cupidcode.zapto.org
+      "
+    
     - echo "Complete Django + Vue deployment with HTTPS finished!"
     - echo "Your application should be available at: https://cupidcode.zapto.org"
     - echo "HTTP requests will automatically redirect to HTTPS"
-  only:
-    - yaml
-
-deploy_verify:
-  stage: deploy
-  needs:
-    - build
-    - deploy_finalize
-  script:
-    - echo "Verifying deployment..."
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "echo 'Deployment verification:' && ls -la /var/www/cupid-app/ && echo 'Apache SSL modules:' && sudo apache2ctl -M | grep ssl"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "echo 'Virtual hosts configuration:' && sudo apache2ctl -S && echo 'Testing connections:' && sleep 5"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "echo 'HTTP test (should redirect):' && curl -I http://localhost/ 2>/dev/null | head -5"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "echo 'HTTPS test:' && curl -I -k https://localhost/ 2>/dev/null | head -5 || echo 'HTTPS localhost test failed - check certificate configuration'"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "echo 'SSL certificate verification:' && sudo certbot certificates | grep cupidcode.zapto.org"
   only:
     - yaml
