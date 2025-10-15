@@ -58,38 +58,76 @@ deploy:
     - echo "Deploying complete Django + Vue application to Azure VM..."
     - echo "Step 1 - Cleaning up existing configurations..."
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo systemctl stop apache2 || true && sudo pkill -f wsgi || echo 'No WSGI processes found' && sudo a2dissite cupid-app.conf || echo 'Cupid site not found' && sudo rm -f /etc/apache2/sites-available/cupid-app.conf && echo 'Cleanup complete'"
+    
     - echo "Step 2 - Creating application directory..."
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo mkdir -p /var/www/cupid-app && sudo chown azureuser:azureuser /var/www/cupid-app && echo 'Directory created'"
+    
     - echo "Step 3 - Cleaning previous deployment..."
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chown -R azureuser:azureuser /var/www/cupid-app && sudo rm -rf /var/www/cupid-app/* && echo 'Previous deployment cleaned'"
+    
     - echo "Step 4 - Uploading Django application..."
     - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/cupid-app/
     - echo "Upload complete"
+    
     - echo "Step 5 - Creating production .env file..."
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && cat > .env << 'EOF'
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP bash << 'ENDSSH'
+      cd /var/www/cupid-app
+      cat > .env << 'ENVEOF'
       DEBUG=False
       SECRET_KEY=your-production-secret-key-here-change-this-in-production
       ALLOWED_HOSTS=*
       DATABASE_URL=sqlite:///db.sqlite3
       STATIC_ROOT=/var/www/cupid-app/staticfiles
       STATIC_URL=/static/
-      EOF"
-    - echo ".env file created"
+      ENVEOF
+      echo ".env file created"
+      ENDSSH
+    
     - echo "Step 6 - Configuring Django production settings..."
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && cat >> server/settings.py << 'EOF'
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP bash << 'ENDSSH'
+      cd /var/www/cupid-app
+      cat >> server/settings.py << 'SETTINGSEOF'
 
       # Production settings
       import os
-      STATIC_ROOT = os.path.join(BASE_DIR, \"staticfiles\")
-      ALLOWED_HOSTS = [\"*\", \"20.66.30.49\", \"localhost\", \"127.0.0.1\"]
+      STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+      ALLOWED_HOSTS = ["*", "20.66.30.49", "localhost", "127.0.0.1"]
       DEBUG = False
-      EOF"
-    - echo "Production settings added"
+      SETTINGSEOF
+      echo "Production settings added"
+      ENDSSH
+    
     - echo "Step 7 - Installing Python dependencies and setting up Django..."
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && sudo apt-get update -qq && sudo apt-get install -y python3-pip python3-venv && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt && mkdir -p staticfiles && python manage.py migrate --noinput && python manage.py collectstatic --noinput && echo 'Django setup complete'"
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP bash << 'ENDSSH'
+      set -e
+      cd /var/www/cupid-app
+      echo "Updating apt packages..."
+      sudo apt-get update -qq
+      echo "Installing Python packages..."
+      sudo apt-get install -y python3-pip python3-venv
+      echo "Creating virtual environment..."
+      python3 -m venv venv
+      echo "Activating virtual environment..."
+      source venv/bin/activate
+      echo "Installing requirements..."
+      pip install -r requirements.txt
+      echo "Creating staticfiles directory..."
+      mkdir -p staticfiles
+      echo "Running migrations..."
+      python manage.py migrate --noinput
+      echo "Collecting static files..."
+      python manage.py collectstatic --noinput
+      echo "Django setup complete"
+      ENDSSH
+    
     - echo "Step 8 - Configuring Apache with mod_wsgi..."
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo apt-get install -y libapache2-mod-wsgi-py3 && sudo a2enmod wsgi"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo tee /etc/apache2/sites-available/cupid-app.conf > /dev/null << 'EOF'
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP bash << 'ENDSSH'
+      sudo tee /etc/apache2/sites-available/cupid-app.conf > /dev/null << 'APACHEEOF'
       <VirtualHost *:80>
           ServerName localhost
           DocumentRoot /var/www/cupid-app
@@ -111,14 +149,30 @@ deploy:
               Require all granted
           </Directory>
           
-          ErrorLog \${APACHE_LOG_DIR}/cupid_error.log
-          CustomLog \${APACHE_LOG_DIR}/cupid_access.log combined
+          ErrorLog ${APACHE_LOG_DIR}/cupid_error.log
+          CustomLog ${APACHE_LOG_DIR}/cupid_access.log combined
       </VirtualHost>
-      EOF"
-    - echo "Apache configuration created"
+      APACHEEOF
+      echo "Apache configuration created"
+      ENDSSH
+    
     - echo "Step 9 - Enabling site and restarting Apache..."
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo a2ensite cupid-app.conf && sudo chown -R www-data:www-data /var/www/cupid-app && sudo chmod -R 755 /var/www/cupid-app && sudo systemctl start apache2 && sudo systemctl reload apache2 && echo 'Apache restarted successfully'"
-    - echo "Complete Django + Vue deployment finished!"
-    - echo "Application should be available at http://$VM_PUBLIC_IP"
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP bash << 'ENDSSH'
+      set -e
+      echo "Enabling cupid-app site..."
+      sudo a2ensite cupid-app.conf
+      echo "Setting permissions..."
+      sudo chown -R www-data:www-data /var/www/cupid-app
+      sudo chmod -R 755 /var/www/cupid-app
+      echo "Starting Apache..."
+      sudo systemctl start apache2
+      echo "Reloading Apache..."
+      sudo systemctl reload apache2
+      echo "Apache restarted successfully"
+      ENDSSH
+    
+    - echo "✅ Complete Django + Vue deployment finished!"
+    - echo "🌐 Application should be available at http://$VM_PUBLIC_IP"
   only:
     - master
