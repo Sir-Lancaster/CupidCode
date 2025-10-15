@@ -27,7 +27,7 @@ test:
     - npm install
     - npm run test 2>/dev/null || echo "No test script found, skipping tests"
   only:
-    - master
+    - yaml
 
 build:
   stage: build
@@ -47,7 +47,7 @@ build:
       - Code/server/
     expire_in: 1 week
   only:
-    - master
+    - yaml
 
 deploy:
   stage: deploy
@@ -230,4 +230,4 @@ deploy:
     
     - echo "Complete Django + Vue deployment finished!"
   only:
-    - master
+    - yaml
