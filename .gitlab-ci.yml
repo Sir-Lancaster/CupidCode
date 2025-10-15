@@ -167,3 +167,4 @@ deploy:
     - echo "Complete Django + Vue deployment finished!"
   only:
     - master
+    #test
