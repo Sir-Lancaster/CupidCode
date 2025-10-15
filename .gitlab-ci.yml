@@ -10,9 +10,10 @@ before_script:
   - |
     mkdir -p ~/.ssh
     chmod 700 ~/.ssh
-    PEM_KEY_PATH=~/key.pem
-    echo "$AZURE_PRIVATE_KEY_B64" | base64 -d > $PEM_KEY_PATH
-    chmod 600 $PEM_KEY_PATH
+    export PEM_KEY_PATH="$HOME/key.pem"
+    echo "$AZURE_PRIVATE_KEY_B64" | base64 -d > "$PEM_KEY_PATH"
+    chmod 600 "$PEM_KEY_PATH"
+    export PEM_KEY_PATH
     ssh-keyscan -H $VM_PUBLIC_IP >> ~/.ssh/known_hosts 2>/dev/null || echo "Could not scan host, continuing..."
     if ! ssh-keygen -yf $PEM_KEY_PATH > /dev/null 2>&1; then
       echo "ERROR: Private key is invalid or not in a supported format."
