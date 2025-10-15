@@ -115,7 +115,7 @@ deploy:
       python manage.py collectstatic --noinput
       "
     
-    # Configure Apache with mod_wsgi for Django (FIXED PATHS)
+    # Configure Apache with mod_wsgi for Django
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       sudo apt-get install -y libapache2-mod-wsgi-py3 &&
@@ -142,11 +142,6 @@ deploy:
               Require all granted
           </Directory>
           
-          Alias /media /var/www/cupid-app/media
-          <Directory /var/www/cupid-app/media>
-              Require all granted
-          </Directory>
-          
           ErrorLog \${APACHE_LOG_DIR}/cupid_error.log
           CustomLog \${APACHE_LOG_DIR}/cupid_access.log combined
       </VirtualHost>
@@ -161,14 +156,6 @@ deploy:
       sudo chmod -R 755 /var/www/cupid-app &&
       sudo systemctl start apache2 &&
       sudo systemctl reload apache2
-      "
-    
-    # Verify deployment
-    - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      echo 'Checking deployment status...' &&
-      sudo systemctl status apache2 --no-pager -l &&
-      curl -I http://localhost/ || echo 'Local test failed'
       "
     
     - echo "Complete Django + Vue deployment finished!"
