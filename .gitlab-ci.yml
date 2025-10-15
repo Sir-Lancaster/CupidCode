@@ -69,7 +69,8 @@ deploy_configure:
     - deploy_setup
   script:
     - echo "Configuring environment and Django settings..."
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && cat > .env << 'EOF'
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && cat > .env << 'EOF'
       DEBUG=False
       SECRET_KEY=your-production-secret-key-here-change-this-in-production
       ALLOWED_HOSTS=cupidcode.zapto.org,www.cupidcode.zapto.org,localhost,127.0.0.1
@@ -110,7 +111,8 @@ deploy_wsgi:
     - deploy_django
   script:
     - echo "Configuring WSGI application..."
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && cat > server/wsgi.py << 'WSGI_EOF'
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && cat > server/wsgi.py << 'WSGI_EOF'
       import os
       import sys
       import traceback
@@ -177,7 +179,8 @@ deploy_apache_config:
   script:
     - echo "Configuring Apache with SSL support..."
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo apt-get install -y libapache2-mod-wsgi-py3 && sudo a2enmod wsgi && sudo a2enmod ssl && sudo a2enmod headers && sudo a2enmod rewrite"
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo tee /etc/apache2/conf-available/wsgi.conf > /dev/null << 'EOF'
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo tee /etc/apache2/conf-available/wsgi.conf > /dev/null << 'EOF'
       WSGIPythonPath /var/www/cupid-app:/var/www/cupid-app/venv/lib/python3.12/site-packages
       EOF"
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo a2enconf wsgi"
@@ -192,7 +195,8 @@ deploy_apache_http:
     - deploy_apache_config
   script:
     - echo "Configuring HTTP virtual host..."
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo tee /etc/apache2/sites-available/cupid-app.conf > /dev/null << 'EOF'
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo tee /etc/apache2/sites-available/cupid-app.conf > /dev/null << 'EOF'
       <VirtualHost *:80>
           ServerName cupidcode.zapto.org
           ServerAlias www.cupidcode.zapto.org
@@ -218,7 +222,8 @@ deploy_apache_https:
     - deploy_apache_http
   script:
     - echo "Configuring HTTPS virtual host..."
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo tee /etc/apache2/sites-available/cupid-app-le-ssl.conf > /dev/null << 'EOF'
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo tee /etc/apache2/sites-available/cupid-app-le-ssl.conf > /dev/null << 'EOF'
       <VirtualHost *:443>
           ServerName cupidcode.zapto.org
           ServerAlias www.cupidcode.zapto.org
