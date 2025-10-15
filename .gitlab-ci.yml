@@ -6,7 +6,7 @@ stages:
   - deploy
 
 before_script:
-  - apt-get update && apt-get install -y openssh-client
+  - apt-get update && apt-get install -y openssh-client python3-pip
   - |
     # Create SSH directory first
     mkdir -p ~/.ssh
@@ -54,7 +54,7 @@ build:
     - find ../server/core/static/core/ -name "*.html" -o -name "*.js" -o -name "*.css"
   artifacts:
     paths:
-      - Code/server/core/static/core/
+      - Code/server/
     expire_in: 1 week
   only:
     - master
@@ -64,12 +64,68 @@ deploy:
   dependencies:
     - build
   script:
-    - echo "Deploying to Azure VM..."
-    - echo "Checking available files:"
-    - ls -la Code/server/core/static/core/
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo rm -rf /var/www/html/*"
-    - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/core/static/core/* azureuser@$VM_PUBLIC_IP:/var/www/html/
-    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo systemctl restart apache2"
-    - echo "Deployment completed"
+    - echo "Deploying Django application to Azure VM..."
+    
+    # Create Django app directory on VM
+    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo mkdir -p /var/www/django-app && sudo chown azureuser:azureuser /var/www/django-app"
+    
+    # Remove old deployment
+    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "rm -rf /var/www/django-app/*"
+    
+    # Upload Django application
+    - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/django-app/
+    
+    # Set up Python environment and install dependencies
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      cd /var/www/django-app &&
+      python3 -m venv venv &&
+      source venv/bin/activate &&
+      pip install -r requirements.txt &&
+      python manage.py collectstatic --noinput --settings=server.settings
+      "
+    
+    # Configure Apache for Django with WSGI
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      sudo apt-get update &&
+      sudo apt-get install -y libapache2-mod-wsgi-py3 &&
+      sudo a2enmod wsgi &&
+      sudo tee /etc/apache2/sites-available/django-app.conf > /dev/null << 'EOF'
+      <VirtualHost *:80>
+          ServerName localhost
+          DocumentRoot /var/www/django-app
+          
+          WSGIDaemonProcess djangoapp python-path=/var/www/django-app python-home=/var/www/django-app/venv
+          WSGIProcessGroup djangoapp
+          WSGIScriptAlias / /var/www/django-app/server/wsgi.py
+          
+          <Directory /var/www/django-app/server>
+              <Files wsgi.py>
+                  Require all granted
+              </Files>
+          </Directory>
+          
+          Alias /static /var/www/django-app/core/static
+          <Directory /var/www/django-app/core/static>
+              Require all granted
+          </Directory>
+          
+          ErrorLog \${APACHE_LOG_DIR}/django_error.log
+          CustomLog \${APACHE_LOG_DIR}/django_access.log combined
+      </VirtualHost>
+      EOF
+      "
+    
+    # Enable site and restart Apache
+    - |
+      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
+      sudo a2dissite 000-default &&
+      sudo a2ensite django-app &&
+      sudo chown -R www-data:www-data /var/www/django-app &&
+      sudo systemctl restart apache2
+      "
+    
+    - echo "Django deployment completed"
   only:
     - master
