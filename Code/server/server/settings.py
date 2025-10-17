@@ -31,6 +31,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
+    'https://cupidcode.zapto.org/'
 ]
 
 VITE_APP_DIR = BASE_DIR / "src"

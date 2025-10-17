@@ -81,7 +81,7 @@ class Quest(models.Model):
     budget = models.DecimalField(max_digits=10, decimal_places=2)
     items_requested = models.TextField()
     pickup_location = models.TextField()
-    dropoff_location = models.TextField()
+    dropoff_location = models.TextField(null=True)
 
 # Need to refactor gig so that it's not just a hard coded list.
 class Gig(models.Model):

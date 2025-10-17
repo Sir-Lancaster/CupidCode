@@ -73,7 +73,6 @@ function handleSameAsPickup() {
 // Form validation
 function validateForm() {
   return item.value.trim() !== '' && 
-         budget.value.trim() !== '' && 
          pickupLocationString.value.trim() !== '' && 
          dropoffLocationString.value.trim() !== ''
 }
