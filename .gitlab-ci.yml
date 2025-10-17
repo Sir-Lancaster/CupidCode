@@ -103,22 +103,22 @@ deploy:
     - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/cupid-app/
     
     # Create production environment configuration file
+
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       cd /var/www/cupid-app
-      # Create .env file with production settings for security and HTTPS
-      cat > .env << 'ENVEOF'
-      DEBUG=False                                           # Disable debug mode for production
-      SECRET_KEY=${DJANGO_SECRET_KEY}                       # Django secret key
-      ALLOWED_HOSTS=cupidcode.zapto.org,www.cupidcode.zapto.org,localhost,127.0.0.1  # Allowed hostnames
-      DATABASE_URL=sqlite:///db.sqlite3                     # Database configuration
-      STATIC_ROOT=/var/www/cupid-app/staticfiles           # Static files directory
-      STATIC_URL=/static/                                   # Static files URL prefix
-      SECURE_SSL_REDIRECT=True                              # Force HTTPS redirects
-      SECURE_PROXY_SSL_HEADER=('HTTP_X_FORWARDED_PROTO', 'https')  # Trust proxy HTTPS headers
-      SESSION_COOKIE_SECURE=True                            # Secure session cookies
-      CSRF_COOKIE_SECURE=True                               # Secure CSRF cookies
-      ENVEOF
+      cat > .env << ENVEOF
+DEBUG=False
+DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+ALLOWED_HOSTS=cupidcode.zapto.org,www.cupidcode.zapto.org,localhost,127.0.0.1
+DATABASE_URL=sqlite:///db.sqlite3
+STATIC_ROOT=/var/www/cupid-app/staticfiles
+STATIC_URL=/static/
+SECURE_SSL_REDIRECT=True
+SECURE_PROXY_SSL_HEADER=('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+ENVEOF
       "
     
     # Configure Django settings for production HTTPS deployment
