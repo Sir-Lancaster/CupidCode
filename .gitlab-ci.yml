@@ -108,7 +108,7 @@ deploy:
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       cd /var/www/cupid-app
       cat > .env << ENVEOF
-      DEBUG=False
+      DEBUG=True
       ALLOWED_HOSTS=cupidcode.zapto.org,www.cupidcode.zapto.org,localhost,127.0.0.1
       ENVEOF
             "
@@ -134,7 +134,7 @@ deploy:
       echo 'import os' >> server/settings.py
       echo 'STATIC_ROOT = os.path.join(BASE_DIR, \"staticfiles\")' >> server/settings.py
       echo 'ALLOWED_HOSTS = [\"cupidcode.zapto.org\", \"www.cupidcode.zapto.org\", \"localhost\", \"127.0.0.1\"]' >> server/settings.py
-      echo 'DEBUG = False' >> server/settings.py                    # Disable debug mode
+      echo 'DEBUG = True' >> server/settings.py                    # Disable debug mode
       echo 'SECURE_SSL_REDIRECT = True' >> server/settings.py       # Force HTTPS
       echo 'SECURE_PROXY_SSL_HEADER = (\"HTTP_X_FORWARDED_PROTO\", \"https\")' >> server/settings.py
       echo 'SESSION_COOKIE_SECURE = True' >> server/settings.py     # Secure cookies
