@@ -65,7 +65,7 @@ build:
     - echo "Build completed"
     
     # Verify Vue.js build output was created in Django static directory
-    - ls -la ../server/core/static/core/
+    - ls -la ../server/core/static/
     
     # Prepare Django backend application for deployment
     - echo "Preparing complete Django application..."
@@ -133,7 +133,7 @@ deploy:
       echo '# Production HTTPS settings' >> server/settings.py
       echo 'import os' >> server/settings.py
       echo 'STATIC_ROOT = os.path.join(BASE_DIR, \"staticfiles\")' >> server/settings.py
-      
+
       echo 'SECURE_SSL_REDIRECT = True' >> server/settings.py       # Force HTTPS
       echo 'SECURE_PROXY_SSL_HEADER = (\"HTTP_X_FORWARDED_PROTO\", \"https\")' >> server/settings.py
       echo 'SESSION_COOKIE_SECURE = True' >> server/settings.py     # Secure cookies
