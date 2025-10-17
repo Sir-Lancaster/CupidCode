@@ -109,7 +109,7 @@ deploy:
       # Create .env file with production settings for security and HTTPS
       cat > .env << 'ENVEOF'
       DEBUG=False                                           # Disable debug mode for production
-      SECRET_KEY=your-production-secret-key-here-change-this-in-production  # Django secret key (should be changed)
+      SECRET_KEY=${DJANGO_SECRET_KEY}                       # Django secret key
       ALLOWED_HOSTS=cupidcode.zapto.org,www.cupidcode.zapto.org,localhost,127.0.0.1  # Allowed hostnames
       DATABASE_URL=sqlite:///db.sqlite3                     # Database configuration
       STATIC_ROOT=/var/www/cupid-app/staticfiles           # Static files directory
