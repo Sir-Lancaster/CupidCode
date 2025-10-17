@@ -767,7 +767,7 @@ def create_gig(request):
     data = request.data
     helpers.update_user_location(request.user, request.META['REMOTE_ADDR'])
     dater = get_object_or_404(Dater, user_id=request.user.id)
-    quest = Quest(budget=data['budget'], pickup_location=data['pickup_location'], items_requested=data['items_requested'])
+    quest = Quest(budget=data['budget'], pickup_location=data['pickup_location'], items_requested=data['items_requested'], dropoff_location=data['dropoff_location'])
     quest.save()
     gig = Gig(dater=dater, quest=quest, status=Gig.Status.UNCLAIMED, dropped_count=0, accepted_count=0)
     gig.save()
@@ -778,16 +778,32 @@ def create_gig(request):
 @permission_classes([IsAuthenticated])
 def accept_gig(request):
     """
-    Modifies the gig to show that it has been accepted by a Cupid.
+     Assign the requesting Cupid to an unclaimed Gig and mark it as CLAIMED.
 
-    Args:
-        request: Information about the request.
-            request.post: The json data sent to the server.
-                gig_id (int): The id of the gig to accept.
-    Returns:
-        Response:
-            If the gig was successfully accepted, return a 200 status code.
-            If the gig could not be accepted or was already accepted, return a 400 status code.
+    Authentication:
+        Requires an authenticated Cupid (request.user must be a Cupid).
+
+    Request JSON:
+        gig_id (int): ID of the Gig to accept.
+
+    Behavior:
+        - Fails if the gig does not exist (404).
+        - Fails if the gig is already claimed or not in UNCLAIMED status (serializer validation should enforce).
+        - Increments the Gig's accepted_count.
+        - Stamps the current (timezone–aware) datetime as date_time_of_claim.
+        - Sets the cupid field to the requesting user's id.
+        - Updates status to CLAIMED.
+
+    Side Effects:
+        Persists modifications to the Gig model instance upon successful validation.
+
+    Responses:
+        200 OK: Serialized Gig after update.
+        400 BAD REQUEST: Validation failure (e.g., already claimed).
+        404 NOT FOUND: Gig not found.
+
+    Notes:
+        Location metadata is captured for auditing via helpers.get_location_string.
     """
     data = request.data
     data['location'] = helpers.get_location_string(request.META['REMOTE_ADDR'])
@@ -810,16 +826,39 @@ def accept_gig(request):
 @permission_classes([IsAuthenticated])
 def complete_gig(request):
     """
-    Modifies the gig to show that it has been completed.
+    Marks a gig as complete, updates related user stats, and returns serialized gig data.
+
+    This view function handles the completion of a gig by:
+      - Retrieving the gig using the provided `gig_id` in the request data.
+      - Updating the gig's status to `COMPLETE` and recording the completion timestamp.
+      - Calculating and awarding a reward (10% of the quest's budget) to the Cupid who completed the gig.
+      - Updating the Cupid's cash balance and completed gigs count.
+      - Returning the updated gig data along with the reward amount.
 
     Args:
-        request: Information about the request.
-            request.post: The json data sent to the server.
-                gig_id (int): The id of the gig to complete.
+        request (Request): The incoming HTTP request containing gig data and metadata.
+            Expected keys in `request.data`:
+                - gig_id (int): The ID of the gig to complete.
+
     Returns:
-        Response:
-            If the gig was successfully completed, return a 200 status code.
-            If the gig could not be completed or was already completed, return a 400 status code.
+        Response: 
+            - 201 Created: If the gig was successfully completed, returns the serialized gig data and reward amount.
+            - 400 Bad Request: If the serializer validation fails, returns validation errors.
+
+    Side Effects:
+        - Modifies the `Gig` and associated `Cupid` models in the database.
+        - Adds a location string to the request data using the client's IP address.
+
+    Example:
+        >>> POST /api/gigs/complete/
+        >>> { "gig_id": 42 }
+        Returns:
+        {
+            "id": 42,
+            "status": "COMPLETE",
+            "date_time_of_completion": "2025-10-14T15:22:00Z",
+            "reward": 50.0
+        }
     """
     data = request.data
     data['location'] = helpers.get_location_string(request.META['REMOTE_ADDR'])
