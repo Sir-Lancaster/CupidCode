@@ -1,7 +1,6 @@
 import json
 import os
 import requests
-import logging
 
 from django.shortcuts import render, redirect
 from django.conf import settings
@@ -15,25 +14,8 @@ from api.models import User
 # Load manifest when server launches
 MANIFEST = {}
 if not settings.DEBUG:
-    logger = logging.getLogger(__name__)
-    candidates = [
-        os.path.join(settings.BASE_DIR, "core", "static", "core", ".vite", "manifest.json"),
-        os.path.join(settings.BASE_DIR, "core", "static", "core", "manifest.json"),
-        os.path.join(settings.BASE_DIR, "static", "core", "manifest.json"),
-    ]
-    for p in candidates:
-        try:
-            if os.path.exists(p):
-                with open(p, "r", encoding="utf-8") as f:
-                    MANIFEST = json.load(f)
-                logger.info("Loaded Vite manifest from %s", p)
-                break
-        except Exception as e:
-            logger.warning("Failed to load Vite manifest at %s: %s", p, e)
-    else:
-        # No manifest found — log (do not raise) so app does not 500
-        logger.warning("Vite manifest not found in expected locations. Frontend assets may be missing.")
-# ...existing code...
+    f = open(f'{settings.BASE_DIR}/core/static/core/.vite/manifest.json')
+    MANIFEST = json.load(f)
 
 
 def index(req):

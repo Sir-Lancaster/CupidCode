@@ -55,26 +55,25 @@ test:
 build:
   stage: build
   script:
-    - |
-      echo "Building Vue frontend..."
-      cd Code/client
-      npm install
-      npm run build
-      echo "Build completed"
-
-      echo "Copying Vite build into Django static directory..."
-      mkdir -p ../server/core/static/core/.vite
-      cp dist/manifest.json ../server/core/static/core/.vite/ 2>/dev/null || echo "Warning: manifest.json not found in dist/"
-      cp -r dist/assets ../server/core/static/core/ 2>/dev/null || echo "Warning: dist/assets not found"
-      ls -la ../server/core/static/core/ || true
-
-      echo "Verifying Vue.js build output:"
-      ls -la ../server/core/static/core/
-
-      echo "Preparing complete Django application..."
-      cd ../server
-      echo "Django files:"
-      ls -la 
+    - echo "Building Vue frontend..."
+    # Navigate to Vue.js client application
+    - cd Code/client
+    # Install all Node.js dependencies from package.json
+    - npm install
+    # Build production-ready Vue.js application (outputs to Django static files)
+    - npm run build
+    - echo "Build completed"
+    
+    # Verify Vue.js build output was created in Django static directory
+    - ls -la ../server/core/static/core/
+    
+    # Prepare Django backend application for deployment
+    - echo "Preparing complete Django application..."
+    - cd ../server
+    - echo "Django files:"
+    - ls -la  # List Django application files for verification
+  
+  # Save built application files as pipeline artifacts for deployment stage
   artifacts:
     paths:
       - Code/server/  # Include entire Django server directory with Vue.js build
