@@ -133,8 +133,7 @@ deploy:
       echo '# Production HTTPS settings' >> server/settings.py
       echo 'import os' >> server/settings.py
       echo 'STATIC_ROOT = os.path.join(BASE_DIR, \"staticfiles\")' >> server/settings.py
-      echo 'ALLOWED_HOSTS = [\"cupidcode.zapto.org\", \"www.cupidcode.zapto.org\", \"localhost\", \"127.0.0.1\"]' >> server/settings.py
-      echo 'DEBUG = False' >> server/settings.py                    # Disable debug mode
+      
       echo 'SECURE_SSL_REDIRECT = True' >> server/settings.py       # Force HTTPS
       echo 'SECURE_PROXY_SSL_HEADER = (\"HTTP_X_FORWARDED_PROTO\", \"https\")' >> server/settings.py
       echo 'SESSION_COOKIE_SECURE = True' >> server/settings.py     # Secure cookies
@@ -142,6 +141,8 @@ deploy:
       echo 'SECURE_BROWSER_XSS_FILTER = True' >> server/settings.py     # XSS protection
       echo 'SECURE_CONTENT_TYPE_NOSNIFF = True' >> server/settings.py   # Content type security
       "
+    # echo 'ALLOWED_HOSTS = [\"cupidcode.zapto.org\", \"www.cupidcode.zapto.org\", \"localhost\", \"127.0.0.1\"]' >> server/settings.py
+    # echo 'DEBUG = False' >> server/settings.py                    # Disable debug mode
     
     # Install dependencies and configure Django application on Azure VM
     - |

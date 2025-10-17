@@ -26,14 +26,9 @@ load_dotenv()
 SECRET_KEY = 'django-insecure-x_e(m+z0-supl3g7n5zi1es0zwecn#_ipb920xxec)%v6^ah5='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'https://cupidcode.zapto.org/'
-]
-
+ALLOWED_HOSTS = [h for h in os.getenv('ALLOWED_HOSTS', '').split(',') if h]
 VITE_APP_DIR = BASE_DIR / "src"
 
 

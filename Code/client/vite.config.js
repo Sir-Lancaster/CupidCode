@@ -9,7 +9,7 @@ export default defineConfig({
     rollupOptions: {
       input: "./src/main.js"
     },
-    outDir: "../server/core/static/core"
+    outDir: "../server/core/static/.vite"
   },
   base: "/static"
 })
