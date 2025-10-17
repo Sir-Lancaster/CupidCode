@@ -1,233 +1,215 @@
+# GitLab CI/CD Pipeline Configuration for Cupid Code Application
+# This pipeline builds a Vue.js frontend, Django backend, and deploys to Azure VM with HTTPS
+
+# Base Docker image for all pipeline jobs - Node.js 18 for Vue.js build process
 image: node:18
 
+# Define the three main stages of our CI/CD pipeline
 stages:
-  - test
-  - build
-  - deploy
+  - test       # Run automated tests on the Vue.js frontend
+  - build      # Build Vue.js app and prepare Django application for deployment
+  - deploy     # Deploy complete application to Azure VM with HTTPS configuration
 
+# Commands that run before each job in every stage
+# Sets up SSH connectivity to Azure VM and validates credentials
 before_script:
+  # Install required system packages for SSH and Python operations
   - apt-get update && apt-get install -y openssh-client python3-pip
+  
+  # Configure SSH connection to Azure VM
   - |
+    # Create SSH directory with proper permissions for security
     mkdir -p ~/.ssh
     chmod 700 ~/.ssh
+    
+    # Decode base64-encoded private key from GitLab CI/CD variables
     PEM_KEY_PATH=~/key.pem
     echo "$AZURE_PRIVATE_KEY_B64" | base64 -d > $PEM_KEY_PATH
-    chmod 600 $PEM_KEY_PATH
+    chmod 600 $PEM_KEY_PATH  # Restrict key file permissions for security
+    
+    # Add Azure VM to known hosts to prevent SSH verification prompts
     ssh-keyscan -H $VM_PUBLIC_IP >> ~/.ssh/known_hosts 2>/dev/null || echo "Could not scan host, continuing..."
+    
+    # Validate that the private key is in correct format before proceeding
     if ! ssh-keygen -yf $PEM_KEY_PATH > /dev/null 2>&1; then
       echo "ERROR: Private key is invalid or not in a supported format."
       exit 1
     fi
 
+# TEST STAGE: Run automated tests on Vue.js frontend
 test:
   stage: test
   script:
     - echo "Running tests..."
+    # Navigate to Vue.js client directory
     - cd Code/client
+    # Install Node.js dependencies
     - npm install
+    # Run test suite (gracefully handle missing test script)
     - npm run test 2>/dev/null || echo "No test script found, skipping tests"
+  # Only run this job when changes are made to the 'master' branch
   only:
     - master
 
+# BUILD STAGE: Compile Vue.js frontend and prepare Django backend
 build:
   stage: build
   script:
     - echo "Building Vue frontend..."
+    # Navigate to Vue.js client application
     - cd Code/client
+    # Install all Node.js dependencies from package.json
     - npm install
+    # Build production-ready Vue.js application (outputs to Django static files)
     - npm run build
     - echo "Build completed"
+    
+    # Verify Vue.js build output was created in Django static directory
     - ls -la ../server/core/static/core/
+    
+    # Prepare Django backend application for deployment
     - echo "Preparing complete Django application..."
     - cd ../server
     - echo "Django files:"
-    - ls -la
+    - ls -la  # List Django application files for verification
+  
+  # Save built application files as pipeline artifacts for deployment stage
   artifacts:
     paths:
-      - Code/server/
-    expire_in: 1 week
+      - Code/server/  # Include entire Django server directory with Vue.js build
+    expire_in: 1 week   # Keep artifacts for 1 week for debugging/rollback
+  
+  # Only run this job when changes are made to the 'master' branch
   only:
     - master
 
+# DEPLOY STAGE: Deploy complete application to Azure VM with HTTPS support
 deploy:
   stage: deploy
+  # This job depends on artifacts from the build stage
   dependencies:
     - build
   script:
-    - echo "Deploying complete Django + Vue application to Azure VM..."
+    - echo "Deploying complete Django + Vue application to Azure VM with HTTPS support..."
     
-    # Create application directory
+    # Prepare deployment directory on Azure VM
+    # Create application directory and set proper ownership
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo mkdir -p /var/www/cupid-app && sudo chown azureuser:azureuser /var/www/cupid-app"
     
-    # Clean previous deployment with proper permissions
+    # Clean existing deployment and ensure proper permissions
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo chown -R azureuser:azureuser /var/www/cupid-app && sudo rm -rf /var/www/cupid-app/*"
     
-    # Upload Django application
+    # Upload Django application files (including Vue.js build) to Azure VM
     - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/cupid-app/
     
-    # Create production .env file with proper static files configuration
+    # Create production environment configuration file
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      cd /var/www/cupid-app &&
-      cat > .env << 'EOF'
-      DEBUG=False
-      SECRET_KEY=your-production-secret-key-here-change-this-in-production
-      ALLOWED_HOSTS=*
-      DATABASE_URL=sqlite:///db.sqlite3
-      STATIC_ROOT=/var/www/cupid-app/staticfiles
-      STATIC_URL=/static/
-      EOF
+      cd /var/www/cupid-app
+      # Create .env file with production settings for security and HTTPS
+      cat > .env << 'ENVEOF'
+      DEBUG=False                                           # Disable debug mode for production
+      SECRET_KEY=your-production-secret-key-here-change-this-in-production  # Django secret key (should be changed)
+      ALLOWED_HOSTS=cupidcode.zapto.org,www.cupidcode.zapto.org,localhost,127.0.0.1  # Allowed hostnames
+      DATABASE_URL=sqlite:///db.sqlite3                     # Database configuration
+      STATIC_ROOT=/var/www/cupid-app/staticfiles           # Static files directory
+      STATIC_URL=/static/                                   # Static files URL prefix
+      SECURE_SSL_REDIRECT=True                              # Force HTTPS redirects
+      SECURE_PROXY_SSL_HEADER=('HTTP_X_FORWARDED_PROTO', 'https')  # Trust proxy HTTPS headers
+      SESSION_COOKIE_SECURE=True                            # Secure session cookies
+      CSRF_COOKIE_SECURE=True                               # Secure CSRF cookies
+      ENVEOF
       "
     
-    # Add production settings to Django settings file
+    # Configure Django settings for production HTTPS deployment
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      cd /var/www/cupid-app &&
-      echo '' >> server/settings.py &&
-      echo '# Production settings' >> server/settings.py &&
-      echo 'import os' >> server/settings.py &&
-      echo 'STATIC_ROOT = os.path.join(BASE_DIR, \"staticfiles\")' >> server/settings.py &&
-      echo 'ALLOWED_HOSTS = [\"*\", \"20.66.30.49\", \"localhost\", \"127.0.0.1\"]' >> server/settings.py &&
-      echo 'DEBUG = False' >> server/settings.py
+      cd /var/www/cupid-app
+      # Append production security settings to Django settings.py
+      echo '' >> server/settings.py
+      echo '# Production HTTPS settings' >> server/settings.py
+      echo 'import os' >> server/settings.py
+      echo 'STATIC_ROOT = os.path.join(BASE_DIR, \"staticfiles\")' >> server/settings.py
+      echo 'ALLOWED_HOSTS = [\"cupidcode.zapto.org\", \"www.cupidcode.zapto.org\", \"localhost\", \"127.0.0.1\"]' >> server/settings.py
+      echo 'DEBUG = False' >> server/settings.py                    # Disable debug mode
+      echo 'SECURE_SSL_REDIRECT = True' >> server/settings.py       # Force HTTPS
+      echo 'SECURE_PROXY_SSL_HEADER = (\"HTTP_X_FORWARDED_PROTO\", \"https\")' >> server/settings.py
+      echo 'SESSION_COOKIE_SECURE = True' >> server/settings.py     # Secure cookies
+      echo 'CSRF_COOKIE_SECURE = True' >> server/settings.py
+      echo 'SECURE_BROWSER_XSS_FILTER = True' >> server/settings.py     # XSS protection
+      echo 'SECURE_CONTENT_TYPE_NOSNIFF = True' >> server/settings.py   # Content type security
       "
     
-    # Install Python dependencies and setup Django
+    # Install dependencies and configure Django application on Azure VM
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      cd /var/www/cupid-app &&
-      sudo apt-get update &&
-      sudo apt-get install -y python3-pip python3-venv &&
-      python3 -m venv venv &&
-      source venv/bin/activate &&
-      pip install -r requirements.txt &&
-      mkdir -p staticfiles &&
-      python manage.py migrate --noinput &&
-      python manage.py collectstatic --noinput &&
+      cd /var/www/cupid-app
+      # Update system packages and install required dependencies
+      sudo apt-get update
+      sudo apt-get install -y python3-pip python3-venv libapache2-mod-wsgi-py3
       
-      # Fix static file structure for Vue assets
-      mkdir -p staticfiles/assets/ &&
-      cp staticfiles/core/assets/* staticfiles/assets/ 2>/dev/null || echo 'No Vue assets to copy' &&
+      # Create Python virtual environment for Django application
+      python3 -m venv venv
+      source venv/bin/activate
       
-      cat > server/wsgi.py << 'WSGI_EOF'
-      import os
-      import sys
-      import traceback
-      import logging
+      # Install Python dependencies from requirements.txt
+      pip install -r requirements.txt
       
-      # Set up detailed logging
-      logging.basicConfig(
-          level=logging.DEBUG,
-          filename='/var/www/cupid-app/wsgi_debug.log',
-          format='%(asctime)s %(levelname)s %(message)s'
-      )
-      logger = logging.getLogger(__name__)
+      # Prepare static files directory
+      mkdir -p staticfiles
       
-      try:
-          logger.info('=== WSGI Starting ===')
-          logger.info('Python path: %s', sys.path)
-          
-          sys.path.insert(0, '/var/www/cupid-app')
-          sys.path.insert(0, '/var/www/cupid-app/server')
-          
-          os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings')
-          logger.info('Django settings module: %s', os.environ.get('DJANGO_SETTINGS_MODULE'))
-          
-          import django
-          logger.info('Django version: %s', django.get_version())
-          
-          django.setup()
-          logger.info('Django setup completed')
-          
-          from django.core.wsgi import get_wsgi_application
-          application = get_wsgi_application()
-          logger.info('WSGI application created successfully')
-          
-      except Exception as e:
-          logger.error('WSGI Error: %s', str(e))
-          logger.error('Traceback: %s', traceback.format_exc())
-          
-          def error_application(environ, start_response):
-              logger.error('Request received but WSGI failed: %s', environ.get('PATH_INFO', '/'))
-              status = '500 Internal Server Error'
-              headers = [('Content-type', 'text/html')]
-              start_response(status, headers)
-              error_msg = f'''
-              <html><body>
-              <h1>WSGI Configuration Error</h1>
-              <p>Error: {str(e)}</p>
-              <p>Check /var/www/cupid-app/wsgi_debug.log for details</p>
-              <pre>{traceback.format_exc()}</pre>
-              </body></html>
-              '''
-              return [error_msg.encode('utf-8')]
-          
-          application = error_application
-      WSGI_EOF
+      # Run Django database migrations (create/update database schema)
+      python manage.py migrate --noinput
+      
+      # Collect all static files (CSS, JS, images) for web server serving
+      python manage.py collectstatic --noinput
+      
+      # Copy Vue.js build assets to static files directory for serving
+      mkdir -p staticfiles/assets/
+      cp staticfiles/core/assets/* staticfiles/assets/ 2>/dev/null || echo 'No Vue assets to copy'
       "
     
-    # Configure Apache with mod_wsgi for Django
-    - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      sudo apt-get install -y libapache2-mod-wsgi-py3 &&
-      sudo a2enmod wsgi &&
-      sudo tee /etc/apache2/conf-available/wsgi.conf > /dev/null << 'EOF'
-      WSGIPythonPath /var/www/cupid-app:/var/www/cupid-app/venv/lib/python3.12/site-packages
-      EOF
-      sudo a2enconf wsgi &&
-      sudo tee /etc/apache2/sites-available/cupid-app.conf > /dev/null << 'EOF'
-      <VirtualHost *:80>
-          ServerName localhost
-          DocumentRoot /var/www/cupid-app
-          
-          # Use embedded mode instead of daemon mode for NumPy compatibility
-          WSGIScriptAlias / /var/www/cupid-app/server/wsgi.py
-          WSGIApplicationGroup %{GLOBAL}
-          WSGIScriptReloading Off
-          
-          <Directory /var/www/cupid-app/server>
-              <Files wsgi.py>
-                  Require all granted
-              </Files>
-          </Directory>
-          
-          Alias /static /var/www/cupid-app/staticfiles
-          <Directory /var/www/cupid-app/staticfiles>
-              Require all granted
-          </Directory>
-          
-          Alias /media /var/www/cupid-app/media
-          <Directory /var/www/cupid-app/media>
-              Require all granted
-          </Directory>
-          
-          ErrorLog \${APACHE_LOG_DIR}/cupid_error.log
-          CustomLog \${APACHE_LOG_DIR}/cupid_access.log combined
-      </VirtualHost>
-      "
+    # Configure WSGI application entry point for Apache
+    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && cat > server/wsgi.py" < deploy_scripts/wsgi_content.py
     
-    # Enable the site and restart Apache
+    # Configure Apache virtual host for HTTP (redirects to HTTPS)
+    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo tee /etc/apache2/sites-available/cupid-app.conf" < deploy_scripts/apache_http.conf
+    
+    # Configure Apache virtual host for HTTPS with SSL certificate
+    - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "sudo tee /etc/apache2/sites-available/cupid-app-le-ssl.conf" < deploy_scripts/apache_https.conf
+    
+    # Configure and start Apache web server with HTTPS support
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      sudo a2dissite 000-default.conf 2>/dev/null || echo 'Default site already disabled' &&
-      sudo a2dissite django-app.conf 2>/dev/null || echo 'Previous django site not found' &&
-      sudo a2ensite cupid-app.conf &&
-      sudo chown -R www-data:www-data /var/www/cupid-app &&
-      sudo chmod -R 755 /var/www/cupid-app &&
+      # Enable required Apache modules for Django and HTTPS
+      sudo a2enmod wsgi      # Python WSGI module for Django
+      sudo a2enmod ssl       # SSL/TLS encryption support
+      sudo a2enmod headers   # HTTP header manipulation
+      sudo a2enmod rewrite   # URL rewriting capabilities
+      
+      # Disable default Apache site and enable our application sites
+      sudo a2dissite 000-default.conf 2>/dev/null || echo 'Default site already disabled'
+      sudo a2ensite cupid-app.conf        # Enable HTTP site (redirects to HTTPS)
+      sudo a2ensite cupid-app-le-ssl.conf # Enable HTTPS site with SSL
+      
+      # Set proper file ownership and permissions for web server
+      sudo chown -R www-data:www-data /var/www/cupid-app
+      sudo chmod -R 755 /var/www/cupid-app
+      
+      # Test Apache configuration for syntax errors
+      sudo apache2ctl configtest
+      
+      # Restart Apache to apply new configuration
       sudo systemctl restart apache2
+      
+      # Check Apache service status to ensure it's running properly
+      sudo systemctl status apache2 --no-pager
       "
     
-    # Verify deployment
-    - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      echo 'Deployment verification:' &&
-      ls -la /var/www/cupid-app/ &&
-      echo 'Apache status:' &&
-      sudo systemctl status apache2 --no-pager -l | head -10 &&
-      echo 'Testing local connection:' &&
-      sleep 3 &&
-      curl -s -o /dev/null -w '%{http_code}' http://localhost/ || echo 'Connection test failed'
-      "
-    
-    - echo "Complete Django + Vue deployment finished!"
+    # Deployment completion messages
+    - echo "Complete Django + Vue deployment with HTTPS finished!"
+    - echo "Your application should be available at https://cupidcode.zapto.org"
+  
+  # Only run this job when changes are made to the 'master' branch
   only:
     - master
