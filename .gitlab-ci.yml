@@ -55,21 +55,26 @@ test:
 build:
   stage: build
   script:
-    - echo "Building Vue frontend..."
-    - cd Code/client
-    - npm install
-    - npm run build
-    - echo "Build completed"
-    - echo "Copying Vite build into Django static directory..."
-    - mkdir -p ../server/core/static/core/.vite
-    - cp dist/manifest.json ../server/core/static/core/.vite/ 2>/dev/null || echo "Warning: manifest.json not found in dist/"
-    - cp -r dist/assets ../server/core/static/core/ 2>/dev/null || echo "Warning: dist/assets not found"
-    - ls -la ../server/core/static/core/ || true
-    - ls -la ../server/core/static/core/
-    - echo "Preparing complete Django application..."
-    - cd ../server
-    - echo "Django files:"
-    - ls -la  
+    - |
+      echo "Building Vue frontend..."
+      cd Code/client
+      npm install
+      npm run build
+      echo "Build completed"
+
+      echo "Copying Vite build into Django static directory..."
+      mkdir -p ../server/core/static/core/.vite
+      cp dist/manifest.json ../server/core/static/core/.vite/ 2>/dev/null || echo "Warning: manifest.json not found in dist/"
+      cp -r dist/assets ../server/core/static/core/ 2>/dev/null || echo "Warning: dist/assets not found"
+      ls -la ../server/core/static/core/ || true
+
+      echo "Verifying Vue.js build output:"
+      ls -la ../server/core/static/core/
+
+      echo "Preparing complete Django application..."
+      cd ../server
+      echo "Django files:"
+      ls -la 
   artifacts:
     paths:
       - Code/server/  # Include entire Django server directory with Vue.js build
