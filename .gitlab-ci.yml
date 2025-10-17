@@ -63,6 +63,13 @@ build:
     # Build production-ready Vue.js application (outputs to Django static files)
     - npm run build
     - echo "Build completed"
+
+    # --- new: copy Vite build output into Django static location so manifest and assets are deployed ---
+    - echo "Copying Vite build into Django static directory..."
+    - mkdir -p ../server/core/static/core/.vite
+    - cp dist/manifest.json ../server/core/static/core/.vite/ 2>/dev/null || echo "Warning: manifest.json not found in dist/"
+    - cp -r dist/assets ../server/core/static/core/ 2>/dev/null || echo "Warning: dist/assets not found"
+    - ls -la ../server/core/static/core/ || true
     
     # Verify Vue.js build output was created in Django static directory
     - ls -la ../server/core/static/core/
