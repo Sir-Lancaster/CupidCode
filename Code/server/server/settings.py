@@ -29,6 +29,11 @@ SECRET_KEY = 'django-insecure-x_e(m+z0-supl3g7n5zi1es0zwecn#_ipb920xxec)%v6^ah5=
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [h for h in os.getenv('ALLOWED_HOSTS', '').split(',') if h]
+
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+
 VITE_APP_DIR = BASE_DIR / "src"
 
 
