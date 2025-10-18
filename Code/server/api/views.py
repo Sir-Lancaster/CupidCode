@@ -114,12 +114,56 @@ def sign_in(request):
         Response:
             Dater, Cupid, or Manager serialized
     """
-    data = request.data
-    data['location'] = helpers.get_location_string(request.META['REMOTE_ADDR'])
-    username = User.objects.get(email=data['email']).username
-    user = authenticate(request, username=username, password=data['password'])
-    if user is not None:
+    import logging
+
+    logger = logging.getLogger(__name__)
+
+    data = request.data or {}
+    # Safely get fields
+    email = data.get('email')
+    password = data.get('password')
+
+    if not email or not password:
+        return Response({'Reason': 'Missing email or password'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # try to capture location but do not fail login if location lookup errors
+    try:
+        data['location'] = helpers.get_location_string(request.META.get('REMOTE_ADDR', ''))
+    except Exception:
+        logger.exception("Failed to get location for sign_in")
+
+    try:
+        user_obj = User.objects.filter(email__iexact=email).first()
+    except Exception as exc:
+        logger.exception("Database error while looking up user by email")
+        return Response({'Reason': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    if not user_obj:
+        return Response({'Reason': 'User not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+    username = getattr(user_obj, 'username', None)
+    if not username:
+        logger.error("User record without username for email=%s", email)
+        return Response({'Reason': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    try:
+        user = authenticate(request, username=username, password=password)
+    except Exception:
+        logger.exception("Authentication backend raised an exception")
+        return Response({'Reason': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    if user is None:
+        # preserve previous behavior: if email exists but password wrong -> incorrect password
+        return Response({'Reason': 'Incorrect password'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # successful authentication -> attempt login
+    try:
         login(request, user)
+    except Exception:
+        logger.exception("Error during login()")
+        return Response({'Reason': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    try:
         if user.role == User.Role.MANAGER:
             return_data = helpers.user_expand(user, UserSerializer(user))
             return Response(return_data, status=status.HTTP_200_OK)
@@ -130,13 +174,9 @@ def sign_in(request):
                 return Response(return_data, status=status.HTTP_200_OK)
             else:
                 return Response({'Reason': 'Invalid User Type'}, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        if User.objects.filter(email=data['email']):
-            reason = 'Incorrect password'
-        else:
-            reason = 'User not found'
-        return Response({'Reason': reason}, status=status.HTTP_400_BAD_REQUEST)
-
+    except Exception:
+        logger.exception("Error preparing sign-in response for user id=%s", getattr(user, 'id', '<unknown>'))
+        return Response({'Reason': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, BasicAuthentication])

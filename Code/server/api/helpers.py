@@ -16,15 +16,43 @@ from rest_framework.response import Response
 from rest_framework import status
 
 # Miscellaneous Utils
-from geopy.geocoders import Nominatim
-import geoip2.database
-from yelpapi import YelpAPI
-from transformers import GPT2Tokenizer, GPT2LMHeadModel
+try:
+    from geopy.geocoders import Nominatim
+except Exception:
+    Nominatim = None
+
+try:
+    import geoip2.database
+except Exception:
+    geoip2 = None
+
+try:
+    from yelpapi import YelpAPI
+except Exception:
+    YelpAPI = None
+
+try:
+    from transformers import GPT2Tokenizer, GPT2LMHeadModel
+except Exception:
+    GPT2Tokenizer = GPT2LMHeadModel = None
+
 from operator import contains
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
-from twilio.rest import Client
-import speech_recognition as sr
+
+try:
+    from sendgrid import SendGridAPIClient
+    from sendgrid.helpers.mail import Mail
+except Exception:
+    SendGridAPIClient = Mail = None
+
+try:
+    from twilio.rest import Client
+except Exception:
+    Client = None
+
+try:
+    import speech_recognition as sr
+except Exception:
+    sr = None
 
 # Local
 from .models import User, Dater, Cupid, Date
@@ -354,35 +382,32 @@ def get_location_from_address(address):
 
 
 def get_location_from_ip_address(ip_address):
-    """
-    Retrieve latitude and longitude coordinates from an IP address.
-
-    Uses a GeoLite2 database lookup to determine the location for a given IP.
-    Returns a default coordinate string if the IP address is localhost, and
-    (None, None) if no match is found in the database.
-
-    Args:
-        ip_address (str): The IP address to look up.
-
-    Returns:
-        tuple[float | None, float | None] | str | None:
-            A tuple (latitude, longitude) for valid IPs,
-            a default coordinate string for localhost,
-            or None if lookup fails.
-    """
+    # ...existing docstring...
     if ip_address is None:
-        return None
-    if ip_address == "127.0.0.1" or ip_address == "localhost":
-        return "430909.36611535 4621007.2874155"
-    geoip_database_path = "api/geodata/GeoLite2-City_20240227/GeoLite2-City.mmdb"
-    with geoip2.database.Reader(geoip_database_path) as reader:
-        try:
-            response = reader.city(ip_address)
-            latitude = response.location.latitude
-            longitude = response.location.longitude
-            return latitude, longitude
-        except geoip2.errors.AddressNotFoundError:
-            return None, None
+        return None, None
+    if ip_address in ("127.0.0.1", "localhost"):
+        # keep format consistent: return tuple of floats for coordinates
+        return 430909.36611535, 4621007.2874155
+
+    # Use absolute path relative to this module
+    base = os.path.dirname(os.path.abspath(__file__))
+    geoip_database_path = os.path.join(base, "geodata", "GeoLite2-City_20240227", "GeoLite2-City.mmdb")
+    if geoip2 is None:
+        return None, None
+    if not os.path.exists(geoip_database_path):
+        return None, None
+
+    try:
+        with geoip2.database.Reader(geoip_database_path) as reader:
+            try:
+                response = reader.city(ip_address)
+                latitude = response.location.latitude
+                longitude = response.location.longitude
+                return latitude, longitude
+            except geoip2.errors.AddressNotFoundError:
+                return None, None
+    except Exception:
+        return None, None
 
 
 def locations_are_near(location1, location2, max_distance_miles):
@@ -466,43 +491,46 @@ def within_distance(lat1, lon1, lat2, lon2, max_distance_miles):
 
 
 def call_yelp_api(pk, search):
-    """
-    Query the Yelp API for nearby businesses based on a user's stored location.
-
-    Retrieves the Dater object for the given user ID, extracts its latitude and
-    longitude, and performs a Yelp search using the provided term. Returns up to
-    10 results from the Yelp API.
-
-    Args:
-        pk (int): The primary key (user ID) of the Dater making the request.
-        search (str): The search term to query in Yelp (e.g., "restaurants", "coffee").
-
-    Returns:
-        dict | None: A dictionary of Yelp search results if successful, or None
-        if an API error occurs.
-    """
+    # defensive: ensure YelpAPI library present and api key available
+    if YelpAPI is None:
+        return None
     dater = get_object_or_404(Dater, user_id=pk)
-    latitude, longitude = dater.location.split(" ")
+    if not dater.location:
+        return None
+    try:
+        latitude, longitude = dater.location.split(" ")
+    except Exception:
+        return None
     api_key = get_yelp_api_key()
-    with YelpAPI(api_key, timeout_s=5.0) as yelp_api:
-        try:
-            return yelp_api.search_query(term=search, latitude=latitude, longitude=longitude, limit=10)
-        except YelpAPI.YelpAPIError as e:
-            return None
+    if not api_key:
+        return None
+    try:
+        y = YelpAPI(api_key, timeout_s=5.0)
+        return y.search_query(term=search, latitude=latitude, longitude=longitude, limit=10)
+    except Exception:
+        return None
 
 
 def get_yelp_api_key():
     """
-    Retrieve the Yelp API key from the configuration file.
-
-    Reads the 'yelp_api_key.txt' file and extracts the Yelp API key from the first line.
-
-    Returns:
-        str: The Yelp API key as a string.
+    Prefer env var YELP_API_KEY. Fallback to absolute yelp_api_key.txt near this module.
+    Return None if not found or malformed.
     """
-    with open('yelp_api_key.txt', 'r') as file:
-        lines = file.readlines()
-        return lines[0].split(" ")[2].strip()
+    key = os.environ.get("YELP_API_KEY")
+    if key:
+        return key
+    base = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(base, "yelp_api_key.txt")
+    try:
+        with open(path, "r") as file:
+            lines = file.readlines()
+            if not lines:
+                return None
+            # best-effort: first line contains key at last token
+            parts = lines[0].strip().split()
+            return parts[-1] if parts else None
+    except Exception:
+        return None
 
 
 def get_twilio_account_sid():
@@ -620,24 +648,12 @@ def process_ai_response(dater, response):
 
 
 def create_new_gig(dater, response):
-    """
-    Create a new gig and its associated quest based on an AI-generated response.
-
-    Parses the AI response to extract requested items, queries nearby locations
-    via the Yelp API, creates a new Quest instance, and then associates it with
-    a new Gig. Handles validation and serialization errors gracefully.
-
-    Args:
-        dater (Dater): The Dater instance requesting the gig.
-        response (str): The AI-generated response containing gig details.
-
-    Returns:
-        Response: A DRF Response object indicating success or failure of gig creation.
-    """
     requested_items = 'NA'
     for line in response.split('\n'):
         if contains('Items requested:', line):
-            requested_items = line.split(':')[1].strip()
+            parts = line.split(':', 1)
+            if len(parts) > 1:
+                requested_items = parts[1].strip()
     if requested_items == 'NA':
         return Response(
             {
@@ -646,11 +662,19 @@ def create_new_gig(dater, response):
             },
             status=status.HTTP_200_OK,
         )
-    locations = call_yelp_api(dater.location, requested_items)
+    # call_yelp_api expects user id (pk), not a location string
+    locations = call_yelp_api(dater.user.id, requested_items)
+    if not locations or 'businesses' not in locations or len(locations.get('businesses', [])) == 0:
+        return Response(
+            {'error': 'gig creation failed. no yelp locations found', 'gig_created': False},
+            status=status.HTTP_200_OK,
+        )
+    first = locations['businesses'][0]
+    pickup_address = first.get('location', {}).get('address1') or first.get('name') or 'unknown'
     quest_data = {
         'budget': dater.budget,
         'items_requested': requested_items,
-        'pickup_location': locations[0]['address'],
+        'pickup_location': pickup_address,
     }
     serializer = QuestSerializer(data=quest_data)
     if serializer.is_valid():
@@ -660,7 +684,7 @@ def create_new_gig(dater, response):
             {'error': 'gig creation failed. could not serialize quest.'},
             status=status.HTTP_400_BAD_REQUEST,
         )
-    gig_data = {'dater': dater, 'quest': serializer.data}
+    gig_data = {'dater': dater.id if hasattr(dater, 'id') else dater, 'quest': serializer.data}
     serializer = GigSerializer(data=gig_data)
     if serializer.is_valid():
         serializer.save()
@@ -673,7 +697,6 @@ def create_new_gig(dater, response):
             {'error': 'gig creation failed. could not serialize.'},
             status=status.HTTP_400_BAD_REQUEST,
         )
-
 
 def send_text(account_sid, auth_token, message):
     """
