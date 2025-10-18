@@ -107,9 +107,6 @@ deploy:
     
     # Upload Django application files (including Vue.js build) to Azure VM
     - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/cupid-app/
-
-    # Upload built Vue assets directly to the staticfiles assets folder
-    - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/core/static/.vite/assets/* azureuser@$VM_PUBLIC_IP:/var/www/cupid-app/staticfiles/assets/ || true
     
     # Create production environment configuration file
 
@@ -156,31 +153,34 @@ deploy:
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
       cd /var/www/cupid-app
-      # Update system packages and install required dependencies
       sudo apt-get update
       sudo apt-get install -y python3-pip python3-venv libapache2-mod-wsgi-py3
-      
-      # Create Python virtual environment for Django application
-      python3 -m venv venv
-      source venv/bin/activate
-      
-      # Install Python dependencies from requirements.txt
-      pip install -r requirements.txt
-      
-      # Prepare static files directory
-      mkdir -p staticfiles
-      
-      # Run Django database migrations (create/update database schema)
+
+      # Create/activate venv and install requirements
+      python3 -m venv venv || true
+      source venv/bin/activate || true
+      pip install -r requirements.txt || true
+
+      # Ensure STATIC_ROOT and assets dirs exist
+      mkdir -p /var/www/cupid-app/staticfiles
+      mkdir -p /var/www/cupid-app/staticfiles/assets
+
+      # Run migrations and collectstatic
       python manage.py migrate --noinput
-      
-      # Collect all static files (CSS, JS, images) for web server serving
       python manage.py collectstatic --noinput
-      
-      # Copy Vue.js build assets to static files directory for serving
-      mkdir -p staticfiles/assets/
-      cp staticfiles/core/assets/* staticfiles/assets/ 2>/dev/null || echo 'No Vue assets to copy'
+
+      # Copy Vue (.vite) build assets into Django STATIC_ROOT if present
+      if [ -d core/static/.vite/assets ]; then
+        sudo cp -r core/static/.vite/assets/* /var/www/cupid-app/staticfiles/assets/ || true
+      else
+        sudo cp -r core/static/assets/* /var/www/cupid-app/staticfiles/assets/ 2>/dev/null || true
+      fi
+
+      # Fix ownership and permissions for web server
+      sudo chown -R www-data:www-data /var/www/cupid-app/staticfiles
+      sudo chmod -R 755 /var/www/cupid-app/staticfiles
       "
-    
+      
     # Configure WSGI application entry point for Apache
     - ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "cd /var/www/cupid-app && cat > server/wsgi.py" < deploy_scripts/wsgi_content.py
     
