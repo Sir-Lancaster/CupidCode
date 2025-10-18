@@ -490,7 +490,7 @@ def call_yelp_api(pk, search):
         except YelpAPI.YelpAPIError as e:
             return None
 
-'''
+
 def get_yelp_api_key():
     """
     Retrieve the Yelp API key from the configuration file.
@@ -593,7 +593,7 @@ def get_twilio_authenticated_sender_phone_number():
     with open('yelp_api_key.txt', 'r') as file:
         lines = file.readlines()
         return lines[5].split(" ")[1].strip()
-'''
+
 
 def process_ai_response(dater, response):
     """

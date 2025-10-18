@@ -116,6 +116,13 @@ deploy:
       cat > .env << ENVEOF
       DEBUG=False
       ALLOWED_HOSTS=cupidcode.zapto.org,www.cupidcode.zapto.org,localhost,127.0.0.1
+      DATABASE_URL=sqlite:///db.sqlite3
+      STATIC_ROOT=/var/www/cupid-app/staticfiles
+      STATIC_URL=/static/
+      SECURE_SSL_REDIRECT=True
+      SECURE_PROXY_SSL_HEADER=('HTTP_X_FORWARDED_PROTO', 'https')
+      SESSION_COOKIE_SECURE=True
+      CSRF_COOKIE_SECURE=True
       ENVEOF
             "
 
