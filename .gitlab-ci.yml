@@ -63,6 +63,12 @@ build:
     # Build production-ready Vue.js application (outputs to Django static files)
     - npm run build
     - echo "Build completed"
+    - |
+      if [ -d "../server/core/static/.vite/.vite" ]; then
+        echo "Flattening nested .vite"
+        mv ../server/core/static/.vite/.vite/* ../server/core/static/.vite/ || true
+        rmdir ../server/core/static/.vite/.vite || true
+      fi
     
     # Verify Vue.js build output was created in Django static directory
     - ls -la ../server/core/static/
