@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import router from '../router'
+import router from '../../router'
 
 const props = defineProps(['title'])
 const isDrawerOpen = ref(false)
@@ -43,49 +43,39 @@ const user_id = parseInt(window.location.hash.split('/')[3])
       </div>
       
       <nav class="drawer-nav">
-        <button @click="navigateTo('DaterHome', { id: user_id })" class="nav-item">
+        <button @click="navigateTo('CupidHome', { id: user_id })" class="nav-item">
           <span class="material-symbols-outlined">home</span>
           Home
         </button>
         
-        <button @click="navigateTo('AiChat', { id: user_id })" class="nav-item">
-          <span class="material-symbols-outlined">smart_toy</span>
-          AI Chat
+        <button @click="navigateTo('GigDetails', { id: user_id })" class="nav-item">
+          <span class="material-symbols-outlined">search</span>
+          Find Gigs
         </button>
         
-        <button @click="navigateTo('AiListen', { id: user_id })" class="nav-item">
-          <span class="material-symbols-outlined">hearing</span>
-          AI Listen
+        <button @click="navigateTo('GigComplete', { id: user_id })" class="nav-item">
+          <span class="material-symbols-outlined">assignment_turned_in</span>
+          Completed Gigs
         </button>
         
-        <button @click="navigateTo('CupidCash', { id: user_id })" class="nav-item">
-          <span class="material-symbols-outlined">payments</span>
-          Payment
-        </button>
-        
-        <button @click="navigateTo('DaterProfile', { id: user_id })" class="nav-item">
+        <button @click="navigateTo('CupidDetails', { id: user_id })" class="nav-item">
           <span class="material-symbols-outlined">person</span>
           Profile
         </button>
         
-        <button @click="navigateTo('DaterGigs', { id: user_id })" class="nav-item">
-          <span class="material-symbols-outlined">work</span>
-          Gigs
+        <button @click="navigateTo('CupidFeedback', { id: user_id })" class="nav-item">
+          <span class="material-symbols-outlined">notifications</span>
+          Notifications
         </button>
         
-        <button @click="navigateTo('CreateGig', { id: user_id })" class="nav-item">
-          <span class="material-symbols-outlined">add_circle</span>
-          Create Gig
+        <button @click="navigateTo('CupidBalance', { id: user_id })" class="nav-item">
+          <span class="material-symbols-outlined">account_balance_wallet</span>
+          Balance
         </button>
         
-        <button @click="navigateTo('Calendar', { id: user_id })" class="nav-item">
-          <span class="material-symbols-outlined">calendar_month</span>
-          Calendar
-        </button>
-        
-        <button @click="navigateTo('DaterFeedback', { id: user_id })" class="nav-item">
-          <span class="material-symbols-outlined">feedback</span>
-          Feedback
+        <button @click="navigateTo('CupidSettings', { id: user_id })" class="nav-item">
+          <span class="material-symbols-outlined">settings</span>
+          Settings
         </button>
         
         <div class="accessibility-section">
