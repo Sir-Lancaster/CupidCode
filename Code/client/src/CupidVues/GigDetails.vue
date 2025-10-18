@@ -62,7 +62,9 @@
     <!-- NavSuite removed as requested - someone else building banner/nav -->
     
     <main>
-        <h1>Active</h1>
+        <h1 class="page-title">Find Gig</h1>
+        
+        <h2>Active</h2>
         <hr/>
         <div class="gig-container">
             <div class="gig-tile active" v-for="(gig, index) in activeGigs" :key="gig.id">
@@ -75,7 +77,7 @@
         </div>
         <p v-if="activeGigs.length == 0" class="empty-message">You are not currently on any gigs.</p>
         
-        <h1>Available</h1>
+        <h2>Available</h2>
         <hr/>
         <div class="gig-container">
             <div class="gig-tile inactive" v-for="(gig, index) in gigs" :key="gig.id">
@@ -293,6 +295,21 @@
     }
 
     h1 {
+        color: var(--new-primary);
+        text-align: center;
+        margin: 20px auto 10px auto;
+        font-size: 1.8em;
+    }
+
+    .page-title {
+        color: var(--new-primary);
+        text-align: center;
+        margin: 20px auto 30px auto;
+        font-size: 2.2em;
+        font-weight: bold;
+    }
+
+    h2 {
         color: var(--new-primary);
         text-align: center;
         margin: 20px auto 10px auto;

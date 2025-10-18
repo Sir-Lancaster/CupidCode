@@ -9,7 +9,6 @@ import NavBar from '../components/NavBar.vue';
 const user_id  = parseInt(window.location.hash.split('/')[3])
 
 // Form data
-const date = ref('')
 const item = ref('')
 const budget = ref('')
 const sameAsPickup = ref(false)
@@ -28,6 +27,33 @@ const dropoffAddress = ref({
   zipCode: ''
 })
 
+// Computed properties to combine address fields into single strings for backend
+const pickupLocationString = computed(() => {
+  const addr = pickupAddress.value
+  const parts = [
+    addr.street,
+    addr.apt,
+    addr.city,
+    addr.state,
+    addr.zipCode
+  ].filter(part => part && part.trim() !== '')
+  
+  return parts.join(', ')
+})
+
+const dropoffLocationString = computed(() => {
+  const addr = dropoffAddress.value
+  const parts = [
+    addr.street,
+    addr.apt,
+    addr.city,
+    addr.state,
+    addr.zipCode
+  ].filter(part => part && part.trim() !== '')
+  
+  return parts.join(', ')
+})
+
 // Function to copy pickup address to dropoff when checkbox is checked
 function handleSameAsPickup() {
   if (sameAsPickup.value) {
@@ -44,6 +70,43 @@ function handleSameAsPickup() {
   }
 }
 
+// Form validation
+function validateForm() {
+  return item.value.trim() !== '' && 
+         budget.value.trim() !== '' && 
+         pickupLocationString.value.trim() !== '' && 
+         dropoffLocationString.value.trim() !== ''
+}
+
+// Submit function
+async function submitGig() {
+  if (!validateForm()) {
+    alert('Please fill in all required fields')
+    return
+  }
+  
+  const gigData = {
+    budget: parseFloat(budget.value),
+    items_requested: item.value,
+    pickup_location: pickupLocationString.value,
+    dropoff_location: dropoffLocationString.value
+  }
+  
+  try {
+    console.log('Submitting gig:', gigData)
+    const response = await makeRequest('/api/gig/create/', 'post', gigData)
+    
+    if (response) {
+      alert('Gig created successfully!')
+      // Navigate to DaterGigs page
+      router.push({ name: 'DaterGigs', params: { id: user_id } })
+    }
+  } catch (error) {
+    console.error('Error creating gig:', error)
+    alert('Failed to create gig. Please try again.')
+  }
+}
+
 </script>
 
 <template>
@@ -53,11 +116,6 @@ function handleSameAsPickup() {
     <div class="container">
         <h1>Create Gig</h1>
         <form class="gig-form">
-            <label class="form-field">
-                Date
-                <input type="date" v-model="date" required>
-            </label>
-
             <label class="form-field">
                 Item
                 <input type="text" v-model="item" required>
@@ -171,7 +229,7 @@ function handleSameAsPickup() {
                 <input type="number" v-model="budget" required>
             </label>
 
-            <button type="submit" class="submit-btn">Create Gig</button>
+            <button type="button" @click="submitGig" class="submit-btn">Create Gig</button>
         </form>
     </div>
 </template>
@@ -283,51 +341,7 @@ function handleSameAsPickup() {
     user-select: none;
   }
 
-  /* Specific styling for date input */
-  .form-field input[type="date"] {
-    padding: 10px;
-    border: 1px solid var(--new-primary);
-    border-radius: 4px;
-    font-size: 16px;
-    background-color: var(--new-background);
-    color: var(--new-primary);
-    cursor: pointer;
-    position: relative;
-    color-scheme: dark; /* Forces dark mode for the date picker */
-  }
-
-  /* Style the calendar icon */
-  .form-field input[type="date"]::-webkit-calendar-picker-indicator {
-    background-color: var(--new-primary);
-    border-radius: 3px;
-    padding: 2px;
-    cursor: pointer;
-    filter: invert(1);
-  }
-
-  /* Firefox date input styling */
-  .form-field input[type="date"]::-moz-focus-inner {
-    border: 0;
-  }
-
-  /* Date input hover and focus states */
-  .form-field input[type="date"]:hover {
-    border-color: var(--new-light-blue);
-  }
-
-  .form-field input[type="date"]:focus {
-    outline: 2px solid var(--new-primary);
-    border-color: var(--new-primary);
-    box-shadow: 0 0 0 2px rgba(9, 161, 41, 0.2);
-  }
-
   .form-field input:focus {
-    outline: 2px solid var(--new-primary);
-    border-color: var(--new-primary);
-  }
-
-  /* Ensure date input doesn't get the general input focus styles doubled */
-  .form-field input:not([type="date"]):focus {
     outline: 2px solid var(--new-primary);
     border-color: var(--new-primary);
   }
