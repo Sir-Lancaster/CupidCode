@@ -1061,13 +1061,12 @@ def get_gigs(request, pk, count):
             A list of gigs (JSON)
     """
     cupid = get_object_or_404(Cupid, user_id=pk)
-    helpers.update_user_location(cupid.user, request.META['REMOTE_ADDR'])
+    #helpers.update_user_location(cupid.user, request.META['REMOTE_ADDR'])
     gigs = Gig.objects.all()
     near_gigs = []
     for gig in gigs:
         quest = gig.quest
-        if gig.status == Gig.Status.UNCLAIMED and (helpers.locations_are_near(
-            quest.pickup_location, cupid.location, cupid.gig_range) or count == 0):
+        if gig.status == Gig.Status.UNCLAIMED:
             near_gigs.append(gig)
     if count != 0:
         near_gigs = near_gigs[:count]
