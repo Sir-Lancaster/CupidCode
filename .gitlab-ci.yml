@@ -107,6 +107,9 @@ deploy:
     
     # Upload Django application files (including Vue.js build) to Azure VM
     - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/* azureuser@$VM_PUBLIC_IP:/var/www/cupid-app/
+
+    # Upload built Vue assets directly to the staticfiles assets folder
+    - scp -i $PEM_KEY_PATH -o StrictHostKeyChecking=no -r Code/server/core/static/.vite/assets/* azureuser@$VM_PUBLIC_IP:/var/www/cupid-app/staticfiles/assets/ || true
     
     # Create production environment configuration file
 
