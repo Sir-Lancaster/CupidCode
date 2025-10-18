@@ -3,7 +3,8 @@
     import { makeRequest } from '../utils/make_request'
     import {ref, onMounted} from 'vue'
 
-    import NavSuite from '../components/NavSuite.vue';
+    import CupidBanner from './components/CupidBanner.vue';
+    import CupidNavBar from './components/CupidNavBar.vue';
     import GigData from './components/GigData.vue'
 
     const gigCount = 0
@@ -59,7 +60,8 @@
 </script>
 
 <template>
-    <!-- NavSuite removed as requested - someone else building banner/nav -->
+    <CupidBanner />
+    <CupidNavBar currentPage="GigDetails" />
     
     <main>
         <h1 class="page-title">Find Gig</h1>
@@ -101,14 +103,27 @@
         --new-accent: #FB3640;      /* Red */
         --new-light-blue: #00CCFF;  /* Light blue */
         
-        position: absolute;
-        top: 42px;
-        left: 0px;
-        right: 0px;
         padding: 20px;
         background-color: var(--new-background);
         color: var(--new-primary);
         min-height: 100vh;
+        
+        /* Spacing for Banner and NavBar */
+        margin-top: 60px; /* Space for banner (60px) + gap */
+    }
+
+    /* Mobile: Add bottom margin for bottom navbar */
+    @media (max-width: 768px) {
+        main {
+            margin-bottom: 90px; /* Space for bottom navbar */
+        }
+    }
+
+    /* Desktop: Add top margin for navbar below banner */
+    @media (min-width: 769px) {
+        main {
+            margin-top: 140px; /* Space for banner + navbar + gaps */
+        }
     }
 
     /* Responsive flexbox container for gig tiles */

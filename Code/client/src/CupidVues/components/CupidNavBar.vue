@@ -16,7 +16,6 @@ const navItems = [
   { name: 'Home', route: 'CupidHome', icon: 'home' },
   { name: 'Find Gigs', route: 'GigDetails', icon: 'search' },
   { name: 'Completed Gigs', route: 'GigComplete', icon: 'assignment_turned_in' },
-  { name: 'Feedback', route: 'CupidFeedback', icon: 'thumbs_up_down' },
   { name: 'Profile', route: 'CupidDetails', icon: 'person' },
   { name: 'Notifications', route: 'CupidFeedback', icon: 'notifications' }
 ]
@@ -30,6 +29,7 @@ const navItems = [
       @click="navigateTo(item.route, { id: user_id })"
       class="nav-button"
       :class="{ active: currentPage === item.route }"
+      :disabled="currentPage === item.route"
     >
       <span class="nav-icon">
         <span class="material-symbols-outlined">{{ item.icon }}</span>
@@ -95,8 +95,18 @@ const navItems = [
   color: #00CCFF !important; /* Light blue for active */
 }
 
-.nav-button:hover {
+.nav-button:hover:not(:disabled) {
   transform: translateY(-2px);
+}
+
+.nav-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+  color: #00CCFF !important; /* Keep blue color for disabled/active state */
+}
+
+.nav-button:disabled:hover {
+  transform: none; /* No hover effect when disabled */
 }
 
 .nav-icon {
