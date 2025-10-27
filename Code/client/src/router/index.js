@@ -1,4 +1,4 @@
-import {createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router'
 // General
 import Login from '../components/Login.vue'
 import Welcome from '../components/Welcome.vue'
@@ -140,8 +140,72 @@ const routes = [
 ]
 
 const router = createRouter({
-    history: createWebHashHistory(),
-    routes
+  history: createWebHashHistory(),
+  routes
 })
+
+// More lenient authentication guards
+router.beforeEach((to, from, next) => {
+  // Skip guards for login/public pages or non-protected routes
+  if (to.name === 'Login' || to.name === 'Register' || !to.params.id) {
+    next()
+    return
+  }
+  
+  // Extract user info from route
+  const routeUserId = to.params.id
+  const routePath = to.path
+  
+  // Determine route type (dater, cupid, manager)
+  let routeType = null
+  if (routePath.includes('/dater/')) routeType = 'dater'
+  else if (routePath.includes('/cupid/')) routeType = 'cupid'
+  else if (routePath.includes('/manager/')) routeType = 'manager'
+  
+  // If no route type detected, allow navigation (might be a public route)
+  if (!routeType) {
+    next()
+    return
+  }
+  
+  // Try to get stored user info
+  const storedUserId = localStorage.getItem('user_id')
+  const storedUserType = localStorage.getItem('user_type')
+  
+  // If no stored user info, try to extract from URL and store it
+  if (!storedUserId || !storedUserType) {
+    // Auto-set user info based on successful route access
+    // This helps with existing sessions where localStorage wasn't set
+    localStorage.setItem('user_id', routeUserId)
+    localStorage.setItem('user_type', routeType)
+    next()
+    return
+  }
+  
+  // If we have stored info, do basic validation
+  if (storedUserType !== routeType) {
+    console.warn(`Role mismatch: stored ${storedUserType} trying to access ${routeType} page`)
+    // Redirect to their correct home page
+    redirectToCorrectHome(storedUserType, storedUserId)
+    return
+  }
+  
+  // Allow navigation
+  next()
+})
+
+// Helper function to redirect to correct home
+function redirectToCorrectHome(userType, userId) {
+  const homeRoutes = {
+    'dater': { name: 'DaterHome', params: { id: userId } },
+    'cupid': { name: 'CupidHome', params: { id: userId } },
+    'manager': { name: 'ManagerHome', params: { id: userId } }
+  }
+  
+  const correctRoute = homeRoutes[userType]
+  if (correctRoute) {
+    router.push(correctRoute)
+  }
+}
 
 export default router

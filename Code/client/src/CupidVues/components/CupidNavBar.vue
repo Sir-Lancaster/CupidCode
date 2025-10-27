@@ -1,44 +1,55 @@
 <script setup>
-import { computed } from 'vue'
+import { defineProps } from 'vue'
 import router from '../../router'
 
 const props = defineProps(['currentPage'])
 
-// Get user_id from URL for navigation
-const user_id = parseInt(window.location.hash.split('/')[3])
-
-function navigateTo(routeName, params = {}) {
-  router.push({ name: routeName, params })
+// Get user_id from current route - this is the key fix
+const getCurrentUserId = () => {
+    return router.currentRoute.value.params.id
 }
 
-// Navigation items with their routes and icons
+function navigateTo(routeName, params = {}) {
+    if (props.currentPage === routeName) return; // Skip if same page
+    
+    // Get user_id from current route
+    const currentUserId = getCurrentUserId()
+    
+    // Use the current user ID 
+    const navigationParams = {
+        id: currentUserId,
+        ...params
+    }
+    
+    router.push({ 
+        name: routeName, 
+        params: navigationParams 
+    })
+}
+
+// Navigation items array
 const navItems = [
-  { name: 'Home', route: 'CupidHome', icon: 'home' },
-  { name: 'Find Gigs', route: 'GigDetails', icon: 'search' },
-  { name: 'Completed Gigs', route: 'GigComplete', icon: 'assignment_turned_in' },
-  { name: 'Profile', route: 'CupidDetails', icon: 'person' },
-  { name: 'Notifications', route: 'CupidFeedback', icon: 'notifications' }
+    { name: 'Home', route: 'CupidHome', icon: 'home' },
+    { name: 'Find Gigs', route: 'GigDetails', icon: 'search' },
+    { name: 'Completed Gigs', route: 'GigComplete', icon: 'assignment_turned_in' },
+    { name: 'Profile', route: 'CupidDetails', icon: 'person' },
+    { name: 'Notifications', route: 'CupidFeedback', icon: 'notifications' }
 ]
 </script>
 
 <template>
-  <nav class="navbar">
-    <button 
-      v-for="item in navItems" 
-      :key="item.name"
-      @click="navigateTo(item.route, { id: user_id })"
-      class="nav-button"
-      :class="{ active: currentPage === item.route }"
-      :disabled="currentPage === item.route"
-    >
-      <span class="nav-icon">
-        <span class="material-symbols-outlined">{{ item.icon }}</span>
-        <!-- Fallback if Material Icons don't load -->
-        <span class="fallback-icon" v-if="false">{{ item.name.charAt(0) }}</span>
-      </span>
-      <span class="nav-text">{{ item.name }}</span>
-    </button>
-  </nav>
+    <nav class="navbar">
+        <button 
+            v-for="item in navItems" 
+            :key="item.route"
+            @click="navigateTo(item.route)"
+            :disabled="currentPage === item.route"
+            :class="['nav-button', { active: currentPage === item.route }]"
+        >
+            <span class="material-symbols-outlined">{{ item.icon }}</span>
+            <span class="nav-text">{{ item.name }}</span>
+        </button>
+    </nav>
 </template>
 
 <style scoped>

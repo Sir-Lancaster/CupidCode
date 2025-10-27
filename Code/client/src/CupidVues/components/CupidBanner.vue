@@ -13,9 +13,14 @@ function closeDrawer() {
   isDrawerOpen.value = false
 }
 
-function navigateTo(routeName, params = {}) {
-  router.push({ name: routeName, params })
-  closeDrawer()
+function navigateTo(routeName) {
+    // Get user_id from current route instead of hash extraction
+    const currentUserId = router.currentRoute.value.params.id
+    
+    router.push({ 
+        name: routeName, 
+        params: { id: currentUserId }
+    })
 }
 
 // Get user_id from URL for navigation
