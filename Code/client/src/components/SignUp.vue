@@ -138,14 +138,27 @@ function previewFile() {
                     </label>
                 </div>
 
-                <label class="form_input" for="fname">
-                    First Name *
-                    <input type="text" id="fname" placeholder="First Name" v-model="fname"/>
-                </label>
-                <label class="form_input" for="lname">
-                    Last Name *
-                    <input type="text" id="lname" placeholder="Last Name" v-model="lname"/>
-                </label>
+                <div class="name-picture-section">
+                    <div class="name-fields">
+                        <label class="form_input" for="fname">
+                            First Name *
+                            <input type="text" id="fname" placeholder="First Name" v-model="fname"/>
+                        </label>
+                        <label class="form_input" for="lname">
+                            Last Name *
+                            <input type="text" id="lname" placeholder="Last Name" v-model="lname"/>
+                        </label>
+                    </div>
+                    <div class="profile-picture-section">
+                        <img name="pfp" src="" height="150" width="150" alt="Image preview" class="pfp-preview" style="margin-top: 10px;">
+
+                        <label class="form_input side_by_side" for="image">
+                            Profile Picture
+                            <input type="file" id="image" name="image" @change="previewFile"/>
+                        </label>
+                    </div>
+                </div>
+
                 <label class="form_input" for="username">
                     Username *
                     <input type="text" id="username" placeholder="username01" v-model="username"/>
@@ -165,11 +178,6 @@ function previewFile() {
                 <label class="form_input" for="address">
                     Address *
                     <input type="text" id="address" placeholder="1300 N 400 W Example Lane" v-model="addr" required/>
-                </label>
-                <label class="form_input" for="image">
-                    Profile Picture
-                    <input type="file" id="image" name="image" @change="previewFile"/>
-                    <img name="pfp" src="" height="100" width="100" alt="Image preview" style="margin-top: 10px;">
                 </label>
                 <label class="form_input" for="desc">
                     Physical Description
@@ -258,6 +266,13 @@ main {
     border-radius: 10px;
 }
 
+.side_by_side {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: none;
+}
+
 h1 {
     text-align: center;
     color: var(--new-primary);
@@ -290,6 +305,28 @@ h3 {
 .radio_detail input[type="radio"] {
     margin: 0;
     cursor: pointer;
+}
+
+.name-picture-section {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.name-fields {
+    flex: 1;
+}
+
+.profile-picture-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pfp-preview {
+    border: 3px solid var(--new-primary);
+    border-radius: 8px;
+    object-fit: cover;
 }
 
 .form_input {
