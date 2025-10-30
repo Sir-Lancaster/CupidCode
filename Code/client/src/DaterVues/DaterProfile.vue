@@ -3,16 +3,19 @@
     import router from '../router/index';
     import { makeRequest } from '../utils/make_request';
 
-    import NavSuite from '../components/NavSuite.vue';
     import PinkButton from '../components/PinkButton.vue';
+    import Banner from '../components/Banner.vue';
+    import NavBar from '../components/NavBar.vue';
 
     const email = ref('')
-    const phone = ref()
+    const phone = ref('')
     const addr = ref('')
     const fname = ref('')
     const lname = ref('')
     const username = ref('')
     const desc = ref('')
+    const showError = ref(false)
+    const errorMsg = ref('')
     let image = null 
     const str = ref('')
     const weak = ref('')
@@ -48,60 +51,71 @@
     }
 
     async function getData() {
-        // dater results
-        const results = await makeRequest(`api/user/${user_id}`)
-        degree.value = results.ai_degree
-        addr.value = results.location
-        desc.value = results.description
-        str.value = results.dating_strengths
-        weak.value = results.dating_weaknesses
-        ntype.value = results.nerd_type
-        interests.value = results.interests
-        goals.value = results.relationship_goals
-        past.value = results.past
+        try {
+            const results = await makeRequest(`api/user/${user_id}`)
+            degree.value = results.ai_degree
+            addr.value = results.location
+            desc.value = results.description
+            str.value = results.dating_strengths
+            weak.value = results.dating_weaknesses
+            ntype.value = results.nerd_type
+            interests.value = results.interests
+            goals.value = results.relationship_goals
+            past.value = results.past
 
-        // user results
-        email.value = results.user['email']
-        fname.value = results.user['first_name']
-        lname.value = results.user['last_name']
-        phone.value = results.user['phone_number']
-        username.value = results.user['username']
+            email.value = results.user['email']
+            fname.value = results.user['first_name']
+            lname.value = results.user['last_name']
+            phone.value = results.user['phone_number']
+            username.value = results.user['username']
+        } catch (error) {
+            showError.value = true
+            errorMsg.value = 'Failed to load profile data'
+        }
     }
 
     async function update() {
-        // Validate data
-        const checkData = [email, phone, addr, desc]
-
-        let check = 0;
-        for (let i = 0; i < checkData.length; i++) {
-            if (checkData[i] !== '') check++;
-            else {
-                const error = document.querySelector(`input[name=${checkData[i]}]`);
-                error.class = error.class + 'error';
+        try {
+            const results = await makeRequest(`/api/dater/profile/`, 'post', {
+                username: username.value,
+                first_name: fname.value,
+                last_name: lname.value,
+                email: email.value,
+                phone_number: phone.value,
+                location: addr.value,
+                description: desc.value,
+                //profile_picture: image,
+                dating_strengths: str.value,
+                dating_weaknesses: weak.value,
+                nerd_type: ntype.value,
+                interests: interests.value,
+                relationship_goals: goals.value,
+                past: past.value,
+                ai_degree: degree.value,
+            })
+            
+            if (results.Reason) {
+                showError.value = true
+                errorMsg.value = results.Reason
+                return
             }
+            
+            showError.value = false
+            router.push({name: 'DaterProfile', params: {id: user_id}});
+        } catch (error) {
+            showError.value = true
+            errorMsg.value = 'Failed to update profile'
         }
-        const results = await makeRequest(`/api/dater/profile/`, 'post', {
-            username: username.value,
-            first_name: fname.value,
-            last_name: lname.value,
-            email: email.value,
-            phone_number: phone.value,
-            location: addr.value,
-            description: desc.value,
-            //profile_picture: image,
-            dating_strengths: str.value,
-            dating_weaknesses: weak.value,
-            nerd_type: ntype.value,
-            interests: interests.value,
-            relationship_goals: goals.value,
-            past: past.value,
-        })
-        router.push({name: 'DaterProfile', params: {id: user_id}});
     }
     
     async function updatePassword() {
-        if (newPassword.value === newPassword2.value) console.log("Still not a feature")
-        console.log("Not a feature currently")
+        if (newPassword.value !== newPassword2.value) {
+            showError.value = true
+            errorMsg.value = 'Passwords do not match'
+            return
+        }
+        // TODO: Implement password update
+        console.log("Password update not yet implemented")
     }
 
     onMounted(getData)
@@ -109,198 +123,273 @@
 </script>
 
 <template>
-    <NavSuite title='Profile' profile='DaterProfile'>
-        <router-link class="link" :to="{ name: 'DaterHome', params: {id: user_id} }"> Home </router-link>
-        <router-link class="link" :to="{ name: 'Calendar', params: {id: user_id} }"> Calendar </router-link>
-        <router-link class="link" :to="{ name: 'AiChat', params: {id: user_id} }"> AI Chat </router-link>
-        <router-link class="link" :to="{ name: 'AiListen', params: {id: user_id} }"> AI Listen </router-link>
-        <router-link class="link" :to="{ name: 'DaterGigs', params: {id: user_id}}"> Gigs </router-link>
-        <router-link class="link" :to="{ name: 'CupidCash', params: {id: user_id} }"> Balance</router-link>
-        <router-link class="link" :to="{ name: 'DaterFeedback', params: {id: user_id}}"> Feedback </router-link>
-    </NavSuite>
+    <Banner />
+    <NavBar currentPage="Home" />
+    <main>
+        <span v-if="showError" class="error">{{ errorMsg }}</span>
 
-    <form class="container" @submit.prevent="update">
-        <h2 class="top">Personal Information</h2>      
-        <div class="personal">
-            <label class="update-content" for="fname">
-                First Name
-                <input type="text" id="fname" v-model="fname"/>
-            </label>
-            <label class="update-content" for="lname">
-                Last Name
-                <input type="text" id="lname" v-model="lname"/>
-            </label>
-            <label class="update-content" for="phone">
-                Phone Number
-                <input type="number" id="phone" v-model="phone"/>
-            </label>
-            <label class="update-content" for="address">
-                Address
-                <input type="text" id="address" v-model="addr"/>
-            </label>
-            <label class="update-content" for="degree">
-                AI Degree
-                <select id="degree" v-model="degree" class="update-select">
-                    <option value="I don't want any help">I don't want any help</option>
-                    <option value="I would like a little help">I would like a little help</option>
-                    <option value="I need a good amount of help">I need a good amount of help</option>
-                    <option value="I need all the help">I need all the help</option>
-                </select>
-            </label>
+        <!-- Box 1: Personal Information -->
+        <div class="form-box">
+            <h2>Personal Information</h2>      
+            <div class="form-grid">
+                <label class="form_input" for="fname">
+                    First Name
+                    <input type="text" id="fname" v-model="fname"/>
+                </label>
+                <label class="form_input" for="lname">
+                    Last Name
+                    <input type="text" id="lname" v-model="lname"/>
+                </label>
+                <label class="form_input" for="phone">
+                    Phone Number
+                    <input type="tel" id="phone" v-model="phone"/>
+                </label>
+                <label class="form_input" for="address">
+                    Address
+                    <input type="text" id="address" v-model="addr"/>
+                </label>
+                <label class="form_input full-width" for="degree">
+                    AI Assistance Level
+                    <select id="degree" v-model="degree">
+                        <option value="I don't want any help">I don't want any help</option>
+                        <option value="I would like a little help">I would like a little help</option>
+                        <option value="I need a good amount of help">I need a good amount of help</option>
+                        <option value="I need all the help">I need all the help</option>
+                    </select>
+                </label>
+            </div>
         </div>
-        <h2>User Information</h2>
-        <div class="userinfo">
-            <label class="update-content" for="username">
-                Username
-                <input type="text" id="username" v-model="username"/>
-            </label>
-            <label class="update-content" for="email">
-                Email
-                <input type="email" id="email" v-model="email"/>
-            </label>
+
+        <!-- Box 2: User Information with Profile Picture -->
+        <div class="form-box">
+            <h2>User Information</h2>
+            <div class="userinfo-container">
+                <div class="userinfo-fields">
+                    <label class="form_input" for="username">
+                        Username
+                        <input type="text" id="username" v-model="username"/>
+                    </label>
+                    <label class="form_input" for="email">
+                        Email
+                        <input type="email" id="email" v-model="email"/>
+                    </label>
+                </div>
+                <div class="profile-picture-section">
+                    <img name="pfp" src="" height="150" width="150" alt="Image preview" class="pfp-preview">
+                    <label class="form_input side_by_side" for="image">
+                        Profile Picture
+                        <input type="file" id="image" name="image" @change="previewFile"/>
+                    </label>
+                </div>
+            </div>
         </div>
-        <h2> Details about you! </h2>
-        <div class="details">
-            <label class="update-text" for="desc">
-                Physical Description
-                <textarea id="desc" v-model="desc"></textarea>
-            </label>
-            <label class="update-content" for="nerd_type">
-                Nerd Type
-                <input type="text" id="nerd_type" v-model="ntype"/>
-            </label>
-            <label class="update-text" for="goals">
-                Relationship Goals
-                <textarea id="goals" v-model="goals"></textarea>
-            </label>
-            <label class="update-text" for="interests">
-                Interests
-                <textarea id="interests" v-model="interests"></textarea>
-            </label>
-            <label class="update-text" for="past">
-                Past Dating History
-                <textarea id="past" v-model="past"></textarea>
-            </label>
-            <label class="update-text" for="strengths">
-                Dating Strengths
-                <textarea id="strengths" v-model="str"></textarea>
-            </label>
-            <label class="update-text" for="weaknesses">
-                Dating Weaknesses
-                <textarea id="weaknesses" v-model="weak"></textarea>
-            </label>
-        </div>
-        <label class="update-content" for="image">
-            Profile Picture
-            <input type="file" id="image" name="image" @change="previewFile"/>
-            <img name="pfp" src="" height="200" alt="Image preview...">
-        </label>
-        <PinkButton> Update/Save changes </PinkButton>
-    </form>
-    <form class="container" @submit.prevent="updatePassword">
-        <h2> Update Password </h2>
-        <!-- Make it so they have to update the password w/ old, new, repeated new. -->
-        <label class="update-content" for="old-password">
-            Old Password
-            <input type="password" id="old-password" v-model="oldPassword"/>
-        </label>
-        <label class="update-content" for="new-password">
-            New Password
-            <input type="password" id="new-password" v-model="newPassword">
-        </label>
-        <label class="update-content" for="new-password-2">
-            Repeat New password
-            <input type="password" id="new-password-2" v-model="newPassword2"/>
-        </label>
-        <PinkButton> Update Password </PinkButton>
-    </form>
+
+        <!-- Box 3: Details About You -->
+        <form class="form-box" @submit.prevent="update">
+            <h2>Details About You</h2>
+            <div class="form-grid">
+                <label class="form_input full-width" for="desc">
+                    Physical Description
+                    <textarea id="desc" v-model="desc" rows="3"></textarea>
+                </label>
+                <label class="form_input full-width" for="nerd_type">
+                    Nerd Type
+                    <input type="text" id="nerd_type" v-model="ntype" placeholder="e.g., Gamer, Book Nerd"/>
+                </label>
+                <label class="form_input full-width" for="interests">
+                    Interests
+                    <textarea id="interests" v-model="interests" rows="3"></textarea>
+                </label>
+                <label class="form_input full-width" for="goals">
+                    Relationship Goals
+                    <textarea id="goals" v-model="goals" rows="3"></textarea>
+                </label>
+                <label class="form_input full-width" for="past">
+                    Past Dating History
+                    <textarea id="past" v-model="past" rows="3"></textarea>
+                </label>
+                <label class="form_input full-width" for="strengths">
+                    Dating Strengths
+                    <textarea id="strengths" v-model="str" rows="3"></textarea>
+                </label>
+                <label class="form_input full-width" for="weaknesses">
+                    Dating Weaknesses
+                    <textarea id="weaknesses" v-model="weak" rows="3"></textarea>
+                </label>
+            </div>
+            <PinkButton>Update Profile</PinkButton>
+        </form>
+
+        <!-- Box 4: Update Password -->
+        <form class="form-box" @submit.prevent="updatePassword">
+            <h2>Update Password</h2>
+            <div class="form-grid">
+                <label class="form_input full-width" for="old-password">
+                    Old Password
+                    <input type="password" id="old-password" v-model="oldPassword"/>
+                </label>
+                <label class="form_input full-width" for="new-password">
+                    New Password
+                    <input type="password" id="new-password" v-model="newPassword">
+                </label>
+                <label class="form_input full-width" for="new-password-2">
+                    Repeat New Password
+                    <input type="password" id="new-password-2" v-model="newPassword2"/>
+                </label>
+            </div>
+            <PinkButton>Update Password</PinkButton>
+        </form>
+    </main>
 </template>
 
 <style scoped>
+main {
+    --new-primary: #09A129;
+    --new-secondary: #1F487E;
+    --new-background: #000000;
+    --new-accent: #FB3640;
+    --new-light-blue: #00CCFF;
+    
+    padding: 40px;
+    background-color: var(--new-background);
+    color: var(--new-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    margin-top: 60px;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    main {
+        margin-bottom: 95px;
+    }
+}
+
+@media (min-width: 769px) {
+    main {
+        margin-top: 140px;
+    }
+}
+
+.error {
+    display: block;
+    text-align: center;
+    color: var(--new-accent);
+    background-color: rgba(251, 54, 64, 0.1);
+    margin: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    width: 100%;
+    max-width: 600px;
+}
+
+.form-box {
+    display: flex;
+    flex-direction: column;
+    background-color: black;
+    border: 3px solid var(--new-primary);
+    width: 100%;
+    max-width: 600px;
+    padding: 20px;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
 
 h2 {
-    margin: 5px;
-    color: var(--secondary-blue);
+    text-align: center;
+    color: var(--new-primary);
+    margin: 0 0 20px 0;
 }
 
-.top {
-    margin-top: 50px;
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
 }
 
-.container {
-    color: var(--primary-blue);
-    text-decoration: bold;
-    margin-bottom: 10px;
+@media (max-width: 600px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
-.personal {
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.form_input {
     display: flex;
     flex-direction: column;
-}
-
-.details {
-    display: flex;
-    flex-direction: column;
-}
-
-.update-content {
-    display: flex;
-    flex-direction: column;
-    padding: 8px;
-    margin: 10px;
     font-weight: bold;
+    padding: 8px;
 }
 
-input {
+.side_by_side {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: none;
+}
+
+input, textarea, select {
     border: 3px rgba(128, 128, 128, 0.5) solid;
     border-radius: 4px;
-    width: auto;
+    width: 100%;
     padding: 8px;
-    margin: 10px;
+    margin-top: 5px;
+    background-color: var(--new-background);
+    color: white;
+    box-sizing: border-box;
 }
 
 input[type="file"] {
     border: none;
-}
-
-.update-text {
-    display: flex;
-    justify-content: center;
-    flex-flow: column wrap;
-    padding: 8px;
-    margin: 10px;
-    font-weight: bold;
+    color: var(--new-primary);
 }
 
 textarea {
-    padding: 16px;
-    margin: 10px;
-    width: auto;
-    height: 100px;
-    border: 3px rgba(128, 128, 128, 0.5) solid;
-    border-radius: 16px;
+    resize: vertical;
+    font-family: inherit;
 }
 
-.update-select {
-    padding: 8px;
-    border: 3px rgba(128, 128, 128, 0.5) solid;
-    border-radius: 8px;
-    margin: 10px;
+select {
+    cursor: pointer;
 }
 
-.button {
-    width: auto;
-    background-color: var(--primary-red);
-    border-radius: 10px;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    box-shadow: 5px 5px 2px rgba(128, 128, 128, 0.5);
-    text-decoration: solid;
-    padding: 16px;
-    margin: 10px;
+.userinfo-container {
     display: flex;
-    justify-self: center;
-    align-self: center;
+    gap: 20px;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 600px) {
+    .userinfo-container {
+        flex-direction: column;
+    }
+}
+
+.userinfo-fields {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-picture-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.pfp-preview {
+    border: 3px solid var(--new-primary);
+    border-radius: 8px;
+    object-fit: cover;
+    background-color: rgba(9, 161, 41, 0.1);
 }
 </style>

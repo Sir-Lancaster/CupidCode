@@ -2,11 +2,12 @@
     import { makeRequest } from '../utils/make_request'
     import {ref, onMounted} from 'vue'
 
-    import NavSuite from '../components/NavSuite.vue';
     import GigData from './components/GigData.vue'
     import Heart from '../components/Heart.vue'
     import Popup from '../components/Popup.vue'
     import PinkButton from '../components/PinkButton.vue'
+    import Banner from '../components/Banner.vue';
+    import NavBar from '../components/NavBar.vue';
 
     // Gig lists
     const claimedGigs = ref([])
@@ -86,20 +87,13 @@
 </script>
 
 <template>
-    <NavSuite title='Gigs' profile='DaterProfile'>
-        <router-link class="link" :to="{ name: 'DaterHome', params: {id: user_id} }"> Home </router-link>
-        <router-link class="link" :to="{ name: 'DaterProfile', params: {id: user_id} }"> Profile </router-link>
-        <router-link class="link" :to="{ name: 'Calendar', params: {id: user_id} }"> Calendar </router-link>
-        <router-link class="link" :to="{ name: 'AiChat', params: {id: user_id} }"> AI Chat </router-link>
-        <router-link class="link" :to="{ name: 'AiListen', params: {id: user_id} }"> AI Listen </router-link>
-        <router-link class="link" :to="{ name: 'CupidCash', params: {id: user_id} }"> Balance</router-link>
-        <router-link class="link" :to="{ name: 'DaterFeedback', params: {id: user_id}}"> Feedback </router-link>
-    </NavSuite>
+    <Banner />
+    <NavBar currentPage="Home" />
 
     <main>
         <h1>Claimed</h1>
         <hr/>
-        <div class="gig claimed" v-for="(gig, index) in claimedGigs">
+        <div class="gig-tile" v-for="(gig, index) in claimedGigs">
             <GigData :gig="gig"/>
             <div class="space-evenly">
                 <PinkButton @click-forward="cancel(gig.id)">Cancel</PinkButton>
@@ -108,7 +102,7 @@
         <p v-if="claimedGigs.length == 0">You have no active gigs.</p>
         <h1>Unclaimed</h1>
         <hr/>
-        <div class="gig unclaimed" v-for="(gig, index) in unclaimedGigs">
+        <div class="gig-tile" v-for="(gig, index) in unclaimedGigs">
             <GigData :gig="gig"/>
             <div class="space-evenly">
                 <PinkButton @click-forward="cancel(gig.id)">Cancel</PinkButton>
@@ -117,7 +111,7 @@
         <p v-if="unclaimedGigs.length == 0">You do not have any pending gigs.</p>
         <h1>Complete</h1>
         <hr/>
-        <div class="gig complete" v-for="(gig, index) in completeGigs">
+        <div class="gig-tile" v-for="(gig, index) in completeGigs">
             <GigData :gig="gig"/>
             <div class="space-evenly">
             <PinkButton @click-forward="toggleActiveGig(gig)">Rate Cupid</PinkButton>
@@ -142,18 +136,82 @@
     </main>
 </template>
 
+
+
+
+
+
+
 <style scoped>
-    .gig {
+    /*main styles*/
+    main {
+        --new-primary: #09A129;     /* Green for text */
+        --new-secondary: #1F487E;   /* Dark blue for buttons */
+        --new-background: #000000;  /* Black for backgrounds */
+        --new-accent: #FB3640;      /* Red */
+        --new-light-blue: #00CCFF;  /* Light blue */
+        
+        padding: 20px;
+        background-color: var(--new-background);
+        color: var(--new-primary);
+        min-height: 100vh;
+        
+        /* Spacing for Banner and NavBar */
+        margin-top: 60px; /* Space for banner (60px) + gap */
+    }
+
+    /* Mobile: Add bottom margin for bottom navbar */
+    @media (max-width: 768px) {
+        main {
+            margin-bottom: 120px; /* Space for bottom navbar */
+        }
+    }
+
+    /* Desktop: Add top margin for navbar below banner */
+    @media (min-width: 769px) {
+        main {
+            margin-top: 140px; /* Space for banner + navbar + gaps */
+        }
+    }
+
+
+
+
+
+    /*gig styles*/
+    .gig-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 30px;
+        justify-content: flex-start;
+    }
+
+    .gig-tile {
         border-radius: 12px;
-        padding: 12px;
-        color: white;
-        margin: 6px;
+        padding: 20px;
+        border: 2px solid var(--new-secondary);
+        background-color: var(--new-background);
+        box-shadow: 0 4px 8px rgba(31, 72, 126, 0.3);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 180px;
+        text-align: center;
     }
 
-    .gig h1 {
-        margin: 0;
+    .gig-tile:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 16px rgba(31, 72, 126, 0.4);
+        border-color: var(--new-light-blue);
     }
 
+
+
+
+
+    /*uhhhhhhh other styles? probably rating, which is not implemented yet*/
     .space-evenly {
         display: flex;
         flex-direction: row;
@@ -162,19 +220,6 @@
 
     .margin-sixteen{
         margin: 16px;
-    }
-
-    .claimed {
-        background-color: var(--secondary-red);
-        border-color: var(--primary-red);
-    }
-
-    .unclaimed {
-        background-color: var(--secondary-blue);
-    }
-
-    .complete {
-        background-color: var(--primary-blue);
     }
 
     .popup h1 {
@@ -219,17 +264,23 @@
         min-height: 5em;
     }
 
+
+
+
+    /*line separator*/
     hr {
         border: 1px solid #F0F0F0;
         border-radius: 30%;
         margin: 6px;
     }
+    /* Adjust main padding for mobile */
     main {
         position: absolute;
-        top: 42px;
+        top: 0px;
         left: 0px;
         right: 0px;
         padding: 8px;
+        padding-bottom: 120px;
         display: flex;
         flex-direction: column;
         align-content: center;
