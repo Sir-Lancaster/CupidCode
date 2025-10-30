@@ -25,27 +25,6 @@ function navigateTo(routeName) {
     })
 }
 
-async function logout() {
-  try {
-    // Close drawer first
-    closeDrawer()
-    
-    // Clear frontend session
-    clearUserSession()
-    
-    // Call backend logout endpoint
-    await makeRequest('logout/', 'POST')
-    
-    // Redirect to login page
-    router.push({ name: 'Login' })
-  } catch (error) {
-    console.error('Logout error:', error)
-    // Even if backend logout fails, clear frontend session and redirect
-    clearUserSession()
-    router.push({ name: 'Login' })
-  }
-}
-
 // Get user_id from URL for navigation
 const user_id = parseInt(window.location.hash.split('/')[3])
 </script>
