@@ -32,14 +32,14 @@ import CreateGig from '../DaterVues/CreateGig.vue';
 const routes = [
     {
         path: '/',
-        name: 'Welcome',
-        component: Welcome
-    },
-    {
-        path: '/login',
         name: 'Login',
         component: Login
     },
+    // {
+    //     path: '/login',
+    //     name: 'Login',
+    //     component: Login
+    // },
     {
         path: '/register',
         name: 'Register',
