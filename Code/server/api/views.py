@@ -252,7 +252,10 @@ def send_chat_message(request):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     # send a message to AI
-    ai_response = helpers.get_ai_response(message)
+
+    user_messages = Message.objects.filter(owner=user_id).order_by('-id')[:20]
+
+    ai_response = helpers.get_ai_response(user_messages)
     # save AI's response to database
     serializer = MessageSerializer(data={'owner': user_id, 'text': ai_response, 'from_ai': True})
     if serializer.is_valid():
