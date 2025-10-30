@@ -2,142 +2,166 @@
 import { makeRequest } from '../utils/make_request.js';
 import { ref } from 'vue';
 import router from '../router/index.js';
-
 import PinkButton from '../components/PinkButton.vue'
 
 const email = ref('')
 const password = ref('')
-
+const showError = ref(false)
+const errorMsg = ref('')
 
 async function login() {
-    const results = await makeRequest('/api/user/sign_in/', 'post', {
-        email: email.value,
-        password: password.value,
-    })
-    // Add error class to which one is invalid
-    const doc = document.getElementById('error')
-    if (results.method === '400' || results.method === 400) {
-        doc.setAttribute('class', 'error shown')
-        return;
-    }
-    else {
-        doc.setAttribute('class', 'error')
-    }
-    
-    console.log(results)
-    if (results.is_suspended) {
-        router.push('/suspended')
-    }
-    else {
-        if (results.user['role'].toLowerCase() === 'dater') {
-            router.push({name: 'DaterHome', params: {id: results.user['id']}})
-        } else if (results.user['role'].toLowerCase() === 'cupid') {
-            console.log(results.user['id'])
-            router.push({name: 'CupidHome', params: {id: results.user['id']}})
-        } else if (results.user['role'].toLowerCase() === 'manager') {
-            router.push({name: 'ManagerHome', params: {id: results.user['id']}})
+    try {
+        const results = await makeRequest('/api/user/sign_in/', 'post', {
+            email: email.value,
+            password: password.value,
+        })
+        
+        // Check if this is an error response with a Reason
+        if (results.Reason) {
+            showError.value = true
+            errorMsg.value = results.Reason
+            return;
         }
-        else {
-            router.push('/login')
+        
+        // Successful response - hide error
+        showError.value = false
+        
+        if (results.is_suspended) {
+            router.push('/suspended')
         }
+        else if (results.user && results.user['role']) {
+            const role = results.user['role'].toLowerCase()
+            if (role === 'dater') {
+                router.push({name: 'DaterHome', params: {id: results.user['id']}})
+            } else if (role === 'cupid') {
+                router.push({name: 'CupidHome', params: {id: results.user['id']}})
+            } else if (role === 'manager') {
+                router.push({name: 'ManagerHome', params: {id: results.user['id']}})
+            } else {
+                router.push('/login')
+            }
+        }
+    } catch (error) {
+        showError.value = true
+        errorMsg.value = 'Email or Password is wrong!'
     }
 }
-
 </script>
 
 <template>
-    <div class="login_paper">
-        <div class="image">
-            <img :src="'/get_img/'" alt="Cupid Code Logo" width="300" height="300">
+    <main>
+        <div class="login_paper">
+            <div class="image">
+                <img :src="'/get_img/'" alt="Cupid Code Logo">
+            </div>
+            <form class="form" @submit.prevent="login">
+                <span v-if="showError" class="error">{{ errorMsg }}</span>
+                <label class="form_input" for="email">
+                    Email
+                    <input type="email" placeholder="example@email.com" id="email" name="email" v-model="email">
+                </label>
+                <label class="form_input" for="password">
+                    Password
+                    <input type="password" placeholder="Password" id="password" name="password" v-model="password">
+                </label>
+                <PinkButton id="sign_in">Sign In</PinkButton>
+            </form>
         </div>
-        <form class="form" @submit.prevent="login">
-            <span id="error" class="error">Email or Password is wrong!</span>
-            <label class="form_input" for="email">
-                Email
-                <input type="email" placeholder="example@email.com" id="email" name="email" v-model="email">
-            </label>
-            <label class="form_input" for="password">
-                Password
-                <input type="password" placeholder="Password" id="password" name="password" v-model="password">
-            </label>
-            <PinkButton id="sign_in">Sign In</PinkButton>
-        </form>
-    </div>
-    <div class="atag">
-        <router-link to="#/register">Get Started Now!</router-link>
-    </div>
+        <div class="atag">
+            Don't have an account?
+            <router-link to="/register">Sign up here!</router-link>
+        </div>
+    </main>
 </template>
 
 <style scoped>
-    .login_paper {
-        display: flex;
-        flex-flow: column wrap;
-    }
-    .button {
-        background-color: var(--primary-red);
-        border-radius: 10px;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        box-shadow: 5px 5px 2px rgba(128, 128, 128, 0.5);
-    }
+main {
+    --new-primary: #09A129;
+    --new-secondary: #1F487E;
+    --new-background: #000000;
+    --new-accent: #FB3640;
+    --new-light-blue: #00CCFF;
+    
+    padding: 20px;
+    background-color: var(--new-background);
+    color: var(--new-primary);
+    min-height: 100vh;
+}
 
-    .form {
-        display: flex;
-        flex-flow: column wrap;
-        background-color: white;
-    }
+.error {
+    display: block;
+    text-align: center;
+    color: var(--new-accent);
+    background-color: rgba(251, 54, 64, 0.1);
+    margin: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    font-weight: bold;
+}
 
-    .form_input {
-        display: flex;
-        flex-direction: column;
-        padding: 8px;
-    }
-    input {
-        border: 3px rgba(128, 128, 128, 0.5) solid;
-        border-radius: 4px;
-        width: auto;
-        padding: 8px;
-        margin: 10px;
-    }
+.login_paper {
+    display: flex;
+    flex-flow: column wrap;
+    background-color: black;
+    align-items: center;
+}
 
-    .button {
-        margin: 10px;
-        padding: 16px;
-        border: none;
-        border-radius: 8px;
-    }
+.form {
+    display: flex;
+    flex-flow: column wrap;
+    background-color: black;
+    border: 3px solid var(--new-primary);
+    width: 100%;
+    max-width: 600px; 
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+}
 
-    .atag {
-        display: flex;
-        margin: 10px;
-        justify-content: center;
-    }
-    a {
-        margin: 10px;
-        color: white;
-    }
+.form_input {
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+}
 
-    a:hover {
-        color: white;
-    }
+input {
+    border: 3px rgba(128, 128, 128, 0.5) solid;
+    border-radius: 4px;
+    width: auto;
+    padding: 8px;
+    margin: 10px;
+    background-color: var(--new-background);
+    color: white;
+}
 
-    a:visited {
-        color: var(--primary-red);
-    }
+.atag {
+    display: flex;
+    margin: 10px;
+    justify-content: center;
+    align-items: center;
+}
 
-    .error {
-        position: relative;
-        left: -300px;
-        overflow: hidden;
-        color: var(--secondary-red);
-    }
+a {
+    margin: 10px;
+    color: var(--new-light-blue);
+}
 
-    .shown {
-        left: 0px;
-        display: flex;
-        justify-content: center;
-        overflow: visible;
-        padding: 10px;
-    }
+a:hover {
+    color: gray;
+}
+
+.image {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
 </style>
