@@ -116,6 +116,7 @@ deploy:
       cat > .env << ENVEOF
       DEBUG=False
       ALLOWED_HOSTS=cupidcode.zapto.org,www.cupidcode.zapto.org,localhost,127.0.0.1
+      AI_API_KEY=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
       CSRF_TRUSTED_ORIGINS=https://cupidcode.zapto.org,https://www.cupidcode.zapto.org
       CORS_ALLOWED_ORIGINS=https://cupidcode.zapto.org,https://www.cupidcode.zapto.org
       DATABASE_URL=sqlite:///db.sqlite3
