@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue'
 import router from '../../router'
+import { clearUserSession } from '../../utils/auth'
+import { makeRequest } from '../../utils/make_request'
 
 const props = defineProps(['title'])
 const isDrawerOpen = ref(false)
@@ -21,6 +23,27 @@ function navigateTo(routeName) {
         name: routeName, 
         params: { id: currentUserId }
     })
+}
+
+async function logout() {
+  try {
+    // Close drawer first
+    closeDrawer()
+    
+    // Clear frontend session
+    clearUserSession()
+    
+    // Call backend logout endpoint
+    await makeRequest('logout/', 'POST')
+    
+    // Redirect to login page
+    router.push({ name: 'Login' })
+  } catch (error) {
+    console.error('Logout error:', error)
+    // Even if backend logout fails, clear frontend session and redirect
+    clearUserSession()
+    router.push({ name: 'Login' })
+  }
 }
 
 // Get user_id from URL for navigation
@@ -88,6 +111,14 @@ const user_id = parseInt(window.location.hash.split('/')[3])
           <button class="nav-item accessibility-toggle">
             <span class="material-symbols-outlined">light_mode</span>
             Toggle Light Mode
+          </button>
+        </div>
+        
+        <!-- Logout Section -->
+        <div class="logout-section">
+          <button @click="logout" class="nav-item logout-btn">
+            <span class="material-symbols-outlined">logout</span>
+            Logout
           </button>
         </div>
       </nav>
@@ -240,5 +271,22 @@ const user_id = parseInt(window.location.hash.split('/')[3])
 
 .accessibility-toggle {
   font-style: italic;
+}
+
+/* Logout Section */
+.logout-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #FB3640;
+}
+
+.logout-btn {
+  color: #FB3640 !important;
+  font-weight: bold;
+}
+
+.logout-btn:hover {
+  background-color: #FB3640 !important;
+  color: #000000 !important;
 }
 </style>
