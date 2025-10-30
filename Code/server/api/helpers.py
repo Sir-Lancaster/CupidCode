@@ -10,6 +10,7 @@ from django.contrib.sessions.models import Session
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, get_list_or_404
+from django.conf import settings
 
 # Rest Framework
 from rest_framework.response import Response
@@ -31,10 +32,7 @@ try:
 except Exception:
     YelpAPI = None
 
-try:
-    from transformers import GPT2Tokenizer, GPT2LMHeadModel
-except Exception:
-    GPT2Tokenizer = GPT2LMHeadModel = None
+from openai import OpenAI
 
 from operator import contains
 
@@ -230,34 +228,31 @@ def save_serializer(serializer):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def get_ai_response(message: str):
-    """
-    Generate a text response using a pre-trained GPT-2 model.
+def get_ai_response(user_messages: str):
+    client = OpenAI(api_key=settings.AI_API_KEY)
 
-    Loads the GPT-2 tokenizer and model, encodes the input message, and generates a
-    continuation using language modeling. Returns the generated text or an error
-    message if generation fails.
+    messages = [
+        {
+            "role": "system",
+            "content": "You are a dating coach. You give thoughtful, supportive, and practical advice on relationships, dating, and communication. Respond with raw text only. Do NOT use Markdown, bullet points, or code blocks."
+        },
+    ]
 
-    Args:
-        message (str): The input text prompt used to generate a response.
+    for msg in reversed(user_messages):
+        role = "user" if not msg.from_ai else "assistant"
+        messages.append({
+            "role": role,
+            "content": msg.text
+        })
 
-    Returns:
-        str: The generated text response from GPT-2, or an error message if an
-        exception occurs during processing.
-    """
-    try:
-        tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-        model = GPT2LMHeadModel.from_pretrained("gpt2")
-        # Tokenize input text
-        input_ids = tokenizer.encode(message, return_tensors='pt')
-        # Generate response
-        output = model.generate(input_ids, max_length=100, num_return_sequences=1, early_stopping=True)
-        # Decode and return response
-        response = tokenizer.decode(output[0], skip_special_tokens=True)
-        return response
-    except Exception as e:
-        return str(e)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        max_tokens=100,
+        temperature=0.7
+    )
 
+    return response.choices[0].message.content
 
 def save_calendar(request):
     """

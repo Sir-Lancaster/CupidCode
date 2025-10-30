@@ -38,14 +38,6 @@ async function send() {
         document.getElementById("header").style.display = 'none';
         
     }
-    let container = document.getElementById("chat-container")
-    
-    const child = document.createElement('div')
-    child.setAttribute('class', 'chat sent')
-    child.innerText = message.value
-    child.setAttribute('key', chatArr.value.length)
-    
-    container.appendChild(child)
 
     // Send to server to save & get response from server
     const results = await makeRequest('/api/chat/', 'post', {
@@ -54,18 +46,11 @@ async function send() {
         },
         message: message.value
     });
-    chatArr.value.push(results.message)
-
-    const ai_child = document.createElement('div')
-    ai_child.setAttribute('class', 'chat response')
-    ai_child.innerText = results.message.text
-    ai_child.setAttribute('key', chatArr.value.length)
-
-    container.appendChild(ai_child)
-
-    message.value = ''
-
-    router.push({ name: 'AiChat', params: {id: user_id} })
+    chatArr.value.push({
+        owner: user_id,
+        text: results.message,
+        from_ai: true,
+    })
 }
 
 onMounted(getChats)
