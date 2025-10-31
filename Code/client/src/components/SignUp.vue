@@ -217,7 +217,7 @@ function previewFile() {
         </div>
         <div class="atag">
             Already have an account?
-            <router-link to="/login">Sign in here!</router-link>
+            <router-link to="/">Sign in here!</router-link>
         </div>
     </main>
 </template>
