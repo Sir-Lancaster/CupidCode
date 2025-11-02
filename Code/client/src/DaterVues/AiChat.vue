@@ -10,6 +10,11 @@ const chatArr = ref([])
 const message = ref('')
 let noChats = false
 
+// Speech recognition variables
+const isRecording = ref(false)
+let recognition = null
+let recordingTimeout = null
+
 // Use router params instead of hash extraction
 const user_id = router.currentRoute.value.params.id
 
@@ -30,6 +35,16 @@ async function getChats() {
 }
 
 async function send() {
+    // Stop recording if active before sending
+    if (isRecording.value) {
+        stopRecording()
+    }
+    
+    // Don't send if message is empty
+    if (!message.value.trim()) {
+        return
+    }
+    
     // Display on screen
     chatArr.value.push({
         owner: user_id,
@@ -68,6 +83,95 @@ function clearChatDisplay() {
             document.getElementById("header").style.display = 'block';
         }
     }
+}
+
+// Speech recognition functions
+function toggleRecording() {
+    if (isRecording.value) {
+        stopRecording()
+    } else {
+        startRecording()
+    }
+}
+
+function startRecording() {
+    // Check for browser support
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert('Speech recognition not supported in this browser')
+        return
+    }
+
+    // Create recognition instance
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    recognition = new SpeechRecognition()
+    
+    // Configure recognition
+    recognition.continuous = true  // allows for longer recordings 
+    recognition.interimResults = true  // Changed to true to capture ongoing speech
+    recognition.language = 'en-US'
+    
+    // Handle results
+    recognition.onresult = (event) => {
+        let finalTranscript = ''
+        
+        // Combine all final results
+        for (let i = 0; i < event.results.length; i++) {
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript + ' '
+            }
+        }
+        
+        // Update message with accumulated transcript
+        if (finalTranscript.trim()) {
+            message.value = finalTranscript.trim()
+        }
+        
+        // Don't stop recording automatically - let it continue
+    }
+    
+    // Handle errors
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error)
+        stopRecording()
+    }
+    
+    // Handle end - restart if still recording (to prevent auto-stop)
+    recognition.onend = () => {
+        if (isRecording.value) {
+            // Restart recognition if we're still supposed to be recording
+            try {
+                recognition.start()
+            } catch (error) {
+                console.error('Failed to restart recording:', error)
+                stopRecording()
+            }
+        }
+    }
+    
+    // Start recognition
+    try {
+        recognition.start()
+        isRecording.value = true
+        
+        // Set 30-second timeout
+        recordingTimeout = setTimeout(() => {
+            stopRecording()
+        }, 30000)
+    } catch (error) {
+        console.error('Failed to start recording:', error)
+    }
+}
+
+function stopRecording() {
+    if (recognition) {
+        recognition.stop()
+        recognition = null
+    }
+    if (recordingTimeout) {
+        clearTimeout(recordingTimeout)
+        recordingTimeout = null
+    }
+    isRecording.value = false
 }
 
 onMounted(getChats)
@@ -112,12 +216,17 @@ onMounted(getChats)
         <!-- Message input -->
         <div class="input-container">
             <div class="input-wrapper">
-                <input 
+                <button @click="toggleRecording" :class="['mic-button', { 'recording': isRecording }]">
+                    <span class="material-symbols-outlined">{{ isRecording ? 'fiber_manual_record' : 'mic' }}</span>
+                </button>
+                <textarea 
                     v-model="message" 
-                    @keyup.enter="send"
+                    @keyup.enter.exact="send"
+                    @keydown.enter.shift.prevent
                     placeholder="Type your message to Cupid AI..."
                     class="message-input"
-                />
+                    rows="1"
+                ></textarea>
                 <button @click="send" :disabled="!message.trim()" class="send-button">
                     <span class="material-symbols-outlined">send</span>
                 </button>
@@ -163,16 +272,43 @@ onMounted(getChats)
 
     /* Fixed Header Bar */
     .header-bar {
-        position: sticky;
+        position: fixed; /* Changed from sticky to fixed */
         top: 0;
+        left: 0;
+        right: 0;
         background-color: var(--new-background);
         border-bottom: 2px solid var(--new-primary);
         padding: 16px 20px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        z-index: 100;
+        z-index: 1002; /* Higher than navbar to ensure it's on top */
         margin-bottom: 0;
+    }
+
+    /* Mobile: Account for mobile navbar position */
+    @media (max-width: 768px) {
+        .header-bar {
+            top: 60px; /* Below banner, navbar is at bottom */
+        }
+        
+        .chat-container {
+            margin-top: 120px; /* Space for banner + header bar */
+            padding: 12px;
+        }
+    }
+
+    /* Desktop: Position below banner and navbar with separator */
+    @media (min-width: 769px) {
+        .header-bar {
+            top: 140px; /* Below banner (60px) + navbar (60px) + gaps (20px) */
+            border-top: 2px solid var(--new-primary); /* Add green separator line */
+        }
+        
+        .chat-container {
+            margin-top: 200px; /* Space for banner + navbar + header bar */
+            padding: 20px;
+        }
     }
 
     .page-title {
@@ -364,7 +500,52 @@ onMounted(getChats)
         gap: 12px;
         max-width: 800px;
         margin: 0 auto;
+        align-items: flex-end; /* Changed from center to flex-end for better alignment */
+    }
+
+    /* Microphone Button */
+    .mic-button {
+        background-color: var(--new-secondary);
+        border: 2px solid var(--new-primary);
+        color: var(--new-primary);
+        border-radius: 8px;
+        padding: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
         align-items: center;
+        justify-content: center;
+        min-width: 48px;
+        height: 48px;
+    }
+
+    .mic-button:hover {
+        background-color: var(--new-primary);
+        color: var(--new-background);
+        transform: translateY(-1px);
+    }
+
+    .mic-button.recording {
+        background-color: var(--new-accent);
+        border-color: var(--new-accent);
+        color: #FFFFFF;
+        animation: pulse 1.5s infinite;
+    }
+
+    .mic-button.recording:hover {
+        background-color: var(--new-accent);
+        color: #FFFFFF;
+        transform: none;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+
+    .mic-button .material-symbols-outlined {
+        font-size: 20px;
     }
 
     .message-input {
@@ -377,6 +558,12 @@ onMounted(getChats)
         font-size: 16px;
         outline: none;
         transition: all 0.3s ease;
+        resize: none;
+        min-height: 48px;
+        max-height: 120px;
+        overflow-y: auto;
+        font-family: inherit;
+        line-height: 1.4;
     }
 
     .message-input:focus {
@@ -387,6 +574,18 @@ onMounted(getChats)
     .message-input::placeholder {
         color: var(--new-primary);
         opacity: 0.6;
+    }
+
+    /* Auto-resize textarea */
+    .message-input {
+        field-sizing: content;
+    }
+
+    /* Fallback for browsers that don't support field-sizing */
+    @supports not (field-sizing: content) {
+        .message-input {
+            height: auto;
+        }
     }
 
     .send-button {
@@ -422,10 +621,6 @@ onMounted(getChats)
 
     /* Responsive adjustments */
     @media (max-width: 768px) {
-        .chat-container {
-            padding: 12px;
-        }
-        
         .message {
             max-width: 85%; /* Slightly smaller on mobile */
         }
