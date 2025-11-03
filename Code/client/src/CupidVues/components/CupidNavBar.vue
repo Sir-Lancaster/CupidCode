@@ -32,8 +32,7 @@ const navItems = [
     { name: 'Home', route: 'CupidHome', icon: 'home' },
     { name: 'Find Gigs', route: 'GigDetails', icon: 'search' },
     { name: 'Completed Gigs', route: 'GigComplete', icon: 'assignment_turned_in' },
-    { name: 'Profile', route: 'CupidDetails', icon: 'person' },
-    { name: 'Notifications', route: 'CupidFeedback', icon: 'notifications' }
+    { name: 'Profile', route: 'CupidDetails', icon: 'person' }
 ]
 </script>
 
@@ -98,7 +97,7 @@ const navItems = [
   justify-content: center;
   padding: 8px 12px;
   transition: all 0.2s ease;
-  min-width: 60px;
+  width: 90px;
   height: 100%;
 }
 
@@ -159,7 +158,7 @@ const navItems = [
   }
   
   .nav-button {
-    min-width: 50px;
+    width: 60px;
     padding: 6px 8px;
   }
 }
@@ -174,7 +173,7 @@ const navItems = [
   }
   
   .nav-button {
-    min-width: 80px;
+    width: 110px;
     padding: 12px 16px;
   }
 }

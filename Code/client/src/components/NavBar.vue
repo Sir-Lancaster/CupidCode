@@ -16,8 +16,7 @@ const navItems = [
   { name: 'Home', route: 'DaterHome', icon: 'home' },
   { name: 'AI', route: 'AiChat', icon: 'smart_toy' },
   { name: 'Payment', route: 'CupidCash', icon: 'payments' },
-  { name: 'Profile', route: 'DaterProfile', icon: 'person' },
-  { name: 'Notifications', route: 'DaterFeedback', icon: 'notifications' }
+  { name: 'Profile', route: 'DaterProfile', icon: 'person' }
 ]
 </script>
 
@@ -86,7 +85,7 @@ const navItems = [
   justify-content: center;
   padding: 8px 12px;
   transition: all 0.2s ease;
-  min-width: 60px;
+  width: 90px;
   height: 100%;
 }
 
@@ -137,7 +136,7 @@ const navItems = [
   }
   
   .nav-button {
-    min-width: 50px;
+    min-width: 60px;
     padding: 6px 8px;
   }
 }
@@ -152,7 +151,7 @@ const navItems = [
   }
   
   .nav-button {
-    min-width: 80px;
+    width: 110px;
     padding: 12px 16px;
   }
 }
