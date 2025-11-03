@@ -39,6 +39,31 @@ ALLOWED_HOSTS = [h for h in os.getenv('ALLOWED_HOSTS', '').split(',') if h]
 VITE_APP_DIR = BASE_DIR / "src"
 
 
+# Production security settings from environment
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if origin.strip()]
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in os.getenv('CORS_ALLOWED_ORIGINS', '').split(',') if origin.strip()]
+
+SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False') == 'True'
+SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False') == 'True'
+CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', 'False') == 'True'
+SECURE_BROWSER_XSS_FILTER = os.getenv('SECURE_BROWSER_XSS_FILTER', 'False') == 'True'
+SECURE_CONTENT_TYPE_NOSNIFF = os.getenv('SECURE_CONTENT_TYPE_NOSNIFF', 'False') == 'True'
+
+# Handle SECURE_PROXY_SSL_HEADER (it's a tuple)
+proxy_header = os.getenv('SECURE_PROXY_SSL_HEADER', '')
+if proxy_header:
+    header_parts = proxy_header.split(',')
+    if len(header_parts) == 2:
+        SECURE_PROXY_SSL_HEADER = (header_parts[0].strip(), header_parts[1].strip())
+
+# Static files
+STATIC_ROOT = os.getenv('STATIC_ROOT', os.path.join(BASE_DIR, 'staticfiles'))
+STATIC_URL = os.getenv('STATIC_URL', '/static/')
+
+
+
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -146,7 +171,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/' if not DEBUG else '__UNUSED__/'
+# STATIC_URL = 'static/' if not DEBUG else '__UNUSED__/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

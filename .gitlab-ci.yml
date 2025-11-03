@@ -123,43 +123,13 @@ deploy:
       STATIC_ROOT=/var/www/cupid-app/staticfiles
       STATIC_URL=/static/
       SECURE_SSL_REDIRECT=True
-      SECURE_PROXY_SSL_HEADER=('HTTP_X_FORWARDED_PROTO', 'https')
+      SECURE_PROXY_SSL_HEADER=HTTP_X_FORWARDED_PROTO,https
       SESSION_COOKIE_SECURE=True
       CSRF_COOKIE_SECURE=True
+      SECURE_BROWSER_XSS_FILTER=True
+      SECURE_CONTENT_TYPE_NOSNIFF=True
       ENVEOF
             "
-
-    #DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-
-    #DATABASE_URL=sqlite:///db.sqlite3
-    #  STATIC_ROOT=/var/www/cupid-app/staticfiles
-    #  STATIC_URL=/static/
-    #  SECURE_SSL_REDIRECT=True
-    #  SECURE_PROXY_SSL_HEADER=('HTTP_X_FORWARDED_PROTO', 'https')
-    #  SESSION_COOKIE_SECURE=True
-    #  CSRF_COOKIE_SECURE=True
-
-    
-    # Configure Django settings for production HTTPS deployment
-    - |
-      ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      cd /var/www/cupid-app
-      # Append production security settings to Django settings.py
-      echo '' >> server/settings.py
-      echo '# Production HTTPS settings' >> server/settings.py
-      echo 'import os' >> server/settings.py
-      echo 'STATIC_ROOT = os.path.join(BASE_DIR, \"staticfiles\")' >> server/settings.py
-      echo 'ALLOWED_HOSTS = [\"cupidcode.zapto.org\", \"www.cupidcode.zapto.org\", \"localhost\", \"127.0.0.1\"]' >> server/settings.py
-      echo 'CSRF_TRUSTED_ORIGINS = [\"https://cupidcode.zapto.org\", \"https://www.cupidcode.zapto.org\"]' >> server/settings.py
-      echo 'CORS_ALLOWED_ORIGINS = [\"https://cupidcode.zapto.org\", \"https://www.cupidcode.zapto.org\"]' >> server/settings.py
-      echo 'DEBUG = False' >> server/settings.py                    # Disable debug mode
-      echo 'SECURE_SSL_REDIRECT = True' >> server/settings.py       # Force HTTPS
-      echo 'SECURE_PROXY_SSL_HEADER = (\"HTTP_X_FORWARDED_PROTO\", \"https\")' >> server/settings.py
-      echo 'SESSION_COOKIE_SECURE = True' >> server/settings.py     # Secure cookies
-      echo 'CSRF_COOKIE_SECURE = True' >> server/settings.py
-      echo 'SECURE_BROWSER_XSS_FILTER = True' >> server/settings.py     # XSS protection
-      echo 'SECURE_CONTENT_TYPE_NOSNIFF = True' >> server/settings.py   # Content type security
-      "
     
     # Install dependencies and configure Django application on Azure VM
     - |
