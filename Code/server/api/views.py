@@ -242,7 +242,7 @@ def send_chat_message(request):
             message(str): The AI's response
     """
     data = request.data
-    data['location'] = helpers.get_location_string(request.META['REMOTE_ADDR'])
+    # data['location'] = helpers.get_location_string(request.META['REMOTE_ADDR'])
     user_id = request.user.id
     message = data['message']
     # save a message to database
