@@ -253,14 +253,14 @@ def send_chat_message(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     # send a message to AI
     user_messages = Message.objects.filter(owner=user_id).order_by('-id')[:20]
-    return helpers.get_ai_response(user_messages)
-    # # save AI's response to database
-    # serializer = MessageSerializer(data={'owner': user_id, 'text': ai_response, 'from_ai': True})
-    # if serializer.is_valid():
-    #     serializer.save()
-    #     return Response({'message': ai_response}, status=status.HTTP_200_OK)
-    # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    # # return AI's response
+    ai_response = helpers.get_ai_response(user_messages)
+    # save AI's response to database
+    serializer = MessageSerializer(data={'owner': user_id, 'text': ai_response, 'from_ai': True})
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'message': ai_response}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # return AI's response
 
 
 @api_view(['GET'])
