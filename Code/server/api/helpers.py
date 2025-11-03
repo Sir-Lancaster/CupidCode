@@ -4,6 +4,8 @@ import base64
 import wave
 import os
 
+from dotenv import load_dotenv
+
 # Django
 from django.contrib.auth import login
 from django.contrib.sessions.models import Session
