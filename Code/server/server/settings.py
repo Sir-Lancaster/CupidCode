@@ -25,7 +25,11 @@ load_dotenv()
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-x_e(m+z0-supl3g7n5zi1es0zwecn#_ipb920xxec)%v6^ah5='
 
-AI_API_KEY = os.getenv('AI_API_KEY', '')
+try:
+    AI_API_KEY = os.getenv('AI_API_KEY', '')
+except Exception as e:
+    AI_API_KEY = ''
+    print(f"Error loading AI_API_KEY: {e}")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
