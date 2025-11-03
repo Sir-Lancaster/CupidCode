@@ -58,9 +58,9 @@ async function send() {
 
     // Send to server to save & get response from server
     const results = await makeRequest('/api/chat/', 'post', {
-        user: {
-            id: user_id
-        },
+        // user: {
+        //     id: user_id
+        // },
         message: message.value
     });
     chatArr.value.push({
