@@ -10,7 +10,6 @@ from django.contrib.sessions.models import Session
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, get_list_or_404
-from django.conf import settings
 
 # Rest Framework
 from rest_framework.response import Response
@@ -229,7 +228,7 @@ def save_serializer(serializer):
 
 
 def get_ai_response(user_messages: str):
-    client = OpenAI(api_key=settings.AI_API_KEY)
+    client = OpenAI(api_key=os.getenv('AI_API_KEY', ''))
 
     messages = [
         {
