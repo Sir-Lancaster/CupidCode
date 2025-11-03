@@ -231,7 +231,7 @@ def save_serializer(serializer):
 
 def get_ai_response(user_messages: str):
     try:
-        client = OpenAI(api_key=os.getenv('AI_API_KEY', ''))
+        client = OpenAI(api_key='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')
 
         messages = [
             {
