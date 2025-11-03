@@ -112,7 +112,7 @@ deploy:
 
     - |
       ssh -i $PEM_KEY_PATH -o StrictHostKeyChecking=no azureuser@$VM_PUBLIC_IP "
-      cd /var/www/cupid-app
+      cd /var/www/cupid-app/server
       cat > .env << ENVEOF
       DEBUG=False
       ALLOWED_HOSTS=cupidcode.zapto.org,www.cupidcode.zapto.org,localhost,127.0.0.1
