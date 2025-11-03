@@ -228,30 +228,33 @@ def save_serializer(serializer):
 
 
 def get_ai_response(user_messages: str):
-    client = OpenAI(api_key=os.getenv('AI_API_KEY', ''))
+    try:
+        client = OpenAI(api_key=os.getenv('AI_API_KEY', ''))
 
-    messages = [
-        {
-            "role": "system",
-            "content": "You are a dating coach. You give thoughtful, supportive, and practical advice on relationships, dating, and communication. Respond with raw text only. Do NOT use Markdown, bullet points, or code blocks."
-        },
-    ]
+        messages = [
+            {
+                "role": "system",
+                "content": "You are a dating coach. You give thoughtful, supportive, and practical advice on relationships, dating, and communication. Respond with raw text only. Do NOT use Markdown, bullet points, or code blocks."
+            },
+        ]
 
-    for msg in reversed(user_messages):
-        role = "user" if not msg.from_ai else "assistant"
-        messages.append({
-            "role": role,
-            "content": msg.text
-        })
+        for msg in reversed(user_messages):
+            role = "user" if not msg.from_ai else "assistant"
+            messages.append({
+                "role": role,
+                "content": msg.text
+            })
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=messages,
-        max_tokens=100,
-        temperature=0.7
-    )
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            max_tokens=100,
+            temperature=0.7
+        )
 
-    return response.choices[0].message.content
+        return response.choices[0].message.content
+    except Exception as e:
+        return Response({'error': f'An error occurred while processing your message: {str(e)}', "api_key": os.getenv('AI_API_KEY', '')}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 def save_calendar(request):
     """

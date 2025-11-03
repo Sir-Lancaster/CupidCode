@@ -241,31 +241,26 @@ def send_chat_message(request):
         Response:
             message(str): The AI's response
     """
-    try:
-        data = request.data
-        data['location'] = helpers.get_location_string(request.META['REMOTE_ADDR'])
-        user_id = request.user.id
-        message = data['message']
-        # save a message to database
-        serializer = MessageSerializer(data={'owner': user_id, 'text': message, 'from_ai': False})
-        if serializer.is_valid():
-            serializer.save()
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # send a message to AI
-
-        user_messages = Message.objects.filter(owner=user_id).order_by('-id')[:20]
-
-        ai_response = helpers.get_ai_response(user_messages)
-        # save AI's response to database
-        serializer = MessageSerializer(data={'owner': user_id, 'text': ai_response, 'from_ai': True})
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'message': ai_response}, status=status.HTTP_200_OK)
+    data = request.data
+    # data['location'] = helpers.get_location_string(request.META['REMOTE_ADDR'])
+    user_id = request.user.id
+    message = data['message']
+    # save a message to database
+    serializer = MessageSerializer(data={'owner': user_id, 'text': message, 'from_ai': False})
+    if serializer.is_valid():
+        serializer.save()
+    else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # return AI's response
-    except Exception as e:
-        return Response({'error': f'An error occurred while processing your message: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # send a message to AI
+    user_messages = Message.objects.filter(owner=user_id).order_by('-id')[:20]
+    return helpers.get_ai_response(user_messages)
+    # # save AI's response to database
+    # serializer = MessageSerializer(data={'owner': user_id, 'text': ai_response, 'from_ai': True})
+    # if serializer.is_valid():
+    #     serializer.save()
+    #     return Response({'message': ai_response}, status=status.HTTP_200_OK)
+    # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # # return AI's response
 
 
 @api_view(['GET'])
