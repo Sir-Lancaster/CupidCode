@@ -249,21 +249,22 @@ async function submitGig() {
     background-color: var(--new-background);
     min-height: 100vh;
     
-    /* Spacing for Banner and NavBar */
-    margin-top: 60px; /* Space for banner (60px) + gap */
+    /* Fixed spacing for Banner and NavBar */
+    padding-top: 80px; /* Space for banner + navbar + gap */
   }
 
   /* Mobile: Add bottom margin for bottom navbar */
   @media (max-width: 768px) {
     .container {
-      margin-bottom: 90px; /* Space for bottom navbar */
+      padding-top: 60px; /* Space for banner + extra spacing on mobile */
+      padding-bottom: 140px; /* Space for bottom navbar */
     }
   }
 
   /* Desktop: Add top margin for navbar below banner */
   @media (min-width: 769px) {
     .container {
-      margin-top: 140px; /* Space for banner + navbar + gaps */
+      padding-top: 160px; /* Space for banner + navbar + gaps */
     }
   }
 

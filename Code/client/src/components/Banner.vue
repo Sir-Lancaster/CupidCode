@@ -76,11 +76,6 @@ const user_id = parseInt(window.location.hash.split('/')[3])
           AI Chat
         </button>
         
-        <button @click="navigateTo('AiListen', { id: user_id })" class="nav-item">
-          <span class="material-symbols-outlined">hearing</span>
-          AI Listen
-        </button>
-        
         <button @click="navigateTo('CupidCash', { id: user_id })" class="nav-item">
           <span class="material-symbols-outlined">payments</span>
           Payment

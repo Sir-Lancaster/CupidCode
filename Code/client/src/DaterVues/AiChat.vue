@@ -45,13 +45,16 @@ async function send() {
         return
     }
     
+    // Reset noChats when sending a new message
+    noChats = false
+    
     // Display on screen
     chatArr.value.push({
         owner: user_id,
         text: message.value,
         from_ai: false,
     })
-    if (chatArr.length >= 1 && document.getElementById('header')) {
+    if (chatArr.value.length >= 1 && document.getElementById('header')) {
         document.getElementById("header").style.display = 'none';
         
     }
@@ -282,7 +285,7 @@ onMounted(getChats)
         display: flex;
         justify-content: space-between;
         align-items: center;
-        z-index: 1002; /* Higher than navbar to ensure it's on top */
+        z-index: 999; /* Lowered from 1002 to be below banner popup */
         margin-bottom: 0;
     }
 
