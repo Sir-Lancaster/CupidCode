@@ -5,7 +5,6 @@
     import GigData from './components/GigData.vue'
     import Heart from '../components/Heart.vue'
     import Popup from '../components/Popup.vue'
-    import PinkButton from '../components/PinkButton.vue'
     import Banner from '../components/Banner.vue';
     import NavBar from '../components/NavBar.vue';
 
@@ -93,31 +92,40 @@
     <main>
         <h1>Claimed</h1>
         <hr/>
-        <div class="gig-tile" v-for="(gig, index) in claimedGigs">
-            <GigData :gig="gig"/>
-            <div class="space-evenly">
-                <PinkButton @click-forward="cancel(gig.id)">Cancel</PinkButton>
+        <div class="gig-container">
+            <div class="gig-tile" v-for="(gig, index) in claimedGigs" :key="gig.id">
+                <GigData :gig="gig"/>
+                <div class="button-container">
+                    <button @click="cancel(gig.id)" class="action-button cancel-button">Cancel</button>
+                </div>
             </div>
         </div>
-        <p v-if="claimedGigs.length == 0">You have no active gigs.</p>
+        <p v-if="claimedGigs.length == 0" class="empty-message">You have no active gigs.</p>
+        
         <h1>Unclaimed</h1>
         <hr/>
-        <div class="gig-tile" v-for="(gig, index) in unclaimedGigs">
-            <GigData :gig="gig"/>
-            <div class="space-evenly">
-                <PinkButton @click-forward="cancel(gig.id)">Cancel</PinkButton>
+        <div class="gig-container">
+            <div class="gig-tile" v-for="(gig, index) in unclaimedGigs" :key="gig.id">
+                <GigData :gig="gig"/>
+                <div class="button-container">
+                    <button @click="cancel(gig.id)" class="action-button cancel-button">Cancel</button>
+                </div>
             </div>
         </div>
-        <p v-if="unclaimedGigs.length == 0">You do not have any pending gigs.</p>
+        <p v-if="unclaimedGigs.length == 0" class="empty-message">You do not have any pending gigs.</p>
+        
         <h1>Complete</h1>
         <hr/>
-        <div class="gig-tile" v-for="(gig, index) in completeGigs">
-            <GigData :gig="gig"/>
-            <div class="space-evenly">
-            <PinkButton @click-forward="toggleActiveGig(gig)">Rate Cupid</PinkButton>
+        <div class="gig-container">
+            <div class="gig-tile" v-for="(gig, index) in completeGigs" :key="gig.id">
+                <GigData :gig="gig"/>
+                <div class="button-container">
+                    <button @click="toggleActiveGig(gig)" class="action-button rate-button">Rate Cupid</button>
+                </div>
             </div>
         </div>
-        <p v-if="completeGigs.length == 0">You have no complete gigs.</p>
+        <p v-if="completeGigs.length == 0" class="empty-message">You have no complete gigs.</p>
+        
         <Popup :data-active="popupActive">
             <h1>Rate</h1>
             <label class="update-content" for="message">
@@ -129,18 +137,12 @@
                 </div>
             </label>
             <div class="space-evenly">
-                <PinkButton class = "margin-sixteen" @click-forward="sendReview">Send</PinkButton>
-                <PinkButton class = "margin-sixteen" @click-forward="toggleActiveGig">Cancel</PinkButton>
+                <button @click="sendReview" class="action-button send-button margin-sixteen">Send</button>
+                <button @click="toggleActiveGig" class="action-button cancel-button margin-sixteen">Cancel</button>
             </div>
         </Popup>
     </main>
 </template>
-
-
-
-
-
-
 
 <style scoped>
     /*main styles*/
@@ -156,21 +158,23 @@
         color: var(--new-primary);
         min-height: 100vh;
         
-        /* Spacing for Banner and NavBar */
-        margin-top: 60px; /* Space for banner (60px) + gap */
+        /* Fixed spacing for Banner and NavBar */
+        padding-top: 80px; /* Space for banner + navbar + gap */
+        margin-top: 0;
     }
 
     /* Mobile: Add bottom margin for bottom navbar */
     @media (max-width: 768px) {
         main {
-            margin-bottom: 120px; /* Space for bottom navbar */
+            padding-top: 60px; /* Space for banner + extra spacing on mobile */
+            padding-bottom: 140px; /* Space for bottom navbar */
         }
     }
 
     /* Desktop: Add top margin for navbar below banner */
     @media (min-width: 769px) {
         main {
-            margin-top: 140px; /* Space for banner + navbar + gaps */
+            padding-top: 160px; /* Space for banner + navbar + gaps */
         }
     }
 
@@ -182,29 +186,106 @@
     .gig-container {
         display: flex;
         flex-wrap: wrap;
-        gap: 20px;
+        gap: 15px;
         margin-bottom: 30px;
         justify-content: flex-start;
     }
 
+    /* Mobile: 1-2 tiles per row */
+    @media (max-width: 768px) {
+        .gig-container {
+            justify-content: space-between;
+            gap: 10px;
+        }
+        
+        .gig-tile {
+            flex: 0 1 calc(50% - 5px);
+            min-width: 0; /* Remove minimum width constraint */
+            max-width: calc(50% - 5px);
+        }
+        
+        /* Single column on very small screens */
+        @media (max-width: 600px) {
+            .gig-tile {
+                flex: 0 1 100%;
+                min-width: 0;
+                max-width: 100%;
+            }
+        }
+        
+        /* Extra small screens */
+        @media (max-width: 400px) {
+            .gig-container {
+                gap: 8px;
+            }
+            
+            .gig-tile {
+                padding: 12px;
+                min-height: 180px;
+            }
+        }
+    }
+
+    /* Tablet: 2-3 tiles per row */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .gig-tile {
+            flex: 0 1 calc(33.333% - 10px);
+            min-width: 250px;
+        }
+    }
+
+    /* Desktop: 3-4 tiles per row */
+    @media (min-width: 1025px) {
+        .gig-tile {
+            flex: 0 1 calc(25% - 12px);
+            min-width: 220px;
+            max-width: 300px;
+        }
+    }
+
+    /* Large desktop: 4-5 tiles per row */
+    @media (min-width: 1400px) {
+        .gig-tile {
+            flex: 0 1 calc(20% - 12px);
+        }
+    }
+
     .gig-tile {
         border-radius: 12px;
-        padding: 20px;
-        border: 2px solid var(--new-secondary);
+        padding: 15px;
+        border: 2px solid var(--new-primary);
         background-color: var(--new-background);
-        box-shadow: 0 4px 8px rgba(31, 72, 126, 0.3);
+        box-shadow: 0 4px 8px rgba(9, 161, 41, 0.2);
         transition: all 0.3s ease;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        min-height: 180px;
-        text-align: center;
+        min-height: 200px;
+        width: 100%; /* Ensure full width within flex constraints */
+        box-sizing: border-box; /* Include padding and border in width calculation */
     }
 
     .gig-tile:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 16px rgba(31, 72, 126, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(9, 161, 41, 0.3);
         border-color: var(--new-light-blue);
+    }
+
+    .button-container {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        justify-content: center;
+        margin-top: auto;
+        padding-top: 15px;
+    }
+
+    .empty-message {
+        text-align: center;
+        color: var(--new-primary);
+        font-style: italic;
+        margin: 20px auto;
+        opacity: 0.8;
     }
 
 
@@ -215,7 +296,9 @@
     .space-evenly {
         display: flex;
         flex-direction: row;
-        align-content: center;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
     }
 
     .margin-sixteen{
@@ -269,25 +352,77 @@
 
     /*line separator*/
     hr {
-        border: 1px solid #F0F0F0;
+        border: 1px solid var(--new-primary);
         border-radius: 30%;
-        margin: 6px;
+        margin: 15px auto 20px auto;
+        width: 80%;
+        opacity: 0.6;
     }
-    /* Adjust main padding for mobile */
-    main {
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        right: 0px;
-        padding: 8px;
-        padding-bottom: 120px;
-        display: flex;
-        flex-direction: column;
-        align-content: center;
-    }
+    
     h1,
     p {
-        margin: auto;
+        margin: 16px auto;
+        text-align: center;
+    }
+
+    /* Custom Action Buttons */
+    .action-button {
+        background-color: var(--new-secondary);
+        border: 2px solid var(--new-primary);
+        border-radius: 8px;
+        padding: 12px 20px;
+        color: var(--new-primary);
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        min-width: 100px;
+    }
+
+    .action-button:hover {
+        background-color: var(--new-primary);
+        color: var(--new-background);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(9, 161, 41, 0.3);
+    }
+
+    .action-button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(9, 161, 41, 0.2);
+    }
+
+    /* Specific button variants */
+    .cancel-button {
+        background-color: var(--new-accent);
+        border-color: var(--new-accent);
+        color: white;
+    }
+
+    .cancel-button:hover {
+        background-color: white;
+        color: var(--new-accent);
+        border-color: var(--new-accent);
+    }
+
+    .rate-button {
+        background-color: var(--new-light-blue);
+        border-color: var(--new-light-blue);
+        color: var(--new-background);
+    }
+
+    .rate-button:hover {
+        background-color: var(--new-background);
+        color: var(--new-light-blue);
+        border-color: var(--new-light-blue);
+    }
+
+    .send-button {
+        background-color: var(--new-secondary);
+        border-color: var(--new-primary);
     }
 </style>
 

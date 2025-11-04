@@ -139,35 +139,33 @@
     @media (max-width: 768px) {
         .gig-container {
             justify-content: space-between;
+            gap: 10px;
         }
         
         .gig-tile {
-            flex: 0 1 calc(50% - 8px);
-            min-width: 280px;
+            flex: 0 1 calc(50% - 5px);
+            min-width: 0; /* Remove minimum width constraint */
+            max-width: calc(50% - 5px);
         }
-    }
-
-    /* Tablet: 3 tiles per row */
-    @media (min-width: 769px) and (max-width: 1024px) {
-        .gig-tile {
-            flex: 0 1 calc(33.333% - 10px);
-            min-width: 250px;
+        
+        /* Single column on very small screens */
+        @media (max-width: 600px) {
+            .gig-tile {
+                flex: 0 1 100%;
+                min-width: 0;
+                max-width: 100%;
+            }
         }
-    }
-
-    /* Desktop: 4-5 tiles per row */
-    @media (min-width: 1025px) {
-        .gig-tile {
-            flex: 0 1 calc(25% - 12px);
-            min-width: 220px;
-            max-width: 300px;
-        }
-    }
-
-    /* Large desktop: 5 tiles per row */
-    @media (min-width: 1400px) {
-        .gig-tile {
-            flex: 0 1 calc(20% - 12px);
+        
+        /* Extra small screens */
+        @media (max-width: 400px) {
+            .gig-container {
+                gap: 8px;
+            }
+            
+            .gig-tile {
+                padding: 12px;
+            }
         }
     }
 
@@ -181,6 +179,8 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        width: 100%; /* Ensure full width within flex constraints */
+        box-sizing: border-box; /* Include padding and border in width calculation */
     }
 
     .gig-tile:hover {
