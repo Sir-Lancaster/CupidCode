@@ -1,7 +1,8 @@
 <script setup>
-import {ref, computed} from 'vue';
+import {ref, computed, onMounted} from 'vue';
 import router from '../router/index.js'
 import { makeRequest } from '../utils/make_request';
+import { loadScript } from '@paypal/paypal-js';
 
 import Banner from '../components/Banner.vue';
 import NavBar from '../components/NavBar.vue';
@@ -26,6 +27,10 @@ const dropoffAddress = ref({
   state: '',
   zipCode: ''
 })
+
+// PayPal state
+const paypalLoaded = ref(false)
+const showPayPal = ref(false)
 
 // Computed properties to combine address fields into single strings for backend
 const pickupLocationString = computed(() => {
@@ -79,25 +84,102 @@ const previewTotalCost = computed(() => {
   return `$${total.toFixed(2)}`
 })
 
+const totalCostValue = computed(() => {
+  const budgetValue = parseFloat(budget.value)
+  if (isNaN(budgetValue) || budgetValue <= 0) return 0
+  return (budgetValue + (budgetValue * 0.10)).toFixed(2)
+})
+
 // Form validation
 function validateForm() {
   return item.value.trim() !== '' && 
          pickupLocationString.value.trim() !== '' && 
-         dropoffLocationString.value.trim() !== ''
+         dropoffLocationString.value.trim() !== '' &&
+         budget.value > 0
 }
 
-// Submit function
+// Initialize PayPal
+onMounted(async () => {
+  try {
+    const paypal = await loadScript({
+      clientId: 'Afhs7qhZLMfQPBxdsYygI8lehzD6tv7FIt0_-ZY4Y3uVEabJiftkBh234o5Z455gwPZ0t0R3-_r3JRJT', // Replace with your PayPal client ID
+      currency: 'USD'
+    })
+    
+    if (paypal) {
+      paypalLoaded.value = true
+    }
+  } catch (error) {
+    console.error('Failed to load PayPal SDK:', error)
+  }
+})
+
+// Render PayPal buttons
+async function renderPayPalButtons() {
+  if (!paypalLoaded.value) {
+    alert('PayPal is not loaded yet. Please try again.')
+    return
+  }
+
+  const paypal = window.paypal
+
+  // Clear any existing buttons
+  const container = document.getElementById('paypal-button-container')
+  container.innerHTML = ''
+
+  paypal.Buttons({
+    createOrder: (data, actions) => {
+      return actions.order.create({
+        purchase_units: [{
+          amount: {
+            value: totalCostValue.value
+          },
+          description: `Cupid Gig: ${item.value}`
+        }]
+      })
+    },
+    onApprove: async (data, actions) => {
+      const order = await actions.order.capture()
+      console.log('Payment successful:', order)
+      
+      // Create the gig after successful payment
+      await createGigAfterPayment(order.id)
+    },
+    onError: (err) => {
+      console.error('PayPal error:', err)
+      alert('Payment failed. Please try again.')
+      showPayPal.value = false
+    },
+    onCancel: () => {
+      console.log('Payment cancelled by user')
+      showPayPal.value = false
+    }
+  }).render('#paypal-button-container')
+}
+
+// Submit function - now opens PayPal
 async function submitGig() {
   if (!validateForm()) {
     alert('Please fill in all required fields')
     return
   }
   
+  showPayPal.value = true
+  
+  // Wait for DOM update, then render PayPal buttons
+  setTimeout(() => {
+    renderPayPalButtons()
+  }, 100)
+}
+
+// Create gig after successful payment
+async function createGigAfterPayment(paypalOrderId) {
   const gigData = {
     budget: parseFloat(budget.value),
     items_requested: item.value,
     pickup_location: pickupLocationString.value,
-    dropoff_location: dropoffLocationString.value
+    dropoff_location: dropoffLocationString.value,
+    payment_id: paypalOrderId // Store PayPal transaction ID
   }
   
   try {
@@ -106,13 +188,16 @@ async function submitGig() {
     
     if (response) {
       alert('Gig created successfully!')
-      // Navigate to DaterGigs page
       router.push({ name: 'DaterGigs', params: { id: user_id } })
     }
   } catch (error) {
     console.error('Error creating gig:', error)
     alert('Failed to create gig. Please try again.')
   }
+}
+
+function cancelPayment() {
+  showPayPal.value = false
 }
 
 </script>
@@ -123,7 +208,7 @@ async function submitGig() {
     
     <div class="container">
         <h1>Create Gig</h1>
-        <form class="gig-form">
+        <form class="gig-form" v-if="!showPayPal">
             <label class="form-field">
                 Item
                 <input type="text" v-model="item" required>
@@ -243,6 +328,16 @@ async function submitGig() {
 
             <button type="button" @click="submitGig" class="submit-btn">Create Gig</button>
         </form>
+
+        <!-- PayPal Checkout Modal -->
+        <div v-if="showPayPal" class="paypal-modal">
+          <div class="paypal-container">
+            <h2>Complete Payment</h2>
+            <p>Total: {{ previewTotalCost }}</p>
+            <div id="paypal-button-container"></div>
+            <button @click="cancelPayment" class="cancel-btn">Cancel</button>
+          </div>
+        </div>
     </div>
 </template>
 
@@ -443,5 +538,63 @@ async function submitGig() {
     text-align: center;
     margin-bottom: 20px;
     color: var(--new-primary);
+  }
+
+  /* PayPal Modal */
+  .paypal-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .paypal-container {
+    background-color: var(--new-background);
+    border: 2px solid var(--new-primary);
+    border-radius: 8px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+  }
+
+  .paypal-container h2 {
+    color: var(--new-primary);
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  .paypal-container p {
+    color: var(--new-primary);
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  #paypal-button-container {
+    margin: 20px 0;
+    min-height: 150px;
+  }
+
+  .cancel-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--new-accent);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  .cancel-btn:hover {
+    opacity: 0.8;
   }
 </style>
