@@ -17,6 +17,7 @@
 
     async function logout() {
       await logoutRequest()
+      localStorage.clear()
       await router.push('/')
       router.go()
     }
