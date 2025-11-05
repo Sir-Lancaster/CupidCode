@@ -28,12 +28,7 @@ function navigateTo(routeName) {
                 <h3>AI Chat</h3>
                 <p>Chat with AI assistant</p>
             </div>
-            
-            <div class="widget-tile" @click="navigateTo('CupidCash')">
-                <span class="material-symbols-outlined icon">attach_money</span>
-                <h3>Add Cash</h3>
-                <p>Manage your balance</p>
-            </div>
+        
             
             <div class="widget-tile" @click="navigateTo('DaterGigs')">
                 <span class="material-symbols-outlined icon">work</span>

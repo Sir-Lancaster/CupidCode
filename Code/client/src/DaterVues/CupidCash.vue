@@ -3,7 +3,9 @@
     import router from '../router/index';
     import { makeRequest } from '../utils/make_request';
 
-    import NavSuite from '../components/NavSuite.vue';
+    import Banner from '../components/Banner.vue';
+    import NavBar from '../components/NavBar.vue';
+
 
     const user_id  = parseInt(window.location.hash.split('/')[3])
 
@@ -64,15 +66,11 @@
 </script>
 
 <template>  
-    <NavSuite title='Add Cash' profile='DaterProfile'>
-        <router-link class="link" :to="{ name: 'DaterHome', params: {id: user_id} }"> Home </router-link>
-        <router-link class="link" :to="{ name: 'DaterProfile', params: {id: user_id} }"> Profile </router-link>
-        <router-link class="link" :to="{ name: 'Calendar', params: {id: user_id} }"> Calendar </router-link>
-        <router-link class="link" :to="{ name: 'AiChat', params: {id: user_id} }"> AI Chat </router-link>
-        <router-link class="link" :to="{ name: 'AiListen', params: {id: user_id} }"> AI Listen </router-link>
-        <router-link class="link" :to="{ name: 'DaterGigs', params: {id: user_id}}"> Gigs </router-link>
-        <router-link class="link" :to="{ name: 'DaterFeedback', params: {id: user_id}}"> Feedback </router-link>
-    </NavSuite>
+    <Banner />
+    <NavBar currentPage="Home" />
+
+    <main>
+
     <div class="container center">
         <h1>{{ 'Current balance: $' + balance }}</h1>
         <form class="container clamped" @submit.prevent="addFunds">
@@ -116,9 +114,44 @@
             <button class="button">Save Card</button>
         </form>
     </div>
+    </main>
 </template>
 
 <style scoped>
+    main {
+        --new-primary: #09A129;     /* Green for text */
+        --new-secondary: #1F487E;   /* Dark blue for buttons */
+        --new-background: #000000;  /* Black for backgrounds */
+        --new-accent: #FB3640;      /* Red */
+        --new-light-blue: #00CCFF;  /* Light blue */
+        
+        padding: 20px;
+        background-color: var(--new-background);
+        color: var(--new-primary);
+        min-height: 100vh;
+        
+        /* Fixed spacing for Banner and NavBar */
+        padding-top: 80px; /* Space for banner + navbar + gap */
+        margin-top: 0;
+    }
+
+    /* Mobile: Add bottom margin for bottom navbar */
+    @media (max-width: 768px) {
+        main {
+            padding-top: 60px; /* Space for banner + extra spacing on mobile */
+            padding-bottom: 140px; /* Space for bottom navbar */
+        }
+    }
+
+    /* Desktop: Add top margin for navbar below banner */
+    @media (min-width: 769px) {
+        main {
+            padding-top: 160px; /* Space for banner + navbar + gaps */
+        }
+    }
+
+
+
 .container h1 {
     margin-top: 50px;
     text-align: center;
@@ -131,6 +164,14 @@
     margin-left: 12px;
     margin-right: 12px;
     flex-direction: column;
+
+    background-color: black;
+    border: 3px solid var(--new-primary);
+    width: 100%;
+    max-width: 600px;
+    padding: 20px;
+    border-radius: 10px;
+    box-sizing: border-box;
 }
 
 .input-container input {
