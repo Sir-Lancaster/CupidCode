@@ -541,6 +541,7 @@ function cancelPayment() {
   }
 
   /* PayPal Modal */
+/* PayPal Modal */
   .paypal-modal {
     position: fixed;
     top: 0;
@@ -550,8 +551,10 @@ function cancelPayment() {
     background-color: rgba(0, 0, 0, 0.8);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Changed from center to flex-start */
     z-index: 1000;
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding: 20px 0; /* Add some padding top and bottom */
   }
 
   .paypal-container {
@@ -561,6 +564,10 @@ function cancelPayment() {
     padding: 30px;
     max-width: 500px;
     width: 90%;
+    margin: auto; /* Center horizontally when content is smaller than viewport */
+    max-height: calc(100vh - 40px); /* Ensure container doesn't exceed viewport minus padding */
+    overflow-y: auto; /* Enable scrolling within the container if needed */
+    box-sizing: border-box; /* Include padding and border in height calculation */
   }
 
   .paypal-container h2 {
@@ -580,6 +587,7 @@ function cancelPayment() {
   #paypal-button-container {
     margin: 20px 0;
     min-height: 150px;
+    display: flex;
   }
 
   .cancel-btn {
