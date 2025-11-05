@@ -102,8 +102,8 @@ function validateForm() {
 onMounted(async () => {
   try {
     const paypal = await loadScript({
-      clientId: 'Afhs7qhZLMfQPBxdsYygI8lehzD6tv7FIt0_-ZY4Y3uVEabJiftkBh234o5Z455gwPZ0t0R3-_r3JRJT', // Replace with your PayPal client ID
-      currency: 'USD'
+      clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID, // Replace with your PayPal client ID
+      currency: import.meta.env.VITE_PAYPAL_CURRENCY || 'USD'
     })
     
     if (paypal) {
