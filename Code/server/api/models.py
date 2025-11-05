@@ -69,6 +69,8 @@ class Cupid(models.Model):
     rating_sum = models.IntegerField(default=0)
     rating_count = models.IntegerField(default=0)
     is_suspended = models.BooleanField(default=False)
+    paypal_email = models.EmailField(null=True, help_text="PayPal email for receiving payments")
+
 
 
 class Message(models.Model):
@@ -104,6 +106,14 @@ class Gig(models.Model):
     quest = models.OneToOneField(Quest, on_delete=models.CASCADE)
     dropped_count = models.IntegerField()
     accepted_count = models.IntegerField()
+    payment_id = models.CharField(max_length=255, blank=True, null=True, help_text="PayPal payment/order ID")
+    payout_id = models.CharField(max_length=255, blank=True, null=True, help_text="PayPal payout batch ID")
+    payout_status = models.CharField(max_length=50, default='pending', choices=[
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('success', 'Success'),
+        ('failed', 'Failed')
+    ])
 
 
 class Date(models.Model):
