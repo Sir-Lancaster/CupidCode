@@ -33,10 +33,21 @@ const gigCount = 0
     }
 
     async function claim(id) {
-        await makeRequest('/api/gig/accept/','post',{
-            'gig_id':id
-        })
-        getData()
+        try {
+            const response = await makeRequest('/api/gig/accept/', 'post', {
+                'gig_id': id
+            })
+            
+            if (response.error) {
+                alert(response.error)
+            } else {
+                alert(response.message || 'Gig claimed successfully!')
+                getData()
+            }
+        } catch (error) {
+            console.error('Error claiming gig:', error)
+            alert('Failed to claim gig. Please try again.')
+        }
     }
 
     onMounted(getData)

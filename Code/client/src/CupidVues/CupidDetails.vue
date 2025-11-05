@@ -14,6 +14,7 @@
     const fname = ref('')
     const lname = ref('')
     const username = ref('')
+    const paypal_email = ref('')
 
     //Cupid info
     const accepting_gigs = ref(false)
@@ -38,7 +39,8 @@
             first_name: fname.value,
             last_name: lname.value,
             phone_number: phone.value,
-            gig_range: range.value
+            gig_range: range.value,
+            paypal_email: paypal_email.value
         })
         router.push({name: 'CupidDetails', params: {id: user_id}});
     }
@@ -57,6 +59,7 @@
         fname.value = cupid.user.first_name
         lname.value = cupid.user.last_name
         username.value = cupid.user.username
+        paypal_email.value = cupid.paypal_email
 
         accepting_gigs.value = cupid.accepting_gigs
         balance.value = cupid.cupid_cash_balance
@@ -102,6 +105,10 @@
             <label class="update-content" for="range">
                 Range
                 <input type="text" id="range" v-model="range"/>
+            </label>
+            <label class="form-field">
+                PayPal Email (for receiving payments)
+                <input type="email" v-model="paypal_email" required>
             </label>
             <PinkButton>Save</PinkButton>
         </form>
