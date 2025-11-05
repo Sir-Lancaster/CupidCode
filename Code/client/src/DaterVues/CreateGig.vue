@@ -70,6 +70,15 @@ function handleSameAsPickup() {
   }
 }
 
+const previewTotalCost = computed(() => {
+  const budgetValue = parseFloat(budget.value)
+  if (isNaN(budgetValue) || budgetValue <= 0) return '$0.00'
+  
+  const fee = budgetValue * 0.10 // 10% Cupid fee
+  const total = budgetValue + fee
+  return `$${total.toFixed(2)}`
+})
+
 // Form validation
 function validateForm() {
   return item.value.trim() !== '' && 
@@ -228,6 +237,10 @@ async function submitGig() {
                 <input type="number" v-model="budget" required>
             </label>
 
+            <label class="form-field preview-total">
+              Total Cost: {{ previewTotalCost }}
+            </label>
+
             <button type="button" @click="submitGig" class="submit-btn">Create Gig</button>
         </form>
     </div>
@@ -282,6 +295,10 @@ async function submitGig() {
     gap: 5px;
     font-weight: bold;
     color: var(--new-primary);
+  }
+
+  .preview-total {
+    font-size: 26px;
   }
 
   .form-field input {
