@@ -1,12 +1,14 @@
 # Standard Library
 from datetime import datetime, timedelta
 import json
+import os
 
 # Django
 from django.contrib.auth import login, authenticate
 from django.http import JsonResponse
 from django.utils.timezone import make_aware
 from django.shortcuts import get_object_or_404, get_list_or_404
+from django.views.decorators.http import require_http_methods
 
 # REST Framework
 from rest_framework import status
@@ -39,6 +41,7 @@ from .serializers import (
 )
 from .models import (User, Dater, Cupid, Gig, Quest, Message, Date, Feedback, PaymentCard, BankAccount)
 from . import helpers
+from .paypal_service import send_payout_to_cupid
 
 # AI API (pytensor) https://pytensor.readthedocs.io/en/latest/
 # Location API (Geolocation) https://pypi.org/project/geolocation-python/
@@ -819,7 +822,7 @@ def create_gig(request):
 @permission_classes([IsAuthenticated])
 def accept_gig(request):
     """
-     Assign the requesting Cupid to an unclaimed Gig and mark it as CLAIMED.
+    Assign the requesting Cupid to an unclaimed Gig, mark it as CLAIMED, and send immediate payout.
 
     Authentication:
         Requires an authenticated Cupid (request.user must be a Cupid).
@@ -829,37 +832,92 @@ def accept_gig(request):
 
     Behavior:
         - Fails if the gig does not exist (404).
-        - Fails if the gig is already claimed or not in UNCLAIMED status (serializer validation should enforce).
+        - Fails if the Cupid doesn't have a PayPal email configured.
+        - Sends full gig budget (10% reward) to Cupid immediately via PayPal.
         - Increments the Gig's accepted_count.
         - Stamps the current (timezone–aware) datetime as date_time_of_claim.
         - Sets the cupid field to the requesting user's id.
         - Updates status to CLAIMED.
 
-    Side Effects:
-        Persists modifications to the Gig model instance upon successful validation.
-
     Responses:
-        200 OK: Serialized Gig after update.
-        400 BAD REQUEST: Validation failure (e.g., already claimed).
-        404 NOT FOUND: Gig not found.
-
-    Notes:
-        Location metadata is captured for auditing via helpers.get_location_string.
+        200 OK: Gig claimed and payout sent successfully.
+        400 BAD REQUEST: Validation failure or missing PayPal email.
+        404 NOT FOUND: Gig or Cupid not found.
+        500 INTERNAL SERVER ERROR: Payout failed.
     """
-    data = request.data
-    data['location'] = helpers.get_location_string(request.META['REMOTE_ADDR'])
-    gig = get_object_or_404(Gig, id=data['gig_id'])
-    serializer = GigSerializer(
-        gig,
-        data={
-            'status': Gig.Status.CLAIMED,
-            'cupid': request.user.id,
-            'accepted_count': gig.accepted_count + 1,
-            'date_time_of_claim': make_aware(datetime.now()),
-        },
-        partial=True,
-    )
-    return helpers.retrieved_response(serializer)
+    try:
+        user = request.user
+        
+        # Get the cupid profile
+        try:
+            cupid = Cupid.objects.get(user=user)
+        except Cupid.DoesNotExist:
+            return Response(
+                {'error': 'Cupid profile not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Check if cupid has PayPal email set
+        if not cupid.paypal_email:
+            return Response(
+                {'error': 'Please add a PayPal email to your profile before accepting gigs'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        gig_id = request.data.get('gig_id')
+        gig = get_object_or_404(Gig, id=gig_id)
+        
+        # Check if gig is available
+        if gig.status != Gig.Status.UNCLAIMED:
+            return Response(
+                {'error': 'This gig is no longer available'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Calculate reward (10% of budget)
+        reward = gig.quest.budget / 10
+        
+        # Send PayPal payout immediately
+        payout_result = send_payout_to_cupid(cupid, reward, gig_id)
+        
+        if not payout_result['success']:
+            return Response(
+                {
+                    'error': 'Failed to process payout',
+                    'details': payout_result.get('error', 'Unknown error')
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+        # Update gig with claim information and payout details
+        gig.cupid = cupid
+        gig.status = Gig.Status.CLAIMED
+        gig.date_time_of_claim = make_aware(datetime.now())
+        gig.accepted_count += 1
+        gig.payout_id = payout_result['payout_batch_id']
+        gig.payout_status = 'processing'
+        gig.save()
+        
+        # Update cupid's balance
+        cupid.cupid_cash_balance += reward
+        cupid.save()
+        
+        serializer = GigSerializer(gig)
+        return Response(
+            {
+                'message': 'Gig claimed successfully and payment sent!',
+                'gig': serializer.data,
+                'reward': float(reward),
+                'payout_id': payout_result['payout_batch_id']
+            },
+            status=status.HTTP_200_OK
+        )
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(['POST'])
@@ -1564,3 +1622,30 @@ def notify(request):
         return helpers.send_text(account_sid, auth_token, message)
     else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+@api_view(['GET'])
+def get_google_maps_config(request):
+    """
+    Get Google Maps API configuration.
+    
+    Returns:
+        Response:
+            GOOGLE_MAPS_API_KEY: The Google Maps API key from environment variables
+    """
+    return Response({
+        'GOOGLE_MAPS_API_KEY': os.getenv('GOOGLE_MAPS_API_KEY', '')
+    })
+
+@api_view(["GET"])
+def paypal_config(request):
+    """Return PayPal configuration for client-side SDK initialization"""
+    return Response({
+        'CLIENT_ID': os.environ.get('VITE_PAYPAL_CLIENT_ID', ''),
+        'CURRENCY': os.environ.get('VITE_PAYPAL_CURRENCY', 'USD'),
+        'MODE': os.environ.get('PAYPAL_MODE', 'sandbox')
+    })
+

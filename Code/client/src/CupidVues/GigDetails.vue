@@ -2,28 +2,105 @@
     import router from '../router/index'
     import { makeRequest } from '../utils/make_request'
     import {ref, onMounted} from 'vue'
+    import { getCurrentLocation, filterGigsByRange } from '../utils/location_utils';
 
     import CupidBanner from './components/CupidBanner.vue';
     import CupidNavBar from './components/CupidNavBar.vue';
     import GigData from './components/GigData.vue'
+    import GigMap from './GigMap.vue'
 
     const gigCount = 0
     const gigs = ref([])
     const activeGigs = ref([])
     const reward = ref(0)
     const rewardShow = ref(false)
+    const showMap = ref(false)
+    const selectedGig = ref(null)
+    const currentLocation = ref(null)
+    const cupidRange = ref(10) // Default range
+    const isLoadingLocation = ref(false)
 
     const user_id  = parseInt(window.location.hash.split('/')[3]) //Gets the id from the router
 
     async function getData() {
-        gigs.value = await makeRequest(`api/gig/${user_id}/${gigCount}`)
-        activeGigs.value = await makeRequest(`api/cupid/gigs/${user_id}?complete=false`)
-        //Django returns a 404 if there none of either of these. We have to tell Vue it is ok.
-        if (gigs.value.detail === 'Not found.'){
-            gigs.value = []
-        }
-        if (activeGigs.value.detail === 'Not found.'){
-            activeGigs.value = []
+        try {
+            // Get cupid profile first
+            const cupidProfile = await makeRequest(`api/user/${user_id}`)
+            cupidRange.value = cupidProfile.gig_range || 10
+            
+            // Load Google Maps API if not already loaded
+            if (!window.google?.maps) {
+                try {
+                    const response = await makeRequest('/api/google-maps-config/')
+                    const apiKey = response.GOOGLE_MAPS_API_KEY
+                    
+                    if (apiKey) {
+                        await new Promise((resolve, reject) => {
+                            const script = document.createElement('script')
+                            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry,places,marker&loading=async`
+                            script.async = true
+                            script.defer = true
+                            
+                            script.onload = () => {
+                                if (window.google?.maps) {
+                                    console.log('Google Maps API loaded successfully')
+                                    resolve()
+                                } else {
+                                    reject(new Error('Google Maps failed to load properly'))
+                                }
+                            }
+                            
+                            script.onerror = () => reject(new Error('Failed to load Google Maps script'))
+                            document.head.appendChild(script)
+                        })
+                    }
+                } catch (error) {
+                    console.warn('Could not load Google Maps API:', error)
+                }
+            }
+            
+            // Get current location
+            isLoadingLocation.value = true
+            try {
+                currentLocation.value = await getCurrentLocation()
+            } catch (error) {
+                console.warn('Could not get current location:', error)
+            }
+            isLoadingLocation.value = false
+            
+            // Get all gigs
+            let allGigs = await makeRequest(`api/gig/${user_id}/${gigCount}`)
+            let activeGigsResponse = await makeRequest(`api/cupid/gigs/${user_id}?complete=false`)
+            
+            if (allGigs.detail === 'Not found.'){
+                allGigs = []
+            }
+            if (activeGigsResponse.detail === 'Not found.'){
+                activeGigs.value = []
+            } else {
+                activeGigs.value = activeGigsResponse
+            }
+            
+            // Now filter with Google Maps available
+            if (currentLocation.value && Array.isArray(allGigs) && window.google?.maps) {
+                gigs.value = await filterGigsByRange(allGigs, currentLocation.value, cupidRange.value)
+            } else {
+                console.log('Location or Google Maps not available - showing all gigs')
+                gigs.value = allGigs
+            }
+            
+        } catch (error) {
+            console.error('Error getting data:', error)
+            // Fallback to showing all gigs without filtering
+            try {
+                gigs.value = await makeRequest(`api/gig/${user_id}/${gigCount}`)
+                if (gigs.value.detail === 'Not found.') {
+                    gigs.value = []
+                }
+            } catch (fallbackError) {
+                console.error('Fallback failed:', fallbackError)
+                gigs.value = []
+            }
         }
     }
 
@@ -31,6 +108,16 @@
         reward.value = amount
         rewardShow.value = true
         setTimeout(() => {rewardShow.value = false},1500)
+    }
+
+    function openMap(gig) {
+        selectedGig.value = gig
+        showMap.value = true
+    }
+
+    function closeMap() {
+        showMap.value = false
+        selectedGig.value = null
     }
 
     async function claim(id) {
@@ -47,7 +134,6 @@
         getData()
         displayReward(response.reward)
     }
-
 
     async function drop(id) {
         await makeRequest('/api/gig/drop/','post',{
@@ -74,6 +160,7 @@
                 <div class="button-container">
                     <button @click="complete(gig.id)" class="btn-primary">Complete</button>
                     <button @click="drop(gig.id)" class="btn-danger">Drop</button>
+                    <button @click="openMap(gig)" class="btn-map">Map</button>
                 </div>
             </div>
         </div>
@@ -86,12 +173,23 @@
                 <GigData :gig="gig"/>
                 <div class="button-container">
                     <button @click="claim(gig.id)" class="btn-primary">Claim</button>
+                    <button @click="openMap(gig)" class="btn-map">Map</button>
                 </div>
             </div>
         </div>
         <p v-if="gigs.length == 0" class="empty-message">There are no gigs available.</p>
         <p class="bottom" :data-active="rewardShow" v-show="rewardShow">+ ${{ reward.toFixed(2) }}</p>
     </main>
+
+    <!-- Map Modal -->
+    <GigMap 
+        v-if="showMap && selectedGig"
+        :pickup-location="selectedGig.quest.pickup_location"
+        :dropoff-location="selectedGig.quest.dropoff_location"
+        :gig-title="`Map for ${selectedGig.quest.items_requested}`"
+        :cupid-id="user_id"
+        @close="closeMap"
+    />
 </template>
 
 <style scoped>
@@ -246,6 +344,29 @@
     }
 
     .btn-danger:active {
+        transform: translateY(0);
+    }
+
+        .btn-map {
+        background-color: var(--new-light-blue);
+        color: var(--new-background);
+        border: 1px solid var(--new-primary);
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .btn-map:hover {
+        background-color: var(--new-primary);
+        color: var(--new-background);
+        transform: translateY(-1px);
+    }
+
+    .btn-map:active {
         transform: translateY(0);
     }
 

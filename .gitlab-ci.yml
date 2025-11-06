@@ -58,6 +58,7 @@ build:
     - echo "Building Vue frontend..."
     # Navigate to Vue.js client application
     - cd Code/client
+    
     # Install all Node.js dependencies from package.json
     - npm install
     # Build production-ready Vue.js application (outputs to Django static files)
@@ -128,8 +129,11 @@ deploy:
       CSRF_COOKIE_SECURE=True
       SECURE_BROWSER_XSS_FILTER=True
       SECURE_CONTENT_TYPE_NOSNIFF=True
+      GOOGLE_MAPS_API_KEY=AIzaSyCVjNyhwhD3eUQco2m7QxkuhXRcxgrHTjQ
       VITE_PAYPAL_CLIENT_ID=Afhs7qhZLMfQPBxdsYygI8lehzD6tv7FIt0_-ZY4Y3uVEabJiftkBh234o5Z455gwPZ0t0R3-_r3JRJT
       VITE_PAYPAL_CURRENCY=USD
+      PAYPAL_SECRET=EDBVjz8OOR-60JZVUW9Fa6LcddGQWvrn4xgJ3BIFQ8xChCxIPPqQE6Cu_PQcGQ9Hw6f9kwI6WyInCEz5
+      PAYPAL_MODE=sandbox
       ENVEOF
             "
     
