@@ -50,6 +50,18 @@
         getData()
     }
 
+    async function complete(id) {
+        try {
+            const response = await makeRequest('/api/gig/complete/', 'post', {
+                'gig_id': id
+            })
+            getData()
+        } catch (error) {
+            console.error('Error completing gig:', error)
+            alert('Failed to complete gig. Please try again.')
+        }
+    }
+
     function toggleActiveGig(gig) {
         if(popupActive.value){
             popupActive.value = false
@@ -90,18 +102,6 @@
     <NavBar currentPage="Home" />
 
     <main>
-        <h1>Claimed</h1>
-        <hr/>
-        <div class="gig-container">
-            <div class="gig-tile" v-for="(gig, index) in claimedGigs" :key="gig.id">
-                <GigData :gig="gig"/>
-                <div class="button-container">
-                    <button @click="cancel(gig.id)" class="action-button cancel-button">Cancel</button>
-                </div>
-            </div>
-        </div>
-        <p v-if="claimedGigs.length == 0" class="empty-message">You have no active gigs.</p>
-        
         <h1>Unclaimed</h1>
         <hr/>
         <div class="gig-container">
@@ -113,7 +113,22 @@
             </div>
         </div>
         <p v-if="unclaimedGigs.length == 0" class="empty-message">You do not have any pending gigs.</p>
+
+
+        <h1>Claimed</h1>
+        <hr/>
+        <div class="gig-container">
+            <div class="gig-tile" v-for="(gig, index) in claimedGigs" :key="gig.id">
+                <GigData :gig="gig"/>
+                <div class="button-container">
+                    <button @click="cancel(gig.id)" class="action-button cancel-button">Cancel</button>
+                    <button @click="complete(gig.id)" class="submit-btn">Complete</button>
+                </div>
+            </div>
+        </div>
+        <p v-if="claimedGigs.length == 0" class="empty-message">You have no active gigs.</p>
         
+
         <h1>Complete</h1>
         <hr/>
         <div class="gig-container">
@@ -177,9 +192,6 @@
             padding-top: 160px; /* Space for banner + navbar + gaps */
         }
     }
-
-
-
 
 
     /*gig styles*/
@@ -393,6 +405,30 @@
     .action-button:active {
         transform: translateY(0);
         box-shadow: 0 2px 4px rgba(9, 161, 41, 0.2);
+    }
+
+    .submit-btn {
+        padding: 12px 20px;
+        background-color: var(--new-secondary);
+        color: var(--new-primary);
+        border: 2px solid var(--new-primary);
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        font-weight: bold;
+        min-height: 44px;
+        min-width: 100px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .submit-btn:hover {
+        background-color: var(--new-primary);
+        color: var(--new-background);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(9, 161, 41, 0.3); 
     }
 
     /* Specific button variants */
