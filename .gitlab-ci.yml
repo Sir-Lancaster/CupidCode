@@ -58,6 +58,14 @@ build:
     - echo "Building Vue frontend..."
     # Navigate to Vue.js client application
     - cd Code/client
+
+    # Create .env file with PayPal credentials for Vite build
+    - |
+      cat > .env << ENVEOF
+      VITE_PAYPAL_CLIENT_ID=Afhs7qhZLMfQPBxdsYygI8lehzD6tv7FIt0_-ZY4Y3uVEabJiftkBh234o5Z455gwPZ0t0R3-_r3JRJT
+      VITE_PAYPAL_CURRENCY=USD
+      ENVEOF
+    
     # Install all Node.js dependencies from package.json
     - npm install
     # Build production-ready Vue.js application (outputs to Django static files)
