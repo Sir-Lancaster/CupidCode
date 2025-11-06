@@ -15,7 +15,6 @@ function navigateTo(routeName, params = {}) {
 const navItems = [
   { name: 'Home', route: 'DaterHome', icon: 'home' },
   { name: 'AI', route: 'AiChat', icon: 'smart_toy' },
-  { name: 'Payment', route: 'CupidCash', icon: 'payments' },
   { name: 'Profile', route: 'DaterProfile', icon: 'person' }
 ]
 </script>

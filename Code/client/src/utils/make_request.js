@@ -1,4 +1,3 @@
-// ...existing code...
 import cookie from "cookie";
 
 export async function makeRequest(uri, method = "get", body = {}) {
@@ -55,4 +54,3 @@ export async function logoutRequest() {
     }
     await fetch('/logout/', options);
 }
-// ...existing code...
