@@ -101,9 +101,17 @@ function validateForm() {
 // Initialize PayPal
 onMounted(async () => {
   try {
+    // Fetch PayPal config from Django backend
+    const config = await makeRequest('/api/paypal/config/')
+
+    if (!config || !config.CLIENT_ID) {
+      console.error('Failed to load PayPal configuration')
+      return
+    }
+    
     const paypal = await loadScript({
-      clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID, // Replace with your PayPal client ID
-      currency: import.meta.env.VITE_PAYPAL_CURRENCY || 'USD'
+      clientId: config.CLIENT_ID,
+      currency: config.CURRENCY || 'USD'
     })
     
     if (paypal) {

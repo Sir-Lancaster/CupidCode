@@ -1,12 +1,14 @@
 # Standard Library
 from datetime import datetime, timedelta
 import json
+import os
 
 # Django
 from django.contrib.auth import login, authenticate
 from django.http import JsonResponse
 from django.utils.timezone import make_aware
 from django.shortcuts import get_object_or_404, get_list_or_404
+from django.views.decorators.http import require_http_methods
 
 # REST Framework
 from rest_framework import status
@@ -1620,3 +1622,30 @@ def notify(request):
         return helpers.send_text(account_sid, auth_token, message)
     else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+@api_view(['GET'])
+def get_google_maps_config(request):
+    """
+    Get Google Maps API configuration.
+    
+    Returns:
+        Response:
+            GOOGLE_MAPS_API_KEY: The Google Maps API key from environment variables
+    """
+    return Response({
+        'GOOGLE_MAPS_API_KEY': os.getenv('GOOGLE_MAPS_API_KEY', '')
+    })
+
+@api_view(["GET"])
+def paypal_config(request):
+    """Return PayPal configuration for client-side SDK initialization"""
+    return Response({
+        'CLIENT_ID': os.environ.get('VITE_PAYPAL_CLIENT_ID', ''),
+        'CURRENCY': os.environ.get('VITE_PAYPAL_CURRENCY', 'USD'),
+        'MODE': os.environ.get('PAYPAL_MODE', 'sandbox')
+    })
+

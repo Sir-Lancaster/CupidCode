@@ -55,4 +55,6 @@ urlpatterns = [
     path('manager/unsuspend/', views.unsuspend, name='unsuspend'),
     path('stt/', views.speech_to_text, name='speech_to_text'),
     path('notify/', views.notify, name='notify'),
+    path('google-maps-config/', views.get_google_maps_config, name='get_google_maps_config'),
+    path('paypal/config/', views.paypal_config, name='paypal_config'),
 ]
