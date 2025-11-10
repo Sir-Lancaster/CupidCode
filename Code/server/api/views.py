@@ -1698,8 +1698,6 @@ def get_notifications(request, pk):
         'current_time': make_aware(datetime.now()).isoformat(),
         'timeout': True
     }, status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
 
 
 
