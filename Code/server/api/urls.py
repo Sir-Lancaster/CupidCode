@@ -56,7 +56,6 @@ urlpatterns = [
     path('stt/', views.speech_to_text, name='speech_to_text'),
     path('email_notification/', views.email_notification, name='email_notification'),
     path('notifications/<int:pk>/', views.get_notifications, name='get_notifications'),
-    path('notify/', views.notify, name='notify'),
     path('google-maps-config/', views.get_google_maps_config, name='get_google_maps_config'),
     path('paypal/config/', views.paypal_config, name='paypal_config'),
 ]

@@ -1699,9 +1699,6 @@ def get_notifications(request, pk):
         'timeout': True
     }, status=status.HTTP_200_OK)
 
-
-
-
 @api_view(['GET'])
 def get_google_maps_config(request):
     """
