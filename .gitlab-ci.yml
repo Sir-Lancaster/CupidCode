@@ -134,6 +134,8 @@ deploy:
       VITE_PAYPAL_CURRENCY=USD
       PAYPAL_SECRET=EDBVjz8OOR-60JZVUW9Fa6LcddGQWvrn4xgJ3BIFQ8xChCxIPPqQE6Cu_PQcGQ9Hw6f9kwI6WyInCEz5
       PAYPAL_MODE=sandbox
+      GRID_API_KEY=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
+      SEND_EMAIL=cupidcodeteam7@gmail.com
       ENVEOF
             "
     
