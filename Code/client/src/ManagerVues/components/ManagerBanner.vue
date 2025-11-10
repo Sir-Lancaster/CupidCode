@@ -15,14 +15,9 @@ function closeDrawer() {
   isDrawerOpen.value = false
 }
 
-function navigateTo(routeName) {
-    // Get user_id from current route instead of hash extraction
-    const currentUserId = router.currentRoute.value.params.id
-    
-    router.push({ 
-        name: routeName, 
-        params: { id: currentUserId }
-    })
+function navigateTo(routeName, params = {}) {
+  router.push({ name: routeName, params })
+  closeDrawer()
 }
 
 async function logout() {
@@ -57,52 +52,34 @@ const user_id = parseInt(window.location.hash.split('/')[3])
     </button>
     
     <div class="logo">
-      Cupid Code
+      Cupid Code Manager
     </div>
     
     <!-- Side Drawer -->
     <div class="drawer-overlay" :class="{ open: isDrawerOpen }" @click="closeDrawer"></div>
     <div class="drawer" :class="{ open: isDrawerOpen }">
       <div class="drawer-header">
-        <h3>Navigation</h3>
+        <h3>Manager Navigation</h3>
         <button @click="closeDrawer" class="close-btn">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
       
       <nav class="drawer-nav">
-        <button @click="navigateTo('CupidHome', { id: user_id })" class="nav-item">
-          <span class="material-symbols-outlined">home</span>
-          Home
+        <button @click="navigateTo('ManagerHome', { id: user_id })" class="nav-item">
+          <span class="material-symbols-outlined">dashboard</span>
+          Dashboard
         </button>
         
-        <button @click="navigateTo('GigDetails', { id: user_id })" class="nav-item">
-          <span class="material-symbols-outlined">search</span>
-          Find Gigs
+        <button @click="navigateTo('ManageDaters', { id: user_id })" class="nav-item">
+          <span class="material-symbols-outlined">favorite</span>
+          Manage Daters
         </button>
         
-        <button @click="navigateTo('GigComplete', { id: user_id })" class="nav-item">
-          <span class="material-symbols-outlined">assignment_turned_in</span>
-          Completed Gigs
-        </button>
-        
-        <button @click="navigateTo('CupidDetails', { id: user_id })" class="nav-item">
+        <button @click="navigateTo('ManageCupids', { id: user_id })" class="nav-item">
           <span class="material-symbols-outlined">person</span>
-          Profile
+          Manage Cupids
         </button>
-        
-        <button @click="navigateTo('CupidFeedback', { id: user_id })" class="nav-item">
-          <span class="material-symbols-outlined">feedback</span>
-          Feedback
-        </button>
-        
-        <div class="accessibility-section">
-          <h4>Accessibility</h4>
-          <button class="nav-item accessibility-toggle">
-            <span class="material-symbols-outlined">light_mode</span>
-            Toggle Light Mode
-          </button>
-        </div>
         
         <!-- Logout Section -->
         <div class="logout-section">
@@ -153,7 +130,7 @@ const user_id = parseInt(window.location.hash.split('/')[3])
   left: 50%;
   transform: translateX(-50%);
   color: #09A129;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
 }
 
@@ -204,6 +181,7 @@ const user_id = parseInt(window.location.hash.split('/')[3])
 .drawer-header h3 {
   color: #09A129;
   margin: 0;
+  font-size: 16px;
 }
 
 .close-btn {
@@ -245,22 +223,6 @@ const user_id = parseInt(window.location.hash.split('/')[3])
 
 .nav-item .material-symbols-outlined {
   font-size: 20px;
-}
-
-.accessibility-section {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid #00CCFF;
-}
-
-.accessibility-section h4 {
-  color: #09A129;
-  margin: 0 0 12px 16px;
-  font-size: 14px;
-}
-
-.accessibility-toggle {
-  font-style: italic;
 }
 
 /* Logout Section */

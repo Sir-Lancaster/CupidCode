@@ -1,54 +1,40 @@
 <script setup>
-import { defineProps } from 'vue'
 import router from '../../router'
 
 const props = defineProps(['currentPage'])
 
-// Get user_id from current route - this is the key fix
-const getCurrentUserId = () => {
-    return router.currentRoute.value.params.id
-}
-
 function navigateTo(routeName, params = {}) {
-    if (props.currentPage === routeName) return; // Skip if same page
-    
-    // Get user_id from current route
-    const currentUserId = getCurrentUserId()
-    
-    // Use the current user ID 
-    const navigationParams = {
-        id: currentUserId,
-        ...params
-    }
-    
-    router.push({ 
-        name: routeName, 
-        params: navigationParams 
-    })
+  router.push({ name: routeName, params })
 }
 
-// Navigation items array
+// Get user_id from URL for navigation
+const user_id = parseInt(window.location.hash.split('/')[3])
+
+// Navigation items with their routes and icons
 const navItems = [
-    { name: 'Home', route: 'CupidHome', icon: 'home' },
-    { name: 'Active Gigs', route: 'GigDetails', icon: 'search' },
-    { name: 'Completed Gigs', route: 'GigComplete', icon: 'assignment_turned_in' },
-    { name: 'Profile', route: 'CupidDetails', icon: 'person' }
+  { name: 'Dashboard', route: 'ManagerHome', icon: 'dashboard' },
+  { name: 'Daters', route: 'ManageDaters', icon: 'favorite' },
+  { name: 'Cupids', route: 'ManageCupids', icon: 'person' }
 ]
 </script>
 
 <template>
-    <nav class="navbar">
-        <button 
-            v-for="item in navItems" 
-            :key="item.route"
-            @click="navigateTo(item.route)"
-            :disabled="currentPage === item.route"
-            :class="['nav-button', { active: currentPage === item.route }]"
-        >
-            <span class="material-symbols-outlined">{{ item.icon }}</span>
-            <span class="nav-text">{{ item.name }}</span>
-        </button>
-    </nav>
+  <nav class="navbar">
+    <button 
+      v-for="item in navItems" 
+      :key="item.name"
+      @click="navigateTo(item.route, { id: user_id })"
+      class="nav-button"
+      :class="{ active: currentPage === item.route }"
+    >
+      <span class="nav-icon">
+        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        <!-- Fallback if Material Icons don't load -->
+        <span class="fallback-icon" v-if="false">{{ item.name.charAt(0) }}</span>
+      </span>
+      <span class="nav-text">{{ item.name }}</span>
+    </button>
+  </nav>
 </template>
 
 <style scoped>
@@ -105,18 +91,8 @@ const navItems = [
   color: #00CCFF !important; /* Light blue for active */
 }
 
-.nav-button:hover:not(:disabled) {
+.nav-button:hover {
   transform: translateY(-2px);
-}
-
-.nav-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.8;
-  color: #00CCFF !important; /* Keep blue color for disabled/active state */
-}
-
-.nav-button:disabled:hover {
-  transform: none; /* No hover effect when disabled */
 }
 
 .nav-icon {
@@ -158,7 +134,7 @@ const navItems = [
   }
   
   .nav-button {
-    width: 60px;
+    min-width: 60px;
     padding: 6px 8px;
   }
 }
