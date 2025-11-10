@@ -1356,10 +1356,10 @@ def get_active_cupids(request):
             If the number of active cupids was not retrieved successfully, return an error message and a 400 status code.
     """
     try:
-        active_cupids = helpers.get_sessions(User.Role.DATER)
+        active_cupids = helpers.get_sessions(User.Role.CUPID)  # Fixed: was DATER, changed to CUPID
         if active_cupids is None:
-            return Response(status.HTTP_400_BAD_REQUEST)
-        return Response(active_cupids, status.HTTP_200_OK)
+            return Response(status=status.HTTP_400_BAD_REQUEST)  # Fixed: added status=
+        return Response(active_cupids, status=status.HTTP_200_OK)  # Fixed: added status=
     except Exception as e:
         return Response({'error': e}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1381,8 +1381,8 @@ def get_active_daters(request):
     try:
         active_daters = helpers.get_sessions(User.Role.DATER)
         if active_daters is None:
-            return Response(status.HTTP_400_BAD_REQUEST)
-        return Response(active_daters, status.HTTP_200_OK)
+            return Response(status=status.HTTP_400_BAD_REQUEST)  # Fixed: added status=
+        return Response(active_daters, status=status.HTTP_200_OK)  # Fixed: added status=
     except Exception as e:
         return Response({'error': e}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1402,7 +1402,7 @@ def get_gig_rate(request):
             If the rate of gigs per hour was not retrieved successfully, return an error message and a 400 status code.
     """
     try:
-        yesterday = datetime.now() - datetime.timedelta(days=1)
+        yesterday = datetime.now() - timedelta(days=1)  # Fixed: removed datetime. prefix
         gigs_from_past_day = Gig.objects.filter(date_time_of_request__range=(yesterday, datetime.now()))
         if gigs_from_past_day is None:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -1451,10 +1451,10 @@ def get_gig_drop_rate(request):
     """
     try:
         number_of_drops = 0
-        yesterday = datetime.now() - datetime.timedelta(days=1)
+        yesterday = datetime.now() - timedelta(days=1)  # Fixed: removed datetime. prefix
         gigs_from_past_day = Gig.objects.filter(date_time_of_request__range=(yesterday, datetime.now()))
         if gigs_from_past_day is None:
-            return Response(status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)  # Fixed: added status=
         for gig in gigs_from_past_day:
             number_of_drops += gig.dropped_count
         drop_rate = number_of_drops / 24
@@ -1479,10 +1479,10 @@ def get_gig_complete_rate(request):
             If the rate of gigs that are completed was not retrieved successfully, return an error message and a 400 status code.
     """
     try:
-        yesterday = datetime.now() - datetime.timedelta(days=1)
+        yesterday = datetime.now() - timedelta(days=1)  # Fixed: removed datetime. prefix
         gigs_from_past_day = Gig.objects.filter(date_time_of_request__range=(yesterday, datetime.now()))
         if gigs_from_past_day is None:
-            return Response(status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)  # Fixed: added status=
         number_of_completed_gigs = gigs_from_past_day.filter(status=2).count()
         number_of_gigs = Gig.objects.all().count()
         gig_complete_rate = number_of_completed_gigs / number_of_gigs
@@ -1597,30 +1597,107 @@ def speech_to_text(request):
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
-def notify(request):
-    """
-    Notify a user (any type) of something via a text or email depending on their communication preference.
-
-    Args:
-        request: Information about the request.
-            request.post: The json data sent to the server.
-                user_id (int): The id of the user to notify.
-                message (str): The message to send to the user.
-    Returns:
-        Response:
-            If the message was sent successfully, return a 200 status code.
-            If the message was not sent successfully, return an error message and a 400 status code.
-    """
+def email_notification(request):
     data = request.data
-    dater = get_object_or_404(Dater, user_id=data['user_id'])
-    account_sid = helpers.get_twilio_account_sid()
-    auth_token = helpers.get_twilio_auth_token()
+    recipient = get_object_or_404(User, id=data['user_id'])
     message = data['message']
-    if dater.communication_preference == 0:
-        return helpers.send_email(dater, message)
-    elif dater.communication_preference == 1:
-        return helpers.send_text(account_sid, auth_token, message)
+    return helpers.send_email(recipient, message)
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def get_notifications(request, pk):
+    """
+    Long poll for real-time popup notifications.
+    
+    Args:
+        pk (int): The user id from URL
+        query params:
+            last_check (str): ISO timestamp of last check (optional)
+            timeout (int): Max seconds to wait (default: 30, max: 60)
+    """
+    import time
+    
+    user_id = pk
+    timeout = min(int(request.GET.get('timeout', 30)), 60)
+    start_time = time.time()
+    
+    if user_id != request.user.id and not request.user.is_staff:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    
+    # Parse last check timestamp or start from now
+    last_check = request.GET.get('last_check')
+    if last_check:
+        try:
+            last_check_time = make_aware(datetime.fromisoformat(last_check.replace('Z', '+00:00')))
+        except ValueError:
+            last_check_time = make_aware(datetime.now())
     else:
+        last_check_time = make_aware(datetime.now())
+    
+    # Long poll loop
+    while time.time() - start_time < timeout:
+        notifications = []
+        
+        # Check for new feedback
+        new_feedback = Feedback.objects.filter(
+            target_id=user_id,
+            date_time__gt=last_check_time
+        )
+        
+        for feedback in new_feedback:
+            notifications.append({
+                'type': 'feedback',
+                'message': f"You received a {feedback.star_rating}-star rating!",
+                'timestamp': feedback.date_time.isoformat()
+            })
+        
+        # Check for gig status changes
+        if request.user.role == User.Role.DATER:
+            gigs = Gig.objects.filter(dater__user_id=user_id)
+            for gig in gigs:
+                if (gig.date_time_of_claim and gig.date_time_of_claim > last_check_time):
+                    notifications.append({
+                        'type': 'gig_claimed',
+                        'message': f"Your gig has been claimed by a Cupid!",
+                        'timestamp': gig.date_time_of_claim.isoformat()
+                    })
+                elif (gig.date_time_of_completion and gig.date_time_of_completion > last_check_time):
+                    notifications.append({
+                        'type': 'gig_completed', 
+                        'message': f"Your gig has been completed!",
+                        'timestamp': gig.date_time_of_completion.isoformat()
+                    })
+                elif (gig.status == Gig.Status.UNCLAIMED and gig.dropped_count > 0 and 
+                      gig.date_time_of_claim and gig.date_time_of_claim <= last_check_time):
+                    # Gig was previously claimed but is now unclaimed (dropped)
+                    notifications.append({
+                        'type': 'gig_dropped',
+                        'message': f"Your gig was dropped and is now available for other Cupids!",
+                        'timestamp': make_aware(datetime.now()).isoformat()
+                    })
+        
+        # Check for gig notifications for cupids too
+        elif request.user.role == User.Role.CUPID:
+            # Cupids could get notifications about new gigs in their area, etc.
+            pass
+        
+        # Return notifications if found
+        if notifications:
+            return Response({
+                'notifications': notifications,
+                'current_time': make_aware(datetime.now()).isoformat()
+            }, status=status.HTTP_200_OK)
+        
+        # Wait 2 seconds before checking again
+        time.sleep(2)
+    
+    # Timeout - return empty
+    return Response({
+        'notifications': [],
+        'current_time': make_aware(datetime.now()).isoformat(),
+        'timeout': True
+    }, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -1648,4 +1725,3 @@ def paypal_config(request):
         'CURRENCY': os.environ.get('VITE_PAYPAL_CURRENCY', 'USD'),
         'MODE': os.environ.get('PAYPAL_MODE', 'sandbox')
     })
-

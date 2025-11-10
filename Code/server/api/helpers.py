@@ -12,6 +12,7 @@ from django.contrib.sessions.models import Session
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, get_list_or_404
+from django.conf import settings
 
 # Rest Framework
 from rest_framework.response import Response
@@ -725,36 +726,102 @@ def send_text(account_sid, auth_token, message):
     return Response(message.sid, status=status.HTTP_200_OK)
 
 
-def send_email(dater, message):
+def send_email(recipient, message):
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                margin: 0;
+                padding: 0;
+            }}
+            .email-container {{
+                max-width: 600px;
+                margin: 40px auto;
+                background-color: #ffffff;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }}
+            .email-header {{
+                background: linear-gradient(135deg, #FB3640 0%, #1F487E 100%);
+                padding: 30px;
+                text-align: center;
+            }}
+            .email-header h1 {{
+                color: #ffffff;
+                margin: 0;
+                font-size: 28px;
+                font-weight: bold;
+            }}
+            .email-body {{
+                padding: 40px 30px;
+                color: #333333;
+                line-height: 1.6;
+            }}
+            .notification-icon {{
+                text-align: center;
+                font-size: 48px;
+                margin-bottom: 20px;
+            }}
+            .message-content {{
+                background-color: #f9f9f9;
+                border-left: 4px solid #09A129;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 4px;
+            }}
+            .email-footer {{
+                background-color: #1F487E;
+                padding: 20px;
+                text-align: center;
+                color: #ffffff;
+                font-size: 14px;
+            }}
+            .email-footer a {{
+                color: #00CCFF;
+                text-decoration: none;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="email-header">
+                <h1>💘 Cupid Code</h1>
+            </div>
+            <div class="email-body">
+                <div class="notification-icon">🔔</div>
+                <h2 style="color: #1F487E; text-align: center;">You have a new notification!</h2>
+                <div class="message-content">
+                    {message}
+                </div>
+                <p style="text-align: center; margin-top: 30px;">
+                    Log in to your Cupid Code account to see more details.
+                </p>
+            </div>
+            <div class="email-footer">
+                <p>© 2025 Cupid Code. All rights reserved.</p>
+                <p>This is an automated notification. Please do not reply to this email.</p>
+            </div>
+        </div>
+    </body>
+    </html>
     """
-    Send an email notification to a Dater using SendGrid.
-
-    Composes and sends an HTML email from the verified Twilio SendGrid sender
-    address to the Dater’s registered email. Handles exceptions raised during
-    email transmission.
-
-    Args:
-        dater (Dater): The Dater instance to send the email to.
-        message (str): The email body content (HTML format).
-
-    Returns:
-        Response: A DRF Response indicating success or containing an error message.
-    """
-    dater_email = dater.email
-    from_email = get_twilio_authenticated_sender_email()
+    
     mail = Mail(
-        from_email=from_email,
-        to_emails=dater_email,
-        subject='Notification from Cupid Code',
-        html_content=message,
-    )
+        from_email=os.getenv('SEND_EMAIL', ''),
+        to_emails=recipient.email,
+        subject='Cupid Code Notification',
+        html_content=html_content)
     try:
-        grid_api_key = get_grid_api_key()
-        sg = SendGridAPIClient(grid_api_key)
-        response = sg.send(mail)
+        SendGridAPIClient(os.getenv('GRID_API_KEY', '')).send(mail)
+        return Response('Email sent', status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'error': e}, status=status.HTTP_400_BAD_REQUEST)
-    return Response(response, status=status.HTTP_200_OK)
+        print(e)
+        return Response('Failed to send email', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 def get_message_from_audio(audio_data, dater):
@@ -854,13 +921,28 @@ def get_sessions(role):
         Response: A DRF Response containing the number of active sessions for
         the specified role, or an error response if none are found.
     """
-    active_sessions = Session.objects.filter(expire_date__gte=timezone.now())
-    if active_sessions is None:
-        return Response({'error': 'No active sessions'}, status=status.HTTP_400_BAD_REQUEST)
-    number_dater_sessions = 0
-    for session in active_sessions:
-        session_data = session.get_decoded()
-        user_id = session_data.get('_auth_user_id')
-        if User.objects.get(id=user_id).role == role:
-            number_dater_sessions += 1
-    return Response({'active_sessions': number_dater_sessions}, status=status.HTTP_200_OK)
+    try:
+        active_sessions = Session.objects.filter(expire_date__gte=timezone.now())
+        if not active_sessions.exists():
+            return {'data': 0}  # Return dict with data key, not Response object
+        
+        number_role_sessions = 0
+        for session in active_sessions:
+            try:
+                session_data = session.get_decoded()
+                user_id = session_data.get('_auth_user_id')
+                if user_id:  # Check if user_id exists
+                    try:
+                        user = User.objects.get(id=user_id)
+                        if user.role == role:
+                            number_role_sessions += 1
+                    except User.DoesNotExist:
+                        # Skip sessions for deleted users
+                        continue
+            except Exception:
+                # Skip sessions that can't be decoded
+                continue
+        
+        return {'data': number_role_sessions}  # Return dict with data key
+    except Exception as e:
+        return {'error': str(e), 'data': 0}  # Return error but still include data key

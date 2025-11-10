@@ -342,7 +342,7 @@
     .update-content {
         text-align: center;
         margin-bottom: 4px;
-        color: white;
+        color: var(--new-primary);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -357,6 +357,22 @@
     textarea {
         width: 100%;
         min-height: 5em;
+    }
+
+    .update-content textarea {
+        border: 1px solid var(--new-primary);
+        border-radius: 4px;
+        padding: 8px;
+        background-color: var(--new-background);
+        color: var(--new-primary);
+        min-width: 250px;
+        min-height: 80px;
+        resize: vertical;
+    }
+
+    .update-content textarea:focus {
+        outline: 2px solid var(--new-primary);
+        border-color: var(--new-primary);
     }
 
 

@@ -159,7 +159,7 @@ onMounted(getData)
             
             <div class="widget-tile" @click="$router.push({name: 'GigDetails', params: {id: user_id}})">
                 <span class="material-symbols-outlined icon">search</span>
-                <h3>Find Gigs</h3>
+                <h3>Active Gigs</h3>
                 <p>Search for available gigs</p>
             </div>
             

@@ -2,7 +2,6 @@
 import { makeRequest } from '../utils/make_request.js';
 import { ref } from 'vue';
 import router from '../router/index.js';
-import PinkButton from '../components/PinkButton.vue'
 
 const email = ref('')
 const password = ref('')
@@ -64,7 +63,7 @@ async function login() {
                     Password
                     <input type="password" placeholder="Password" id="password" name="password" v-model="password">
                 </label>
-                <PinkButton id="sign_in">Sign In</PinkButton>
+                <button @click="$emit('click-forward')" class="action-button send-button">Sign In</button>
             </form>
         </div>
         <div class="atag">
@@ -164,4 +163,39 @@ a:hover {
     height: auto;
     display: block;
 }
+
+/* Custom Action Buttons */
+    .action-button {
+        background-color: var(--new-secondary);
+        border: 2px solid var(--new-primary);
+        border-radius: 8px;
+        padding: 12px 20px;
+        color: var(--new-primary);
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        min-width: 100px;
+    }
+
+    .action-button:hover {
+        background-color: var(--new-primary);
+        color: var(--new-background);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(9, 161, 41, 0.3);
+    }
+
+    .action-button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(9, 161, 41, 0.2);
+    }
+
+    .send-button {
+        background-color: var(--new-secondary);
+        border-color: var(--new-primary);
+    }
 </style>

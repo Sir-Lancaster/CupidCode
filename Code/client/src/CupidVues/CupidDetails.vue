@@ -3,9 +3,8 @@
     import { makeRequest } from '../utils/make_request'
     import {ref, onMounted} from 'vue'
 
-    import NavSuite from '../components/NavSuite.vue';
-    import CupidCoin from './components/CupidCoin.vue'
-    import PinkButton from '../components/PinkButton.vue'
+    import CupidBanner from './components/CupidBanner.vue';
+    import CupidNavBar from './components/CupidNavBar.vue';
 
     //User info
     const user_id  = parseInt(window.location.hash.split('/')[3]) //Gets the id from the router
@@ -45,13 +44,6 @@
         router.push({name: 'CupidDetails', params: {id: user_id}});
     }
 
-    async function toggleAccept() {
-        accepting_gigs.value = !accepting_gigs.value
-        await makeRequest(`/api/cupid/accepting/`, `post`, {
-            'choice': accepting_gigs.value
-        })
-    }
-
     async function getData() {
         const cupid = await makeRequest(`api/user/${user_id}`)
         email.value = cupid.user.email
@@ -73,19 +65,14 @@
 </script>
 
 <template>
-    <NavSuite title='Profile' profile='CupidDetails'>
-        <router-link class="link" :to="{name: 'CupidHome', params: {id: user_id}}"> Home </router-link>
-        <router-link class="link" :to="{name: 'GigDetails', params: {id: user_id}}"> Gigs Available </router-link>
-        <router-link class="link" :to="{name: 'GigComplete', params: {id: user_id}}"> Gigs Completed </router-link>
-        <router-link class="link" :to="{name: 'CupidFeedback', params: {id: user_id}}"> Feedback </router-link>
-    </NavSuite>
+    <CupidBanner />
+    <CupidNavBar currentPage="CupidDetails" />
 
     <main> 
-        <CupidCoin :active="accepting_gigs" @click="toggleAccept"/>
         <div class="card">
-            <p id="balance">${{ balance }}</p>
+            <h1>{{ fname }}'s Profile</h1>
             <hr></hr>
-            <p id="succesful">{{ gigs_completed }} gigs succesful of {{ gigs_failed + gigs_completed}}</p>
+            <p id="succesful">{{ gigs_completed }} gigs successful of {{ gigs_failed + gigs_completed}}</p>
         </div>
         <h1>Update Details</h1>
         <hr>
@@ -106,6 +93,7 @@
                 Range
                 <input type="text" id="range" v-model="range"/>
             </label>
+            <button @click="$emit('click-forward')" class="action-button send-button margin-sixteen">Update Profile</button>
             <label class="form-field">
                 PayPal Email (for receiving payments)
                 <input type="email" v-model="paypal_email" required>
@@ -118,12 +106,34 @@
 <style scoped>
 
 main {
-    position: absolute;
-    top: 42px;
-    left: 0px;
-    right: 0px;
-    padding: 8px;
+    --new-primary: #09A129;     /* Green for text */
+    --new-secondary: #1F487E;   /* Dark blue for buttons */
+    --new-background: #000000;  /* Black for backgrounds */
+    --new-accent: #FB3640;      /* Red */
+    --new-light-blue: #00CCFF;  /* Light blue */
+        
+    padding: 20px;
+    background-color: var(--new-background);
+    color: var(--new-primary);
+    min-height: 100vh;
+        
+    /* Spacing for Banner and NavBar */
+    margin-top: 60px; /* Space for banner (60px) + gap */
 }
+
+/* Mobile: Add bottom margin for bottom navbar */
+    @media (max-width: 768px) {
+        main {
+            margin-bottom: 90px; /* Space for bottom navbar */
+        }
+    }
+
+    /* Desktop: Add top margin for navbar below banner */
+    @media (min-width: 769px) {
+        main {
+            margin-top: 140px; /* Space for banner + navbar + gaps */
+        }
+    }
 
 hr {
     border: 1px solid #F0F0F0;
@@ -142,25 +152,28 @@ hr {
 input {
     border: 3px rgba(128, 128, 128, 0.5) solid;
     border-radius: 4px;
-    width: auto;
+    width: 100%;
     padding: 8px;
-    margin: 10px;
+    margin-top: 5px;
+    background-color: var(--new-background);
+    color: white;
+    box-sizing: border-box;
 }
 
 .card {
-    border: 4px solid var(--secondary-blue);
+    border: 4px solid var(--new-background);
     border-radius: 16px;
     margin: 16px;
     padding: 8px;
-    background-color: var(--primary-blue);
-    color: white;
+    background-color: var(--new-background);
+    color: var(--new-primary);
     font-size: 1.3em;
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
 .card > hr {
-    border-color: var(--secondary-red);
+    border-color: var(--new-accent);
 }
 .card > p {
     margin-top: 2px;
@@ -168,4 +181,39 @@ input {
     margin-left: auto;
     margin-right: auto;
 }
+
+/* Custom Action Buttons */
+    .action-button {
+        background-color: var(--new-secondary);
+        border: 2px solid var(--new-primary);
+        border-radius: 8px;
+        padding: 12px 20px;
+        color: var(--new-primary);
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        min-width: 100px;
+    }
+
+    .action-button:hover {
+        background-color: var(--new-primary);
+        color: var(--new-background);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(9, 161, 41, 0.3);
+    }
+
+    .action-button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(9, 161, 41, 0.2);
+    }
+
+    .send-button {
+        background-color: var(--new-secondary);
+        border-color: var(--new-primary);
+    }
 </style>
