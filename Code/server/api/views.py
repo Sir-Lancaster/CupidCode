@@ -1004,18 +1004,20 @@ def drop_gig(request):
     gig = get_object_or_404(Gig, id=data['gig_id'])
     if gig.cupid != request.user.cupid:
         return Response(status=status.HTTP_403_FORBIDDEN)
-    serializer = GigSerializer(
-        gig,
-        data={
-            'status': Gig.Status.UNCLAIMED,
-            'cupid': None,
-            'dropped_count': gig.dropped_count + 1,
-        },
-        partial=True,
-    )
-    gig.cupid.gigs_failed += 1
-    gig.cupid.save()
-    return helpers.retrieved_response(serializer)
+    
+    # Update gig with drop information
+    gig.status = Gig.Status.UNCLAIMED
+    gig.cupid = None
+    gig.dropped_count += 1
+    gig.date_time_of_drop = make_aware(datetime.now())  # Set drop timestamp
+    gig.save()
+    
+    # Update cupid stats
+    request.user.cupid.gigs_failed += 1
+    request.user.cupid.save()
+    
+    serializer = GigSerializer(gig)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -1668,13 +1670,12 @@ def get_notifications(request, pk):
                         'message': f"Your gig has been completed!",
                         'timestamp': gig.date_time_of_completion.isoformat()
                     })
-                elif (gig.status == Gig.Status.UNCLAIMED and gig.dropped_count > 0 and 
-                      gig.date_time_of_claim and gig.date_time_of_claim <= last_check_time):
-                    # Gig was previously claimed but is now unclaimed (dropped)
+                elif (gig.date_time_of_drop and gig.date_time_of_drop > last_check_time):
+                    # Use the actual drop timestamp for proper notification timing
                     notifications.append({
                         'type': 'gig_dropped',
                         'message': f"Your gig was dropped and is now available for other Cupids!",
-                        'timestamp': make_aware(datetime.now()).isoformat()
+                        'timestamp': gig.date_time_of_drop.isoformat()
                     })
         
         # Check for gig notifications for cupids too
