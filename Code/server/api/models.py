@@ -103,6 +103,7 @@ class Gig(models.Model):
     date_time_of_request = models.DateTimeField(auto_now_add=True)
     date_time_of_claim = models.DateTimeField(null=True)
     date_time_of_completion = models.DateTimeField(null=True)
+    date_time_of_drop = models.DateTimeField(null=True)
     quest = models.OneToOneField(Quest, on_delete=models.CASCADE)
     dropped_count = models.IntegerField()
     accepted_count = models.IntegerField()
