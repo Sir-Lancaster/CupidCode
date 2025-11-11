@@ -61,10 +61,13 @@ async function notify(notification) {
   currentNotification.value = notification;
   popupActive.value = true;
   
+  // Comment out email functionality to test push notifications only
+  /*
   await makeRequest('api/email_notification/', 'post', {
     user_id: user_id,
     message: notification.message
   })
+  */
 
   // Auto-hide after 5 seconds
   setTimeout(() => {
