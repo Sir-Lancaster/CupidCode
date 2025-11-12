@@ -941,3 +941,86 @@ def get_sessions(role):
         return {'data': number_role_sessions}  # Return dict with data key
     except Exception as e:
         return {'error': str(e), 'data': 0}  # Return error but still include data key
+
+
+
+def find_places_for_keyword(keyword, user_location):
+    """
+    Find places that sell the given keyword using Google Places API
+    """
+    try:
+        import googlemaps
+        
+        # Get Google Maps API key
+        api_key = os.getenv('GOOGLE_MAPS_API_KEY')
+        if not api_key:
+            raise Exception('Google Maps API key not configured')
+        
+        gmaps = googlemaps.Client(key=api_key)
+        
+        # Search for places
+        location = (user_location.get('lat', 40.7128), user_location.get('lng', -74.0060))
+        radius = 10000  # 10km radius
+        
+        # Try different search queries
+        search_queries = [
+            f"{keyword} store",
+            f"{keyword} shop", 
+            f"buy {keyword}",
+            keyword
+        ]
+        
+        all_results = []
+        
+        for query in search_queries:
+            try:
+                result = gmaps.places_nearby(
+                    location=location,
+                    radius=radius,
+                    keyword=query,
+                    type='store'
+                )
+                
+                if result.get('results'):
+                    all_results.extend(result['results'])
+            except Exception as e:
+                print(f"Error searching for '{query}': {e}")
+        
+        unique_places = {}
+        for place in all_results:
+            place_id = place.get('place_id')
+            if place_id not in unique_places:
+                # Enrich place data with formatted address
+                try:
+                    place_details = gmaps.place(
+                        place_id=place_id,
+                        fields=['formatted_address', 'name', 'rating', 'user_ratings_total', 'geometry']
+                    )
+                    
+                    if place_details.get('result'):
+                        # Merge the detailed info with the original place data
+                        enriched_place = {**place, **place_details['result']}
+                        unique_places[place_id] = enriched_place
+                    else:
+                        # Fallback: create formatted_address from vicinity or name
+                        place['formatted_address'] = place.get('vicinity', place.get('name', 'Unknown Location'))
+                        unique_places[place_id] = place
+                        
+                except Exception as e:
+                    print(f"Error getting place details for {place_id}: {e}")
+                    # Fallback: create formatted_address from vicinity or name
+                    place['formatted_address'] = place.get('vicinity', place.get('name', 'Unknown Location'))
+                    unique_places[place_id] = place
+        
+        # Sort by rating (highest first), then by user ratings count
+        sorted_places = sorted(
+            unique_places.values(),
+            key=lambda x: (x.get('rating', 0), x.get('user_ratings_total', 0)),
+            reverse=True
+        )
+        
+        return sorted_places[:5]  # Return top 5 results
+        
+    except Exception as e:
+        print(f"Error in find_places_for_keyword: {e}")
+        return []

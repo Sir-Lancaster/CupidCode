@@ -2,6 +2,8 @@
 import { makeRequest } from '../utils/make_request';
 import {onMounted, ref, watch} from 'vue';
 import router from '../router';
+import AIGigProposal from './components/AIGig.vue'
+import { getCurrentLocation } from '../utils/location_utils'
 
 import Banner from '../components/Banner.vue';
 import NavBar from '../components/NavBar.vue';
@@ -9,15 +11,23 @@ import NavBar from '../components/NavBar.vue';
 const chatArr = ref([])
 const message = ref('')
 let noChats = false
+let openAICheckTimeout = null
+const checkedTranscripts = new Set() // To avoid duplicate checks
 
 // Speech recognition variables
 const isRecording = ref(false)
 let recognition = null
 let recordingTimeout = null
 
+let keywordDetectedInSession = false
+let processingKeywordCheck = false
+
+const showAIGig = ref(false)
+const proposedGig = ref(null)
+const userLocation = ref(null)
+
 // Use router params instead of hash extraction
 const user_id = router.currentRoute.value.params.id
-
 const chatCount = 10;
 
 async function getChats() {
@@ -61,9 +71,6 @@ async function send() {
 
     // Send to server to save & get response from server
     const results = await makeRequest('/api/chat/', 'post', {
-        // user: {
-        //     id: user_id
-        // },
         message: message.value
     });
     chatArr.value.push({
@@ -71,9 +78,23 @@ async function send() {
         text: results.message,
         from_ai: true,
     })
-    
-    // Clear input after sending
     message.value = ''
+}
+
+function closeAIGig() {
+    showAIGig.value = false
+    proposedGig.value = null
+}
+
+function onGigCreated(gigData) {
+    // Add success message to chat
+    chatArr.value.push({
+        owner: user_id,
+        text: `Great! I've created your gig for ${proposedGig.value?.keyword}. A Cupid will pick it up soon! 🎉`,
+        from_ai: true,
+    })
+    
+    closeAIGig()
 }
 
 // Clear chat display function
@@ -104,6 +125,10 @@ function startRecording() {
         return
     }
 
+    keywordDetectedInSession = false
+    processingKeywordCheck = false
+    checkedTranscripts.clear()
+
     // Create recognition instance
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     recognition = new SpeechRecognition()
@@ -116,20 +141,93 @@ function startRecording() {
     // Handle results
     recognition.onresult = (event) => {
         let finalTranscript = ''
+        let interimTranscript = ''
         
-        // Combine all final results
+        // Combine all final and interim results
         for (let i = 0; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
                 finalTranscript += event.results[i][0].transcript + ' '
+            } else {
+                // Real-time interim speech
+                interimTranscript += event.results[i][0].transcript + ' '
             }
         }
         
-        // Update message with accumulated transcript
-        if (finalTranscript.trim()) {
-            message.value = finalTranscript.trim()
+        // Get the complete current transcript
+        const completeTranscript = (finalTranscript + interimTranscript).trim()
+        
+        // Send to OpenAI for word detection 
+        if (completeTranscript && !keywordDetectedInSession && !processingKeywordCheck) {
+            checkForWordWithOpenAI(completeTranscript)
         }
         
-        // Don't stop recording automatically - let it continue
+        // Update message display
+        if (completeTranscript) {
+            message.value = completeTranscript
+        }
+    }
+
+    async function checkForWordWithOpenAI(transcript) {
+        if (keywordDetectedInSession || processingKeywordCheck) {
+            return
+        }
+        // Debounce to avoid too many API calls
+        if (openAICheckTimeout) {
+            clearTimeout(openAICheckTimeout)
+        }
+        // Don't check the same transcript twice
+        if (checkedTranscripts.has(transcript)) {
+            return
+        }
+        
+        openAICheckTimeout = setTimeout(async () => {
+            try {
+                processingKeywordCheck = true
+                checkedTranscripts.add(transcript)
+                
+                console.log('Sending to OpenAI for word detection:', transcript)
+                
+                const response = await makeRequest('/api/check-speech-for-word/', 'post', {
+                    transcript: transcript,
+                    target_word: 'flower'
+                })
+
+                if (response.word_detected) {
+                    console.log('OpenAI detected the word:', response.detected_word)
+                    keywordDetectedInSession = true
+                    const keyword = response.detected_word
+                    if (!userLocation.value) {
+                        try {
+                            userLocation.value = await getCurrentLocation()
+                        } catch (error) {
+                            console.warn('Could not get location:', error)
+                        }
+                    }
+                    try {
+                        const gigResponse = await makeRequest('/api/ai-gig/create/', 'post', {
+                            keyword: keyword,
+                            user_location: userLocation.value
+                        })
+                        if (gigResponse.success) {
+                            proposedGig.value = gigResponse.gig_data
+                            showAIGig.value = true
+                            console.log(`🤖 AI Gig created for detected word: ${keyword}`)
+                        } else {
+                            console.log(`❌ Could not create gig for ${keyword}: ${gigResponse.error}`)
+                        }
+                    } catch (error) {
+                        console.error('Error creating AI gig:', error)
+                    }
+                    console.log('🚫 Keyword detection disabled for remainder of this recording session')
+                } else {
+                    console.log('❌ No keyword detected in:', transcript)
+                }
+            } catch (error) {
+                console.error('Error checking with OpenAI:', error)
+            } finally {
+                processingKeywordCheck = false
+            }
+        }, 100) // Wait 100ms after speech stops changing
     }
     
     // Handle errors
@@ -174,6 +272,12 @@ function stopRecording() {
         clearTimeout(recordingTimeout)
         recordingTimeout = null
     }
+    if (openAICheckTimeout) {
+        clearTimeout(openAICheckTimeout)
+        openAICheckTimeout = null
+    }
+    processingKeywordCheck = false
+
     isRecording.value = false
 }
 
@@ -235,6 +339,14 @@ onMounted(getChats)
                 </button>
             </div>
         </div>
+            <!-- AI Gig Proposal Modal -->
+        <AIGigProposal
+            v-if="showAIGig && proposedGig"
+            :gig-data="proposedGig"
+            :user-id="user_id"
+            @close="closeAIGig"
+            @gig-created="onGigCreated"
+         />
     </main>
 </template>
 
