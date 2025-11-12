@@ -16,3 +16,4 @@ twilio>=9.0.0
 sendgrid>=6.11.0
 selenium>=4.19.0
 openai>=2.6.1
+googlemaps>=4.10.0
