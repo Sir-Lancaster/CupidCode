@@ -50,25 +50,6 @@ function parseCoordinates(locationString) {
   return null
 }
 
-// Get current location
-function getCurrentLocation() {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error('Geolocation not supported'))
-      return
-    }
-    
-    navigator.geolocation.getCurrentPosition(
-      position => resolve({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      }),
-      error => reject(error),
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-    )
-  })
-}
-
 // Geocode address to coordinates
 function geocodeAddress(address) {
   return new Promise((resolve, reject) => {
@@ -119,32 +100,81 @@ async function createRoute(map, origin, destination, color, suppressMarkers = tr
   })
 }
 
+// Add this function at the top of the script section
+async function getCurrentLocation() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      console.warn('Geolocation not supported')
+      // Use Salt Lake City as fallback
+      resolve({ lat: 40.7589, lng: -111.8883 })
+      return
+    }
+
+    console.log('Requesting geolocation permission...')
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log('Got user location:', position.coords)
+        resolve({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        })
+      },
+      (error) => {
+        console.warn('Geolocation error:', error.message)
+        
+        // Handle different error types
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            console.warn('Location access denied by user')
+            break
+          case error.POSITION_UNAVAILABLE:
+            console.warn('Location information unavailable')
+            break
+          case error.TIMEOUT:
+            console.warn('Location request timed out')
+            break
+        }
+        
+        // Always resolve with fallback location instead of rejecting
+        resolve({ lat: 40.7589, lng: -111.8883 })
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // 5 minutes
+      }
+    )
+  })
+}
+
 // Main map initialization
 async function initializeMap() {
   try {
-    isLoading.value = true
-    errorMessage.value = ''
+    console.log('Initializing map...')
     
-    // Get current location
-    try {
-      currentLocation.value = await getCurrentLocation()
-    } catch (error) {
-      console.warn('Could not get current location:', error)
+    // Verify Google Maps is loaded
+    if (!window.google?.maps?.Map) {
+      throw new Error('Google Maps not properly loaded')
     }
-    
-    // Process pickup location
+
+    // Get current location with explicit permission request
+    console.log('Getting current location...')
+    currentLocation.value = await getCurrentLocation()
+    console.log('Current location:', currentLocation.value)
+
+    // Parse pickup location
     pickupCoords.value = parseCoordinates(props.pickupLocation)
     if (!pickupCoords.value && props.pickupLocation) {
       try {
         pickupCoords.value = await geocodeAddress(props.pickupLocation)
       } catch (error) {
         console.warn('Could not geocode pickup:', error)
-        errorMessage.value = 'Could not find pickup location'
       }
     }
-    
-    // Process dropoff location
-    if (props.dropoffLocation && props.dropoffLocation !== props.pickupLocation) {
+
+    // Parse dropoff location
+    if (props.dropoffLocation) {
       dropoffCoords.value = parseCoordinates(props.dropoffLocation)
       if (!dropoffCoords.value) {
         try {
@@ -154,17 +184,25 @@ async function initializeMap() {
         }
       }
     }
-    
+
     // Set map center
-    const center = pickupCoords.value || currentLocation.value || { lat: 40.7128, lng: -74.0060 }
-    
+    const center = pickupCoords.value || currentLocation.value || { lat: 40.7589, lng: -111.8883 }
+    console.log('Map center:', center)
+
     // Create map with Map ID to support Advanced Markers
     const mapElement = document.getElementById('gig-map')
+    if (!mapElement) {
+      throw new Error('Map container element not found')
+    }
+
+    console.log('Creating Google Map...')
     const map = new window.google.maps.Map(mapElement, {
       center,
       zoom: 13,
       mapId: 'cupid-gig-map' // Add Map ID for Advanced Markers
     })
+
+    console.log('Map created successfully')
     
     // Add markers using AdvancedMarkerElement with updated properties
     if (currentLocation.value) {
@@ -264,29 +302,54 @@ async function initializeMap() {
     
   } catch (error) {
     console.error('Map initialization error:', error)
-    errorMessage.value = 'Failed to load map'
+    errorMessage.value = `Map error: ${error.message}`
   } finally {
     isLoading.value = false
   }
 }
 
 // Load Google Maps script with proper async loading
+// Load Google Maps script with proper async loading
 function loadGoogleMapsScript(apiKey) {
   return new Promise((resolve, reject) => {
+    // Check if Google Maps is already loaded
+    if (window.google && window.google.maps && window.google.maps.Map) {
+      resolve()
+      return
+    }
+
+    // Check if script is already loading
+    if (document.querySelector('script[src*="maps.googleapis.com"]')) {
+      // Wait for existing script to load
+      const checkLoaded = setInterval(() => {
+        if (window.google && window.google.maps && window.google.maps.Map) {
+          clearInterval(checkLoaded)
+          resolve()
+        }
+      }, 100)
+      
+      setTimeout(() => {
+        clearInterval(checkLoaded)
+        reject(new Error('Google Maps loading timeout'))
+      }, 10000)
+      return
+    }
+
     const script = document.createElement('script')
-    
-    // Use loading=async for better performance as recommended by Google
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry,places,marker&loading=async`
     script.async = true
     script.defer = true
     
     script.onload = () => {
-      // Wait for Google Maps to be fully loaded
-      if (window.google && window.google.maps) {
-        resolve()
-      } else {
-        reject(new Error('Google Maps failed to load properly'))
+      // Wait for Google Maps to be fully loaded with a timeout
+      const checkGoogle = () => {
+        if (window.google && window.google.maps && window.google.maps.Map) {
+          resolve()
+        } else {
+          setTimeout(checkGoogle, 50)
+        }
       }
+      checkGoogle()
     }
     
     script.onerror = () => {
@@ -294,39 +357,39 @@ function loadGoogleMapsScript(apiKey) {
     }
     
     document.head.appendChild(script)
+    
+    // Fallback timeout
+    setTimeout(() => {
+      reject(new Error('Google Maps loading timeout'))
+    }, 10000)
   })
 }
 
 // Load Google Maps and initialize
 onMounted(async () => {
-  if (!window.google) {
-    try {
-      // Fetch API key from backend
-      const response = await makeRequest('/api/google-maps-config/')
-      const apiKey = response.GOOGLE_MAPS_API_KEY
-      
-      console.log('API Key received:', apiKey ? 'Yes' : 'No') // Debug line (don't log the actual key)
-      
-      if (!apiKey) {
-        console.error('Google Maps API key not found in environment variables')
-        errorMessage.value = 'Google Maps API key not configured'
-        isLoading.value = false
-        return
-      }
-      
-      // Load Google Maps script with proper async loading
-      await loadGoogleMapsScript(apiKey)
-      
-      // Initialize the map after the script is loaded
-      await initializeMap()
-      
-    } catch (error) {
-      console.error('Failed to load Google Maps:', error)
-      errorMessage.value = 'Failed to load Google Maps configuration'
-      isLoading.value = false
+  try {
+    console.log('Starting map initialization...')
+    
+    // Get Google Maps config
+    const config = await makeRequest('/api/google-maps-config/')
+    if (!config?.GOOGLE_MAPS_API_KEY) {
+      throw new Error('Google Maps API key not configured')
     }
-  } else {
-    initializeMap()
+
+    console.log('Loading Google Maps script...')
+    
+    // Load Google Maps with proper waiting
+    await loadGoogleMapsScript(config.GOOGLE_MAPS_API_KEY)
+    
+    console.log('Google Maps loaded, initializing map...')
+    
+    // Initialize map
+    await initializeMap()
+    
+  } catch (error) {
+    console.error('Failed to load map:', error)
+    errorMessage.value = `Failed to load map: ${error.message}`
+    isLoading.value = false
   }
 })
 

@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 import json
 import os
+from openai import OpenAI
 
 # Django
 from django.contrib.auth import login, authenticate
@@ -1731,6 +1732,8 @@ def get_notifications(request, pk):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
 @api_view(['GET'])
 def get_google_maps_config(request):
     """
@@ -1752,3 +1755,131 @@ def paypal_config(request):
         'CURRENCY': os.environ.get('VITE_PAYPAL_CURRENCY', 'USD'),
         'MODE': os.environ.get('PAYPAL_MODE', 'sandbox')
     })
+
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def check_speech_for_word(request):
+    transcript = request.data.get('transcript', '')
+    target_word = request.data.get('target_word', 'flower')
+    
+    try:
+        client = OpenAI(api_key=os.getenv('AI_API_KEY', ''))
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system", 
+                    "content": f"""You are checking if the word '{target_word}' or related words are mentioned in speech. 
+                    Respond with JSON only."""
+                },
+                {
+                    "role": "user", 
+                    "content": f"""Check this speech for '{target_word}' or related words: '{transcript}'. 
+                    
+                    Return JSON with:
+                    - word_detected (true/false)
+                    - detected_word (the actual word found)  
+                    - confidence (0-1)
+                    """
+                }
+            ],
+            temperature=0.3,  # Lower temperature for more consistent detection
+            max_tokens=150   # Reduced since we're not generating prompts
+        )
+        
+        # Parse OpenAI response
+        ai_response = response.choices[0].message.content
+        
+        # Try to parse as JSON, fallback if needed
+        try:
+            import json
+            parsed_response = json.loads(ai_response)
+        except:
+            # Fallback simple detection without auto_message_prompt
+            word_detected = target_word.lower() in transcript.lower()
+            parsed_response = {
+                "word_detected": word_detected,
+                "detected_word": target_word if word_detected else None,
+                "confidence": 0.8
+            }
+        
+        return Response(parsed_response)
+        
+    except Exception as e:
+        return Response({
+            "word_detected": False,
+            "error": str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def create_ai_gig(request):
+    """
+    Create a gig using AI with Google Places API to find pickup locations
+    """
+    try:
+        data = request.data
+        keyword = data.get('keyword')
+        user_location = data.get('user_location', {})  # {lat, lng}
+        dater = get_object_or_404(Dater, user_id=request.user.id)
+        
+        places = helpers.find_places_for_keyword(keyword, user_location)
+
+        print(f"Keyword: {keyword}")
+        print(f"User location: {user_location}")
+        print(f"Found {len(places)} places")
+        if places:
+            print(f"First place keys: {places[0].keys()}")
+            print(f"First place: {places[0]}")
+        
+        if not places:
+            return Response({
+                'success': False, 
+                'error': 'No places found for this item'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Use the closest/best place
+        best_place = places[0]
+        geometry = best_place.get('geometry', {})
+        location_data = geometry.get('location', {})
+        pickup_location = (
+            best_place.get('formatted_address') or 
+            best_place.get('vicinity') or 
+            best_place.get('name') or 
+            'Unknown Location'
+        )
+        
+        gig_data = {
+            'keyword': keyword,
+            'pickup_location': pickup_location,
+            'pickup_place_id': best_place.get('place_id'),
+            'pickup_coords': {
+                'lat': location_data.get('lat', 0),
+                'lng': location_data.get('lng', 0)
+            },
+            'dropoff_location': f"{user_location.get('lat', '')},{user_location.get('lng', '')}" if user_location.get('lat') and user_location.get('lng') else None,
+            'budget': dater.budget or 0, 
+            'place_name': best_place.get('name', 'Unknown Business'),
+            'place_rating': best_place.get('rating')
+        }
+        
+        return Response({
+            'success': True,
+            'gig_data': gig_data,
+            'message': f"Found {gig_data['place_name']} for {keyword}!"
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        import traceback
+        print(f"Error in create_ai_gig: {e}")
+        print(traceback.format_exc())  # This will help debug the exact error
+        
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
