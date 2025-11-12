@@ -3,6 +3,7 @@ import requests
 import base64
 import logging
 from decimal import Decimal
+import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +88,7 @@ def send_payout_to_cupid(cupid, amount, gig_id):
     
     payout_data = {
         'sender_batch_header': {
-            'sender_batch_id': f'cupid_gig_{gig_id}_{cupid.user_id}',
+            'sender_batch_id': f'cupid_gig_{gig_id}_{cupid.user_id}_{int(datetime.datetime.utcnow().timestamp())}',
             'email_subject': 'You have received a payment from Cupid!',
             'email_message': f'Congratulations! You have received ${amount_str} for completing a gig.'
         },
