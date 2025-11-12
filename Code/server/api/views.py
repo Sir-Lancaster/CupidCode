@@ -1619,87 +1619,89 @@ def get_notifications(request, pk):
             timeout (int): Max seconds to wait (default: 30, max: 60)
     """
     import time
-    
-    user_id = pk
-    timeout = min(int(request.GET.get('timeout', 30)), 60)
-    start_time = time.time()
-    
-    if user_id != request.user.id and not request.user.is_staff:
-        return Response(status=status.HTTP_403_FORBIDDEN)
-    
-    # Parse last check timestamp or start from now
-    last_check = request.GET.get('last_check')
-    if last_check:
-        try:
-            last_check_time = make_aware(datetime.fromisoformat(last_check.replace('Z', '+00:00')))
-            
-        except ValueError:
+    try: 
+        user_id = pk
+        timeout = min(int(request.GET.get('timeout', 30)), 60)
+        start_time = time.time()
+        
+        if user_id != request.user.id and not request.user.is_staff:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        
+        # Parse last check timestamp or start from now
+        last_check = request.GET.get('last_check')
+        if last_check:
+            try:
+                last_check_time = make_aware(datetime.fromisoformat(last_check.replace('Z', '+00:00')))
+                
+            except ValueError:
+                last_check_time = make_aware(datetime.now())
+        else:
             last_check_time = make_aware(datetime.now())
-    else:
-        last_check_time = make_aware(datetime.now())
-    
-    # Long poll loop
-    while time.time() - start_time < timeout:
-        notifications = []
         
-        # Check for new feedback
-        new_feedback = Feedback.objects.filter(
-            target_id=user_id,
-            date_time__gt=last_check_time
-        )
+        # Long poll loop
+        while time.time() - start_time < timeout:
+            notifications = []
+            
+            # Check for new feedback
+            new_feedback = Feedback.objects.filter(
+                target_id=user_id,
+                date_time__gt=last_check_time
+            )
+            
+            for feedback in new_feedback:
+                notifications.append({
+                    'type': 'feedback',
+                    'message': f"You received a {feedback.star_rating}-star rating!",
+                    'timestamp': feedback.date_time.isoformat()
+                })
+            
+            # Check for gig status changes
+            if request.user.role == User.Role.DATER:
+                gigs = Gig.objects.filter(dater__user_id=user_id)
+                for gig in gigs:
+                    if (gig.date_time_of_claim and gig.date_time_of_claim > last_check_time):
+                        notifications.append({
+                            'type': 'gig_claimed',
+                            'message': f"Your gig has been claimed by a Cupid!",
+                            'timestamp': gig.date_time_of_claim.isoformat()
+                        })
+                    elif (gig.date_time_of_completion and gig.date_time_of_completion > last_check_time):
+                        notifications.append({
+                            'type': 'gig_completed', 
+                            'message': f"Your gig has been completed!",
+                            'timestamp': gig.date_time_of_completion.isoformat()
+                        })
+                    elif (gig.date_time_of_drop and gig.date_time_of_drop > last_check_time):
+                        # Use the actual drop timestamp for proper notification timing
+                        notifications.append({
+                            'type': 'gig_dropped',
+                            'message': f"Your gig was dropped and is now available for other Cupids!",
+                            'timestamp': gig.date_time_of_drop.isoformat()
+                        })
+            
+            # Check for gig notifications for cupids too
+            elif request.user.role == User.Role.CUPID:
+                # Cupids could get notifications about new gigs in their area, etc.
+                pass
+            
+            # Return notifications if found
+            if notifications:
+                return Response({
+                    'notifications': notifications,
+                    'current_time': make_aware(datetime.now()).isoformat()
+                }, status=status.HTTP_200_OK)
+            
+            # Wait 2 seconds before checking again
+            time.sleep(2)
         
-        for feedback in new_feedback:
-            notifications.append({
-                'type': 'feedback',
-                'message': f"You received a {feedback.star_rating}-star rating!",
-                'timestamp': feedback.date_time.isoformat()
-            })
-        
-        # Check for gig status changes
-        if request.user.role == User.Role.DATER:
-            gigs = Gig.objects.filter(dater__user_id=user_id)
-            for gig in gigs:
-                if (gig.date_time_of_claim and gig.date_time_of_claim > last_check_time):
-                    notifications.append({
-                        'type': 'gig_claimed',
-                        'message': f"Your gig has been claimed by a Cupid!",
-                        'timestamp': gig.date_time_of_claim.isoformat()
-                    })
-                elif (gig.date_time_of_completion and gig.date_time_of_completion > last_check_time):
-                    notifications.append({
-                        'type': 'gig_completed', 
-                        'message': f"Your gig has been completed!",
-                        'timestamp': gig.date_time_of_completion.isoformat()
-                    })
-                elif (gig.date_time_of_drop and gig.date_time_of_drop > last_check_time):
-                    # Use the actual drop timestamp for proper notification timing
-                    notifications.append({
-                        'type': 'gig_dropped',
-                        'message': f"Your gig was dropped and is now available for other Cupids!",
-                        'timestamp': gig.date_time_of_drop.isoformat()
-                    })
-        
-        # Check for gig notifications for cupids too
-        elif request.user.role == User.Role.CUPID:
-            # Cupids could get notifications about new gigs in their area, etc.
-            pass
-        
-        # Return notifications if found
-        if notifications:
-            return Response({
-                'notifications': notifications,
-                'current_time': make_aware(datetime.now()).isoformat()
-            }, status=status.HTTP_200_OK)
-        
-        # Wait 2 seconds before checking again
-        time.sleep(2)
-    
-    # Timeout - return empty
-    return Response({
-        'notifications': [],
-        'current_time': make_aware(datetime.now()).isoformat(),
-        'timeout': True
-    }, status=status.HTTP_200_OK)
+        # Timeout - return empty
+        return Response({
+            'notifications': [],
+            'current_time': make_aware(datetime.now()).isoformat(),
+            'timeout': True
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 def get_google_maps_config(request):
