@@ -377,6 +377,12 @@ def rate_dater(request):
         dater.rating_count += 1
         dater.rating_sum += data['rating']
         dater.save()
+
+        try:
+            helpers.send_email(dater.user.email, "You've been rated by a Cupid!")
+        except Exception as e:
+            print(f"Failed to send email notification: {e}")
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -612,6 +618,12 @@ def rate_cupid(request):
         cupid.rating_count += 1
         cupid.rating_sum += data['rating']
         cupid.save()
+
+        try:
+            helpers.send_email(cupid.user.email, "You've been rated by a Dater!")
+        except Exception as e:
+            print(f"Failed to send email notification: {e}")
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -901,6 +913,11 @@ def accept_gig(request):
         # Update cupid's balance
         cupid.cupid_cash_balance += reward
         cupid.save()
+
+        try:
+            helpers.send_email(gig.dater.user.email, "Your gig has been claimed by a Cupid!")
+        except Exception as e:
+            print(f"Failed to send email notification: {e}")
         
         serializer = GigSerializer(gig)
         return Response(
@@ -978,6 +995,12 @@ def complete_gig(request):
         gig.cupid.save()
         return_data = serializer.data
         return_data['reward'] = reward
+
+        try:
+            helpers.send_email(gig.dater.user.email, "Your gig has been completed by a Cupid!")
+        except Exception as e:
+            print(f"Failed to send email notification: {e}")
+        
         return Response(return_data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1015,6 +1038,11 @@ def drop_gig(request):
     # Update cupid stats
     request.user.cupid.gigs_failed += 1
     request.user.cupid.save()
+
+    try:
+        helpers.send_email(gig.dater.user.email, "Your gig has been dropped by a Cupid!")
+    except Exception as e:
+        print(f"Failed to send email notification: {e}")
     
     serializer = GigSerializer(gig)
     return Response(serializer.data, status=status.HTTP_200_OK)
