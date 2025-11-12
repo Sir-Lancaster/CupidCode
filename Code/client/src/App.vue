@@ -1,16 +1,16 @@
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { ref, onMounted, computed, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import router from './router/index.js';
 import { makeRequest } from './utils/make_request.js';
 import Popup from './components/Popup.vue'
 
-const user_id = parseInt(window.location.hash.split('/')[3])
 const popupActive = ref(false)
 const route = useRoute()
 const currentNotification = ref(null)
 const isPolling = ref(false)
 const lastCheck = ref(new Date().toISOString())
+const user_id = ref(null)
 
 const isNotLoginPage = computed(() => {
   return route.path !== '/' && route.path !== '/login'
@@ -22,16 +22,27 @@ async function getUser() {
   })
 }
 
+function updateUserId() {
+  const id = parseInt(window.location.hash.split('/')[3]);
+  if (!isNaN(id) && id > 0) {
+    user_id.value = id;
+  } else {
+    user_id.value = null;
+  }
+}
+
 // Long polling for notifications
 async function startNotificationPolling() {
   if (isPolling.value) return;
+  if (!user_id.value) return;
   
+  console.log(`Starting notification polling for user ${user_id.value}`);
   isPolling.value = true;
   
   while (isPolling.value) {
     try {
       const response = await makeRequest(
-        `api/notifications/${user_id}/?last_check=${encodeURIComponent(lastCheck.value)}&timeout=30`, 
+        `api/notifications/${user_id.value}/?last_check=${encodeURIComponent(lastCheck.value)}&timeout=30`, 
         'get'
       );
       
@@ -60,16 +71,7 @@ async function startNotificationPolling() {
 async function notify(notification) {
   currentNotification.value = notification;
   popupActive.value = true;
-  
-  // Comment out email functionality to test push notifications only
-  /*
-  await makeRequest('api/email_notification/', 'post', {
-    user_id: user_id,
-    message: notification.message
-  })
-  */
 
-  // Auto-hide after 5 seconds
   setTimeout(() => {
     popupActive.value = false;
     currentNotification.value = null;
@@ -85,14 +87,24 @@ function hideNotification() {
   currentNotification.value = null;
 }
 
-// Start polling when component mounts (if user is logged in)
-onMounted(() => {
-  if (user_id && !isNaN(user_id)) {
-    startNotificationPolling();
+watch(() => route.path, () => {
+  updateUserId();
+});
+
+watch(user_id, (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    isPolling.value = false;
+    lastCheck.value = new Date().toISOString();
+    setTimeout(() => startNotificationPolling(), 100);
+  } else if (!newId && isPolling.value) {
+    isPolling.value = false;
   }
 });
 
-// Stop polling when component unmounts
+onMounted(() => {
+  updateUserId();
+});
+
 onUnmounted(() => {
   isPolling.value = false;
 });
