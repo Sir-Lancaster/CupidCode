@@ -42,10 +42,10 @@ def get_paypal_access_token():
         
         if response.status_code == 200:
             access_token = response.json().get('access_token')
-            logger.info("✅ Successfully obtained PayPal access token")
+            logger.info("Successfully obtained PayPal access token")
             return access_token
         else:
-            logger.error(f"❌ Failed to get access token: {response.status_code} - {response.text}")
+            logger.error(f"Failed to get access token: {response.status_code} - {response.text}")
             return None
             
     except Exception as e:
@@ -115,7 +115,7 @@ def send_payout_to_cupid(cupid, amount, gig_id):
             response_data = response.json()
             payout_batch_id = response_data.get('batch_header', {}).get('payout_batch_id')
             
-            logger.info(f"✅ Payout successful! Batch ID: {payout_batch_id}")
+            logger.info(f"Payout successful! Batch ID: {payout_batch_id}")
             
             return {
                 'success': True,
@@ -124,7 +124,7 @@ def send_payout_to_cupid(cupid, amount, gig_id):
             }
         else:
             error_message = f"Failed. Response status: {response.status_code}. Response message: {response.reason}. Error message: {response.text}"
-            logger.error(f"❌ Payout failed: {error_message}")
+            logger.error(f"Payout failed: {error_message}")
             
             return {
                 'success': False,
