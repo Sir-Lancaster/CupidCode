@@ -654,6 +654,19 @@ requests = ["requests (>=2.16.2)", "urllib3 (>=1.24.2)"]
 timezone = ["pytz"]
 
 [[package]]
+name = "googlemaps"
+version = "4.10.0"
+description = "Python client library for Google Maps Platform"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "googlemaps-4.10.0.tar.gz", hash = "sha256:3055fcbb1aa262a9159b589b5e6af762b10e80634ae11c59495bd44867e47d88"},
+]
+
+[package.dependencies]
+requests = ">=2.20.0,<3.0"
+
+[[package]]
 name = "h11"
 version = "0.14.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
@@ -2729,4 +2742,4 @@ requests = "*"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "ef80d27bd7857f85e738c76f89d3e6f3326fcd25698c4b65385fb6fa140b9af4"
+content-hash = "ca0dd31af63c34cc2bdbef3038bf5858d4b7cfd7963fe87ca319e87c55cc900f"

@@ -5,6 +5,9 @@ import router from './router/index.js';
 import { makeRequest } from './utils/make_request.js';
 import Popup from './components/Popup.vue'
 
+// Debug helper so all logs are easy to filter in the browser console
+const debug = (...args) => console.log('[NOTIF]', ...args)
+
 const popupActive = ref(false)
 const route = useRoute()
 const currentNotification = ref(null)
@@ -24,55 +27,75 @@ async function getUser() {
 
 function updateUserId() {
   const id = parseInt(window.location.hash.split('/')[3]);
+  const before = user_id.value
   if (!isNaN(id) && id > 0) {
     user_id.value = id;
+    debug('updateUserId -> valid user_id detected', { route: route.path, parsedId: id, previous: before, current: user_id.value })
   } else {
+    debug('updateUserId -> no valid user_id found', { route: route.path, parsedId: id, previous: before })
     user_id.value = null;
   }
 }
 
 // Long polling for notifications
 async function startNotificationPolling() {
-  if (isPolling.value) return;
-  if (!user_id.value) return;
+  if (isPolling.value) {
+    debug('startNotificationPolling called but polling already active')
+    return;
+  }
+  if (!user_id.value) {
+    debug('startNotificationPolling aborted: no user_id')
+    return;
+  }
   
-  console.log(`Starting notification polling for user ${user_id.value}`);
+  debug('Starting notification polling', { user: user_id.value, lastCheck: lastCheck.value })
   isPolling.value = true;
   
   while (isPolling.value) {
     try {
-      const response = await makeRequest(
-        `api/notifications/${user_id.value}/?last_check=${encodeURIComponent(lastCheck.value)}&timeout=30`, 
-        'get'
-      );
+      const url = `api/notifications/${user_id.value}/?last_check=${encodeURIComponent(lastCheck.value)}&timeout=30`;
+      debug('Polling request', { url, lastCheck: lastCheck.value })
+      const response = await makeRequest(url, 'get');
       
       // Update last check time
+      const prevLast = lastCheck.value;
       lastCheck.value = response.current_time;
+      debug('Polling response', { timeout: !!response.timeout, notifications: (response.notifications || []).length, current_time: response.current_time })
+      debug('Updated lastCheck', { from: prevLast, to: lastCheck.value })
       
       // Show notifications
       if (response.notifications && response.notifications.length > 0) {
         response.notifications.forEach(notification => {
+          debug('Showing notification', { type: notification?.type, timestamp: notification?.timestamp, message: notification?.message })
           notify(notification);
         });
+      } else {
+        debug('No notifications this cycle')
       }
       
       // If timed out, wait a bit before next poll
       if (response.timeout) {
+        debug('Server long-poll timeout: sleeping 3000ms before next poll')
         await sleep(3000);
       }
       
     } catch (error) {
-      console.error('Notification polling error:', error);
+      console.error('[NOTIF] Notification polling error:', error);
+      debug('Sleeping 5000ms after error')
       await sleep(5000); // Wait on error
     }
   }
+
+  debug('Polling loop exited (isPolling is false)')
 }
 
 async function notify(notification) {
+  debug('notify()', { notification })
   currentNotification.value = notification;
   popupActive.value = true;
 
   setTimeout(() => {
+    debug('Auto-hide notification after 5s')
     popupActive.value = false;
     currentNotification.value = null;
   }, 5000);
@@ -83,34 +106,44 @@ function sleep(ms) {
 }
 
 function hideNotification() {
+  debug('hideNotification() called by user')
   popupActive.value = false;
   currentNotification.value = null;
 }
 
 watch(() => route.path, () => {
+  debug('Route changed', { path: route.path, hash: window.location.hash })
   updateUserId();
 });
 
 watch(user_id, (newId, oldId) => {
   if (newId && newId !== oldId) {
+    debug('user_id changed -> restarting polling', { from: oldId, to: newId })
+    if (isPolling.value) {
+      debug('Stopping existing polling loop before restart')
+    }
     isPolling.value = false;
     lastCheck.value = new Date().toISOString();
     setTimeout(() => startNotificationPolling(), 100);
   } else if (!newId && isPolling.value) {
+    debug('user_id cleared -> stopping polling')
     isPolling.value = false;
   }
 });
 
 onMounted(() => {
+  debug('App mounted')
   updateUserId();
 });
 
 onUnmounted(() => {
+  debug('App unmounted -> stopping polling')
   isPolling.value = false;
 });
 
 // Stop polling when user navigates away or closes tab
 window.addEventListener('beforeunload', () => {
+  debug('beforeunload -> stopping polling')
   isPolling.value = false;
 });
 </script>
