@@ -43,9 +43,9 @@ const navItems = [
   left: 0;
   right: 0;
   width: 100%;
-  background-color: #000000 !important;
-  border-top: 2px solid #00CCFF;
-  border-bottom: 2px solid #00CCFF;
+  background-color: var(--new-background) !important;
+  border-top: 2px solid var(--new-light-blue);
+  border-bottom: 2px solid var(--new-light-blue);
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -75,7 +75,7 @@ const navItems = [
 .nav-button {
   background: none;
   border: none;
-  color: #FB3640 !important; /* Red for inactive */
+  color: var(--new-accent) !important; /* Red for inactive */
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -88,7 +88,7 @@ const navItems = [
 }
 
 .nav-button.active {
-  color: #00CCFF !important; /* Light blue for active */
+  color: var(--new-light-blue) !important; /* Light blue for active */
 }
 
 .nav-button:hover {
@@ -115,8 +115,8 @@ const navItems = [
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background-color: #FB3640;
-  color: white;
+  background-color: var(--new-accent);
+  color: var(--on-button-text);
   display: flex;
   align-items: center;
   justify-content: center;

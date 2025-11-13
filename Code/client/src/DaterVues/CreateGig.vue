@@ -352,19 +352,13 @@ function cancelPayment() {
 <style scoped>
   /* New color scheme variables for testing */
   .container {
-    --new-primary: #09A129;     /* Green for text */
-    --new-secondary: #1F487E;   /* Dark blue for buttons */
-    --new-background: #000000;  /* Black for backgrounds */
-    --new-accent: #FB3640;      /* Red (not used here) */
-    --new-light-blue: #00CCFF;  /* Light blue (not used here) */
-    
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
     background-color: var(--new-background);
     min-height: 100vh;
-    
+
     /* Fixed spacing for Banner and NavBar */
     padding-top: 80px; /* Space for banner + navbar + gap */
   }
@@ -602,7 +596,7 @@ function cancelPayment() {
     width: 100%;
     padding: 12px;
     background-color: var(--new-accent);
-    color: white;
+    color: var(--on-button-text);
     border: none;
     border-radius: 4px;
     font-size: 16px;

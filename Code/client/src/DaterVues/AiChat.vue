@@ -360,14 +360,7 @@ onMounted(getChats)
 </template>
 
 <style scoped>
-    /* New color scheme variables */
     main {
-        --new-primary: #09A129;     /* Green for text */
-        --new-secondary: #1F487E;   /* Dark blue for buttons */
-        --new-background: #000000;  /* Black for backgrounds */
-        --new-accent: #FB3640;      /* Red */
-        --new-light-blue: #00CCFF;  /* Light blue */
-        
         background-color: var(--new-background);
         color: var(--new-primary);
         min-height: 100vh;
@@ -448,7 +441,7 @@ onMounted(getChats)
         gap: 8px;
         background-color: var(--new-accent);
         border: 2px solid var(--new-accent);
-        color: #FFFFFF;
+        color: var(--on-button-text);
         border-radius: 8px;
         padding: 10px 16px;
         cursor: pointer;
@@ -458,7 +451,7 @@ onMounted(getChats)
     }
 
     .clear-button:hover:not(:disabled) {
-        background-color: #FFFFFF;
+        background-color: var(--on-button-text);
         color: var(--new-accent);
         transform: translateY(-1px);
     }
@@ -652,13 +645,13 @@ onMounted(getChats)
     .mic-button.recording {
         background-color: var(--new-accent);
         border-color: var(--new-accent);
-        color: #FFFFFF;
+        color: var(--on-button-text);
         animation: pulse 1.5s infinite;
     }
 
     .mic-button.recording:hover {
         background-color: var(--new-accent);
-        color: #FFFFFF;
+        color: var(--on-button-text);
         transform: none;
     }
 

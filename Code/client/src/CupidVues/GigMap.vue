@@ -70,6 +70,15 @@ function geocodeAddress(address) {
   })
 }
 
+// Helper to read CSS variables at runtime
+function cssVar(name, fallback = '') {
+  try {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback
+  } catch (e) {
+    return fallback
+  }
+}
+
 // Create route between two points with specific color
 async function createRoute(map, origin, destination, color, suppressMarkers = true) {
   const directionsService = new window.google.maps.DirectionsService()
@@ -207,13 +216,13 @@ async function initializeMap() {
     // Add markers using AdvancedMarkerElement with updated properties
     if (currentLocation.value) {
       // Create custom pin element for current location
-      const currentLocationPin = new google.maps.marker.PinElement({
-        background: '#00CCFF',
-        borderColor: '#ffffff',
-        glyphColor: '#ffffff',
-        glyphText: '📍', // Use glyphText instead of glyph
-        scale: 1.2
-      })
+        const currentLocationPin = new google.maps.marker.PinElement({
+          background: cssVar('--new-light-blue', '#00CCFF'),
+          borderColor: cssVar('--on-button-text', '#ffffff'),
+          glyphColor: cssVar('--on-button-text', '#ffffff'),
+          glyphText: '📍', // Use glyphText instead of glyph
+          scale: 1.2
+        })
       
       new google.maps.marker.AdvancedMarkerElement({
         position: currentLocation.value,
@@ -226,9 +235,9 @@ async function initializeMap() {
     if (pickupCoords.value) {
       // Create custom pin element for pickup location
       const pickupPin = new google.maps.marker.PinElement({
-        background: '#09A129',
-        borderColor: '#ffffff',
-        glyphColor: '#ffffff',
+        background: cssVar('--new-primary', '#09A129'),
+        borderColor: cssVar('--on-button-text', '#ffffff'),
+        glyphColor: cssVar('--on-button-text', '#ffffff'),
         glyphText: '🏠', // Use glyphText instead of glyph
         scale: 1.2
       })
@@ -244,9 +253,9 @@ async function initializeMap() {
     if (dropoffCoords.value) {
       // Create custom pin element for dropoff location
       const dropoffPin = new google.maps.marker.PinElement({
-        background: '#FB3640',
-        borderColor: '#ffffff',
-        glyphColor: '#ffffff',
+        background: cssVar('--new-accent', '#FB3640'),
+        borderColor: cssVar('--on-button-text', '#ffffff'),
+        glyphColor: cssVar('--on-button-text', '#ffffff'),
         glyphText: '🎯', // Use glyphText instead of glyph
         scale: 1.2
       })
@@ -262,14 +271,14 @@ async function initializeMap() {
     // Create routes with different colors
     if (currentLocation.value && pickupCoords.value) {
       try {
-        // Yellow route: Current location to pickup
-        const toPickupRoute = await createRoute(map, currentLocation.value, pickupCoords.value, '#FFD700')
+  // Route: Current location to pickup (uses theme accent for visibility)
+  const toPickupRoute = await createRoute(map, currentLocation.value, pickupCoords.value, cssVar('--new-light-blue', '#FFD700'))
         const toPickupLeg = toPickupRoute.routes[0].legs[0]
         routeInfo.value.toPickupDuration = toPickupLeg.duration.text
         
         if (dropoffCoords.value) {
-          // Red route: Pickup to dropoff
-          const toDropoffRoute = await createRoute(map, pickupCoords.value, dropoffCoords.value, '#FB3640')
+          // Route: Pickup to dropoff
+          const toDropoffRoute = await createRoute(map, pickupCoords.value, dropoffCoords.value, cssVar('--new-accent', '#FB3640'))
           const toDropoffLeg = toDropoffRoute.routes[0].legs[0]
           routeInfo.value.toDropoffDuration = toDropoffLeg.duration.text
           
@@ -487,8 +496,8 @@ function closeMap() {
 }
 
 .map-container {
-  background-color: #000000;
-  border: 2px solid #09A129;
+  background-color: var(--new-background);
+  border: 2px solid var(--new-primary);
   border-radius: 8px;
   width: 90%;
   max-width: 1600px;
@@ -500,8 +509,8 @@ function closeMap() {
 }
 
 .map-header {
-  background-color: #1F487E;
-  color: #09A129;
+  background-color: var(--new-secondary);
+  color: var(--new-primary);
   padding: 15px 20px;
   display: flex;
   justify-content: space-between;
@@ -517,7 +526,7 @@ function closeMap() {
 .close-btn {
   background: none;
   border: none;
-  color: #09A129;
+  color: var(--new-primary);
   font-size: 24px;
   font-weight: bold;
   cursor: pointer;
@@ -532,8 +541,8 @@ function closeMap() {
 }
 
 .close-btn:hover {
-  background-color: #09A129;
-  color: #000000;
+  background-color: var(--new-primary);
+  color: var(--new-background);
 }
 
 .map-content {
@@ -551,11 +560,11 @@ function closeMap() {
   position: absolute;
   top: 10px;
   right: 10px;
-  background-color: rgba(0, 0, 0, 0.8);
-  border: 1px solid #09A129;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--new-primary);
   border-radius: 4px;
   padding: 10px;
-  color: #09A129;
+  color: var(--new-primary);
   min-width: 140px;
 }
 
@@ -584,15 +593,15 @@ function closeMap() {
 }
 
 .legend-marker.current {
-  background: #00CCFF;
+  background: var(--new-light-blue);
 }
 
 .legend-marker.pickup {
-  background: #09A129;
+  background: var(--new-primary);
 }
 
 .legend-marker.dropoff {
-  background: #FB3640;
+  background: var(--new-accent);
 }
 
 .legend-path {
@@ -603,22 +612,22 @@ function closeMap() {
 }
 
 .legend-path.yellow {
-  background: #FFD700;
+  background: var(--new-light-blue);
 }
 
 .legend-path.red {
-  background: #FB3640;
+  background: var(--new-accent);
 }
 
 .route-info {
   position: absolute;
   bottom: 10px;
   left: 10px;
-  background-color: rgba(0, 0, 0, 0.8);
-  border: 1px solid #09A129;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--new-primary);
   border-radius: 4px;
   padding: 10px;
-  color: #09A129;
+  color: var(--new-primary);
   min-width: 160px;
 }
 
@@ -636,18 +645,17 @@ function closeMap() {
 }
 
 .route-item.total {
-  border-top: 1px solid #09A129;
+  border-top: 1px solid var(--new-primary);
   padding-top: 4px;
   margin-top: 4px;
   font-weight: bold;
 }
-
 .route-label {
-  color: #09A129;
+  color: var(--new-primary);
 }
 
 .route-value {
-  color: #00CCFF;
+  color: var(--new-light-blue);
   font-weight: bold;
 }
 
@@ -657,18 +665,18 @@ function closeMap() {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #09A129;
+  color: var(--new-primary);
   z-index: 1000;
 }
 
 .loading-spinner {
   border: 3px solid rgba(9, 161, 41, 0.3);
-  border-top: 3px solid #09A129;
+  border-top: 3px solid var(--new-primary);
   border-radius: 50%;
   width: 40px;
   height: 40px;

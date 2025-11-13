@@ -119,17 +119,11 @@
 
 <style scoped>
     main {
-        --new-primary: #09A129;     /* Green for text */
-        --new-secondary: #1F487E;   /* Dark blue for buttons */
-        --new-background: #000000;  /* Black for backgrounds */
-        --new-accent: #FB3640;      /* Red */
-        --new-light-blue: #00CCFF;  /* Light blue */
-        
         padding: 20px;
         background-color: var(--new-background);
         color: var(--new-primary);
         min-height: 100vh;
-        
+
         /* Fixed spacing for Banner and NavBar */
         padding-top: 80px; /* Space for banner + navbar + gap */
         margin-top: 0;
@@ -165,7 +159,7 @@
     margin-right: 12px;
     flex-direction: column;
 
-    background-color: black;
+    background-color: var(--new-background);
     border: 3px solid var(--new-primary);
     width: 100%;
     max-width: 600px;
@@ -239,7 +233,7 @@ select {
     border-radius: 8px;
     padding: 16px;
     margin: 10px;
-    color: white;
+    color: var(--on-button-text);
     background-color: var(--secondary-red);
 }
 

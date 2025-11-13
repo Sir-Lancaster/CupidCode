@@ -93,12 +93,11 @@
                 Range
                 <input type="text" id="range" v-model="range"/>
             </label>
-            <button @click="$emit('click-forward')" class="action-button send-button margin-sixteen">Update Profile</button>
-            <label class="form-field">
+            <label class="update-content" for="paypal_email">
                 PayPal Email (for receiving payments)
                 <input type="email" v-model="paypal_email" required>
             </label>
-            <PinkButton>Save</PinkButton>
+            <button @click="$emit('click-forward')" class="action-button send-button margin-sixteen">Update Profile</button>
         </form>
     </main>
 </template>
@@ -106,17 +105,11 @@
 <style scoped>
 
 main {
-    --new-primary: #09A129;     /* Green for text */
-    --new-secondary: #1F487E;   /* Dark blue for buttons */
-    --new-background: #000000;  /* Black for backgrounds */
-    --new-accent: #FB3640;      /* Red */
-    --new-light-blue: #00CCFF;  /* Light blue */
-        
     padding: 20px;
     background-color: var(--new-background);
     color: var(--new-primary);
     min-height: 100vh;
-        
+
     /* Spacing for Banner and NavBar */
     margin-top: 60px; /* Space for banner (60px) + gap */
 }
@@ -156,7 +149,7 @@ input {
     padding: 8px;
     margin-top: 5px;
     background-color: var(--new-background);
-    color: white;
+    color: var(--new-primary);
     box-sizing: border-box;
 }
 

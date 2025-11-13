@@ -243,12 +243,6 @@
 
 <style scoped>
 main {
-    --new-primary: #09A129;
-    --new-secondary: #1F487E;
-    --new-background: #000000;
-    --new-accent: #FB3640;
-    --new-light-blue: #00CCFF;
-    
     padding: 40px;
     background-color: var(--new-background);
     color: var(--new-primary);
@@ -289,7 +283,7 @@ main {
 .form-box {
     display: flex;
     flex-direction: column;
-    background-color: black;
+    background-color: var(--new-background);
     border: 3px solid var(--new-primary);
     width: 100%;
     max-width: 600px;
@@ -341,7 +335,7 @@ input, textarea, select {
     padding: 8px;
     margin-top: 5px;
     background-color: var(--new-background);
-    color: white;
+    color: var(--new-primary);
     box-sizing: border-box;
 }
 

@@ -223,12 +223,6 @@ function previewFile() {
 
 <style scoped>
 main {
-    --new-primary: #09A129;
-    --new-secondary: #1F487E;
-    --new-background: #000000;
-    --new-accent: #FB3640;
-    --new-light-blue: #00CCFF;
-    
     padding: 20px;
     background-color: var(--new-background);
     color: var(--new-primary);
@@ -249,14 +243,14 @@ main {
 .register_paper {
     display: flex;
     flex-flow: column wrap;
-    background-color: black;
+    background-color: var(--new-background);
     align-items: center;
 }
 
 .form {
     display: flex;
     flex-flow: column wrap;
-    background-color: black;
+    background-color: var(--new-background);
     border: 3px solid var(--new-primary);
     width: 100%;
     max-width: 600px; 
@@ -342,7 +336,7 @@ input, textarea {
     padding: 8px;
     margin: 10px;
     background-color: var(--new-background);
-    color: white;
+    color: var(--new-primary);
 }
 
 input[type="file"] {
