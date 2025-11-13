@@ -971,18 +971,9 @@ def find_places_for_keyword(keyword, user_location):
         search_queries = [
             keyword,
             f"{keyword} store",
-            f"clothing {keyword}",  # For items like pants
+            
             f"{keyword} shop"
         ]
-        
-        # Add category-specific searches
-        if keyword.lower() in ['pants', 'shirt', 'dress', 'clothes', 'clothing']:
-            search_queries.extend([
-                "department store",
-                "clothing store", 
-                "retail store",
-                "fashion"
-            ])
         
         print(f"Searching for '{keyword}' with queries: {search_queries}")
         
@@ -1028,31 +1019,77 @@ def find_places_for_keyword(keyword, user_location):
                     )
                     
                     if place_details.get('result'):
-                        # Merge the detailed info with the original place data
                         enriched_place = {**place, **place_details['result']}
                         unique_places[place_id] = enriched_place
                     else:
-                        # Fallback: create formatted_address from vicinity or name
                         place['formatted_address'] = place.get('vicinity', place.get('name', 'Unknown Location'))
                         unique_places[place_id] = place
                         
                 except Exception as e:
                     print(f"Error getting place details for {place_id}: {e}")
-                    # Fallback: create formatted_address from vicinity or name
                     place['formatted_address'] = place.get('vicinity', place.get('name', 'Unknown Location'))
                     unique_places[place_id] = place
         
-        # Sort by rating (highest first), then by user ratings count
+        def calculate_relevance_score(place, search_keyword):
+            """Calculate relevance score based on multiple factors"""
+            score = 0
+            name = place.get('name', '').lower()
+            types = place.get('types', [])
+            keyword_lower = search_keyword.lower()
+            
+            # Name matching (highest weight)
+            if keyword_lower in name:
+                if name.startswith(keyword_lower):
+                    score += 100  # Exact start match
+                elif name.endswith(keyword_lower):
+                    score += 80   # Exact end match
+                else:
+                    score += 60   # Contains keyword
+            
+            # Type matching
+            relevant_types = ['store', 'establishment', 'point_of_interest']
+            for place_type in types:
+                if keyword_lower in place_type.lower():
+                    score += 50
+                elif place_type in relevant_types:
+                    score += 20
+            
+            # Distance factor (closer is more relevant)
+            # Google Places returns results roughly ordered by distance, so use index as proxy
+            # This will be refined by the original order from Google's algorithm
+            
+            # Rating bonus (but lower weight than name/type matching)
+            rating = place.get('rating', 0)
+            if rating >= 4.0:
+                score += 15
+            elif rating >= 3.0:
+                score += 10
+            elif rating >= 2.0:
+                score += 5
+            
+            # Popular places bonus
+            user_ratings_total = place.get('user_ratings_total', 0)
+            if user_ratings_total > 100:
+                score += 10
+            elif user_ratings_total > 50:
+                score += 5
+            
+            return score
+        
+        # Sort by relevance score (highest first)
         sorted_places = sorted(
             unique_places.values(),
-            key=lambda x: (x.get('rating', 0), x.get('user_ratings_total', 0)),
+            key=lambda x: calculate_relevance_score(x, keyword),
             reverse=True
         )
+
+        print(f"Total unique places found: {len(unique_places)}")
+        for place in sorted_places[:10]:  # Show top 10 instead of just 5
+            relevance_score = calculate_relevance_score(place, keyword)
+            print(f"  - {place.get('name')} (Relevance: {relevance_score}, Rating: {place.get('rating', 'N/A')}, Type: {place.get('types', [])})")
         
         return sorted_places[:5] 
-    
 
-        
     except Exception as e:
         print(f"Error in find_places_for_keyword: {e}")
         return []
