@@ -115,18 +115,12 @@ onMounted(getDaters)
 <style scoped>
 /* New color scheme variables */
 main {
-  --new-primary: #09A129;     /* Green for text */
-  --new-secondary: #1F487E;   /* Dark blue for buttons */
-  --new-background: #000000;  /* Black for backgrounds */
-  --new-accent: #FB3640;      /* Red */
-  --new-light-blue: #00CCFF;  /* Light blue */
-  
   background-color: var(--new-background);
   color: var(--new-primary);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  
+
   /* Spacing for Banner and NavBar */
   margin-top: 60px;
   padding-bottom: 120px;
@@ -369,11 +363,11 @@ main {
 .suspend-btn {
   background-color: var(--new-accent);
   border-color: var(--new-accent);
-  color: white;
+  color: var(--on-button-text);
 }
 
 .suspend-btn:hover {
-  background-color: white;
+  background-color: var(--on-button-text);
   color: var(--new-accent);
 }
 

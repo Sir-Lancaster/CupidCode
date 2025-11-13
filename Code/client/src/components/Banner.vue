@@ -1,11 +1,12 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import router from '../router'
 import { clearUserSession } from '../utils/auth'
 import { makeRequest } from '../utils/make_request'
 
 const props = defineProps(['title'])
 const isDrawerOpen = ref(false)
+const theme = ref('dark')
 
 function toggleDrawer() {
   isDrawerOpen.value = !isDrawerOpen.value
@@ -43,6 +44,30 @@ async function logout() {
 
 // Get user_id from URL for navigation
 const user_id = parseInt(window.location.hash.split('/')[3])
+
+function applyTheme(t) {
+  try {
+    document.documentElement.setAttribute('data-theme', t)
+    localStorage.setItem('theme', t)
+    theme.value = t
+  } catch (e) {
+    console.warn('Could not apply theme', e)
+  }
+}
+
+function toggleLightMode() {
+  const next = theme.value === 'light' ? 'dark' : 'light'
+  applyTheme(next)
+}
+
+onMounted(() => {
+  const stored = localStorage.getItem('theme')
+  if (stored === 'light' || stored === 'dark') {
+    applyTheme(stored)
+  } else {
+    applyTheme('dark')
+  }
+})
 </script>
 
 <template>
@@ -103,8 +128,8 @@ const user_id = parseInt(window.location.hash.split('/')[3])
         
         <div class="accessibility-section">
           <h4>Accessibility</h4>
-          <button class="nav-item accessibility-toggle">
-            <span class="material-symbols-outlined">light_mode</span>
+          <button class="nav-item accessibility-toggle" @click="toggleLightMode">
+            <span class="material-symbols-outlined">{{ theme === 'light' ? 'dark_mode' : 'light_mode' }}</span>
             Toggle Light Mode
           </button>
         </div>
@@ -128,9 +153,9 @@ const user_id = parseInt(window.location.hash.split('/')[3])
   left: 0;
   right: 0;
   height: 60px;
-  background-color: #000000;
-  border-top: 2px solid #00CCFF;
-  border-bottom: 2px solid #00CCFF;
+  background-color: var(--new-background);
+  border-top: 2px solid var(--new-light-blue);
+  border-bottom: 2px solid var(--new-light-blue);
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -140,7 +165,7 @@ const user_id = parseInt(window.location.hash.split('/')[3])
 .hamburger-btn {
   background: none;
   border: none;
-  color: #09A129;
+  color: var(--new-primary);
   font-size: 24px;
   cursor: pointer;
   padding: 8px;
@@ -150,14 +175,14 @@ const user_id = parseInt(window.location.hash.split('/')[3])
 }
 
 .hamburger-btn:hover {
-  color: #00CCFF;
+  color: var(--new-light-blue);
 }
 
 .logo {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  color: #09A129;
+  color: var(--new-primary);
   font-size: 20px;
   font-weight: bold;
 }
@@ -187,8 +212,8 @@ const user_id = parseInt(window.location.hash.split('/')[3])
   left: -300px;
   width: 280px;
   height: 100vh;
-  background-color: #000000;
-  border-right: 2px solid #00CCFF;
+  background-color: var(--new-background);
+  border-right: 2px solid var(--new-light-blue);
   transition: left 0.3s ease;
   z-index: 1002;
   overflow-y: auto;
@@ -207,14 +232,14 @@ const user_id = parseInt(window.location.hash.split('/')[3])
 }
 
 .drawer-header h3 {
-  color: #09A129;
+  color: var(--new-primary);
   margin: 0;
 }
 
 .close-btn {
   background: none;
   border: none;
-  color: #09A129;
+  color: var(--new-primary);
   font-size: 24px;
   cursor: pointer;
   padding: 4px;
@@ -236,7 +261,7 @@ const user_id = parseInt(window.location.hash.split('/')[3])
   padding: 12px 16px;
   background: none;
   border: none;
-  color: #09A129;
+  color: var(--new-primary);
   font-size: 16px;
   cursor: pointer;
   text-align: left;
@@ -244,8 +269,8 @@ const user_id = parseInt(window.location.hash.split('/')[3])
 }
 
 .nav-item:hover {
-  background-color: #1F487E;
-  color: #00CCFF;
+  background-color: var(--new-secondary);
+  color: var(--new-light-blue);
 }
 
 .nav-item .material-symbols-outlined {
@@ -259,7 +284,7 @@ const user_id = parseInt(window.location.hash.split('/')[3])
 }
 
 .accessibility-section h4 {
-  color: #09A129;
+  color: var(--new-primary);
   margin: 0 0 12px 16px;
   font-size: 14px;
 }
@@ -272,16 +297,16 @@ const user_id = parseInt(window.location.hash.split('/')[3])
 .logout-section {
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid #FB3640;
+  border-top: 1px solid var(--new-accent);
 }
 
 .logout-btn {
-  color: #FB3640 !important;
+  color: var(--new-accent) !important;
   font-weight: bold;
 }
 
 .logout-btn:hover {
-  background-color: #FB3640 !important;
-  color: #000000 !important;
+  background-color: var(--new-accent) !important;
+  color: var(--new-background) !important;
 }
 </style>

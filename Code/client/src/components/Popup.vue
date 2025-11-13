@@ -10,13 +10,6 @@
 </template>
 <style scoped>
     .popup {
-        /* New color scheme variables - same as other components */
-        --new-primary: #09A129;     /* Green for text */
-        --new-secondary: #1F487E;   /* Dark blue for buttons */
-        --new-background: #000000;  /* Black for backgrounds */
-        --new-accent: #FB3640;      /* Red */
-        --new-light-blue: #00CCFF;  /* Light blue */
-        
         position: fixed;
         width: clamp(220px, 50%, 400px);
         height: fit-content;

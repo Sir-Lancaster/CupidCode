@@ -63,7 +63,9 @@ async function login() {
                     Password
                     <input type="password" placeholder="Password" id="password" name="password" v-model="password">
                 </label>
-                <button @click="$emit('click-forward')" class="action-button send-button">Sign In</button>
+                <div class="button-container">
+                    <button @click="$emit('click-forward')" class="action-button send-button">Sign In</button>
+                </div>
             </form>
         </div>
         <div class="atag">
@@ -75,12 +77,6 @@ async function login() {
 
 <style scoped>
 main {
-    --new-primary: #09A129;
-    --new-secondary: #1F487E;
-    --new-background: #000000;
-    --new-accent: #FB3640;
-    --new-light-blue: #00CCFF;
-    
     padding: 20px;
     background-color: var(--new-background);
     color: var(--new-primary);
@@ -101,14 +97,14 @@ main {
 .login_paper {
     display: flex;
     flex-flow: column wrap;
-    background-color: black;
+    background-color: var(--new-background);
     align-items: center;
 }
 
 .form {
     display: flex;
     flex-flow: column wrap;
-    background-color: black;
+    background-color: var(--new-background);
     border: 3px solid var(--new-primary);
     width: 100%;
     max-width: 600px; 
@@ -123,14 +119,14 @@ main {
     padding: 8px;
 }
 
-input {
+    input {
     border: 3px rgba(128, 128, 128, 0.5) solid;
     border-radius: 4px;
     width: auto;
     padding: 8px;
     margin: 10px;
     background-color: var(--new-background);
-    color: white;
+    color: var(--new-primary);
 }
 
 .atag {
@@ -164,9 +160,14 @@ a:hover {
     display: block;
 }
 
+.button-container {
+    display: flex;
+    justify-content: center;
+}
+
 /* Custom Action Buttons */
     .action-button {
-        background-color: var(--new-secondary);
+        background-color: var(--new-background);
         border: 2px solid var(--new-primary);
         border-radius: 8px;
         padding: 12px 20px;
@@ -180,6 +181,7 @@ a:hover {
         justify-content: center;
         min-height: 44px;
         min-width: 100px;
+        width:50%;
     }
 
     .action-button:hover {

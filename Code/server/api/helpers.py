@@ -813,11 +813,16 @@ def send_email(recipient_email, message):
     
     mail = Mail(
         from_email=os.getenv('SEND_EMAIL', ''),
-        to_emails=recipient_email,
+        to_emails=recipient.email,
         subject='Cupid Code Notification',
         html_content=html_content)
-    
-    SendGridAPIClient(os.getenv('GRID_API_KEY', '')).send(mail)
+    try:
+        SendGridAPIClient(os.getenv('GRID_API_KEY', '')).send(mail)
+        return Response('Email sent', status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response('Failed to send email', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 def get_message_from_audio(audio_data, dater):
     """

@@ -7,9 +7,9 @@
     button {
         margin-left: 3px;
         margin-right: 3px;
-        background-color: var(--primary-red);
+    background-color: var(--primary-red);
         border-radius: 10px;
-        color: white;
+    color: var(--on-button-text);
         border: none;
         border-radius: 4px;
         box-shadow: 5px 5px 2px rgba(0, 0, 0, 0.2);

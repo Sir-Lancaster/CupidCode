@@ -171,13 +171,6 @@ window.addEventListener('beforeunload', () => {
 
 <style scoped>
   .notification-content {
-    /* Color scheme variables - same as DaterHome */
-    --new-primary: #09A129;     /* Green for text */
-    --new-secondary: #1F487E;   /* Dark blue for buttons */
-    --new-background: #000000;  /* Black for backgrounds */
-    --new-accent: #FB3640;      /* Red */
-    --new-light-blue: #00CCFF;  /* Light blue */
-    
     padding: 16px;
     border-radius: 8px;
     background: rgba(255,255,255,0.08);

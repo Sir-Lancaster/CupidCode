@@ -1756,7 +1756,6 @@ def paypal_config(request):
         'MODE': os.environ.get('PAYPAL_MODE', 'sandbox')
     })
 
-
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])

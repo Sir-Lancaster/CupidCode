@@ -162,17 +162,11 @@
 <style scoped>
     /*main styles*/
     main {
-        --new-primary: #09A129;     /* Green for text */
-        --new-secondary: #1F487E;   /* Dark blue for buttons */
-        --new-background: #000000;  /* Black for backgrounds */
-        --new-accent: #FB3640;      /* Red */
-        --new-light-blue: #00CCFF;  /* Light blue */
-        
         padding: 20px;
         background-color: var(--new-background);
         color: var(--new-primary);
         min-height: 100vh;
-        
+
         /* Fixed spacing for Banner and NavBar */
         padding-top: 80px; /* Space for banner + navbar + gap */
         margin-top: 0;
@@ -451,11 +445,11 @@
     .cancel-button {
         background-color: var(--new-accent);
         border-color: var(--new-accent);
-        color: white;
+        color: var(--on-button-text);
     }
 
     .cancel-button:hover {
-        background-color: white;
+        background-color: var(--on-button-text);
         color: var(--new-accent);
         border-color: var(--new-accent);
     }

@@ -5,10 +5,32 @@
   --primary-red: #f04b7f;
   --secondary-red: #a55271;
   --content-background: #FCEBFF;
+
+  --new-primary: #09A129;     /* Green for text */
+  --new-secondary: #1F487E;   /* Dark blue for buttons */
+  --new-background: #000000;  /* Black for backgrounds */
+  --new-accent: #FB3640;      /* Red */
+  --new-light-blue: #00CCFF;  /* Light blue */
+  --on-button-text: #FFFFFF;  /* Text color for buttons/accents */
+  --light-mode-background: #FFFFFF;
+  --light-mode-text: #000000;
+}
+
+[data-theme="light"] {
+  --new-background: var(--light-mode-background);
+  --new-primary: var(--light-mode-text);
+  --on-button-text: var(--light-mode-text);
 }
 
 body {
   margin: 0;
+}
+
+/* Ensure the page background follows the theme variables so scrolling never shows a white page */
+html, body, #app {
+  background-color: var(--new-background);
+  color: var(--new-primary);
+  min-height: 100%;
 }
 
 .image {
@@ -19,7 +41,7 @@ body {
 }
 
 .nav {
-  color: white;
+  color: var(--new-primary);
   background-color: var(--primary-blue);
   top: 0;
   left: 0;
@@ -78,11 +100,11 @@ body {
 .icon {
   display: flex;
   justify-content: center;
-  color: white;
+  color: var(--new-primary);
 }
 
 .link {
-  color: white;
+  color: var(--new-primary);
   gap: 10px;
   padding-bottom: 4px;
 }
@@ -90,7 +112,7 @@ body {
 .logout {
   display: flex;
   align-self: center;
-  color: white;
+  color: var(--on-button-text);
   background-color: var(--secondary-red);
   border: none;
   padding: 8px;
@@ -112,7 +134,7 @@ body {
   display: flex;
   justify-content: flex-end;
   background-color: var(--primary-red);
-  color: white;
+  color: var(--on-button-text);
   position: relative;
   margin-bottom: 10px;
   margin-left: calc(100% - 240px);
@@ -123,7 +145,7 @@ body {
   display: flex;
   justify-content: flex-start;
   background-color: var(--secondary-blue);
-  color: white;
+  color: var(--on-button-text);
   position: relative;
   margin-bottom: 10px;
   margin-right: calc(100% - 240px);
@@ -133,7 +155,7 @@ body {
 /* These are for Calendar */
 .date {
   text-align: center;
-  color: white;
+  color: var(--new-primary);
   display: flex;
   margin: 20px;
   padding: 10px;
@@ -155,7 +177,7 @@ body {
   border-radius: 4px;
   padding: 8px;
   margin: 2px 4px;
-  color: white;
+  color: var(--on-button-text);
   box-shadow: 5px 5px 2px rgba(0, 0, 0, 0.2);
 }
 

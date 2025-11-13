@@ -211,19 +211,13 @@ onMounted(getData)
 </template>
 
 <style scoped>
-    /* New color scheme variables - same as other pages */
+    /* Page layout — use global theme variables from client/src/style.css */
     main {
-        --new-primary: #09A129;     /* Green for text */
-        --new-secondary: #1F487E;   /* Dark blue for buttons */
-        --new-background: #000000;  /* Black for backgrounds */
-        --new-accent: #FB3640;      /* Red */
-        --new-light-blue: #00CCFF;  /* Light blue */
-        
         padding: 20px;
         background-color: var(--new-background);
         color: var(--new-primary);
         min-height: 100vh;
-        
+
         /* Spacing for Banner and NavBar */
         margin-top: 60px; /* Space for banner (60px) + gap */
     }

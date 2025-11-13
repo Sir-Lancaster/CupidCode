@@ -166,18 +166,12 @@ onMounted(() => getCalendar())
 <style scoped>
 /* New color scheme variables */
 main {
-    --new-primary: #09A129;     /* Green for text */
-    --new-secondary: #1F487E;   /* Dark blue for buttons */
-    --new-background: #000000;  /* Black for backgrounds */
-    --new-accent: #FB3640;      /* Red */
-    --new-light-blue: #00CCFF;  /* Light blue */
-    
     background-color: var(--new-background);
     color: var(--new-primary);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    
+
     /* Spacing for Banner and NavBar */
     margin-top: 60px; /* Space for banner */
     padding-bottom: 120px;
@@ -397,7 +391,7 @@ main {
     border: 2px solid var(--new-accent);
     border-radius: 6px;
     padding: 8px 16px;
-    color: white;
+    color: var(--on-button-text);
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -406,7 +400,7 @@ main {
 }
 
 :global(.date .button:hover) {
-    background-color: white;
+    background-color: var(--on-button-text);
     color: var(--new-accent);
     transform: translateY(-1px);
 }

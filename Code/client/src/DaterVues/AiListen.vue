@@ -148,7 +148,7 @@ async function stopListen() {
     height: 50%;
     padding: 30px;
     margin: 2px 4px;
-    color: white;
+        color: var(--on-button-text);
     box-shadow: 5px 5px 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -204,10 +204,10 @@ async function stopListen() {
     transition: transform 0.2s cubic-bezier(0,1.4,1,1);
 }
 
-.update-content {
+    .update-content {
     text-align: center;
     margin-bottom: 4px;
-    color: white;
+    color: var(--new-primary);
     display: flex;
     flex-direction: column;
     align-items: center;
