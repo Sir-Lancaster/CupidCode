@@ -962,18 +962,30 @@ def find_places_for_keyword(keyword, user_location):
         location = (user_location.get('lat', 40.7128), user_location.get('lng', -74.0060))
         radius = 10000  # 10km radius
         
-        # Try different search queries
+        # Expand search queries to include broader terms
         search_queries = [
+            keyword,
             f"{keyword} store",
-            f"{keyword} shop", 
-            f"buy {keyword}",
-            keyword
+            f"clothing {keyword}",  # For items like pants
+            f"{keyword} shop"
         ]
+        
+        # Add category-specific searches
+        if keyword.lower() in ['pants', 'shirt', 'dress', 'clothes', 'clothing']:
+            search_queries.extend([
+                "department store",
+                "clothing store", 
+                "retail store",
+                "fashion"
+            ])
+        
+        print(f"Searching for '{keyword}' with queries: {search_queries}")
         
         all_results = []
         
         for query in search_queries:
             try:
+                # Try both keyword search and text search
                 result = gmaps.places_nearby(
                     location=location,
                     radius=radius,
@@ -983,6 +995,19 @@ def find_places_for_keyword(keyword, user_location):
                 
                 if result.get('results'):
                     all_results.extend(result['results'])
+                    print(f"Query '{query}' found {len(result['results'])} results")
+                
+                # Also try text search for broader coverage
+                text_result = gmaps.places(
+                    query=f"{query} near me",
+                    location=location,
+                    radius=radius
+                )
+                
+                if text_result.get('results'):
+                    all_results.extend(text_result['results'])
+                    print(f"Text search for '{query}' found {len(text_result['results'])} results")
+                    
             except Exception as e:
                 print(f"Error searching for '{query}': {e}")
         
@@ -1019,7 +1044,9 @@ def find_places_for_keyword(keyword, user_location):
             reverse=True
         )
         
-        return sorted_places[:5]  # Return top 5 results
+        return sorted_places[:5] 
+    
+
         
     except Exception as e:
         print(f"Error in find_places_for_keyword: {e}")

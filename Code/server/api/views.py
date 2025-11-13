@@ -1762,7 +1762,11 @@ def paypal_config(request):
 @permission_classes([IsAuthenticated])
 def check_speech_for_word(request):
     transcript = request.data.get('transcript', '')
-    target_word = request.data.get('target_word', 'flower')
+    
+    # Add logging for debugging
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"Processing transcript: '{transcript}'")
     
     try:
         client = OpenAI(api_key=os.getenv('AI_API_KEY', ''))
@@ -1772,47 +1776,97 @@ def check_speech_for_word(request):
             messages=[
                 {
                     "role": "system", 
-                    "content": f"""You are checking if the word '{target_word}' or related words are mentioned in speech. 
-                    Respond with JSON only."""
+                    "content": """You are a product detection assistant. Your job is to identify any sellable products mentioned in speech.
+                    
+                    Products include: food, drinks, flowers, books, electronics, clothing, jewelry, toys, household items, gifts, etc.
+                    
+                    IMPORTANT: Respond ONLY with valid JSON. No other text."""
                 },
                 {
                     "role": "user", 
-                    "content": f"""Check this speech for '{target_word}' or related words: '{transcript}'. 
+                    "content": f"""Analyze this text for any products someone could buy from a store: "{transcript}"
                     
-                    Return JSON with:
-                    - word_detected (true/false)
-                    - detected_word (the actual word found)  
-                    - confidence (0-1)
+                    Respond with JSON:
+                    {{
+                        "word_detected": true/false,
+                        "detected_word": "product name" or null,
+                        "confidence": 0.0-1.0
+                    }}
+                    
+                    Examples of products: pizza, coffee, flowers, phone, shirt, book, chocolate
                     """
                 }
             ],
-            temperature=0.3,  # Lower temperature for more consistent detection
-            max_tokens=150   # Reduced since we're not generating prompts
+            temperature=0.2,  # Lower temperature for more consistent results
+            max_tokens=100    # Reduced tokens since we just need simple JSON
         )
         
         # Parse OpenAI response
-        ai_response = response.choices[0].message.content
+        ai_response = response.choices[0].message.content.strip()
+        logger.info(f"OpenAI response: '{ai_response}'")
         
-        # Try to parse as JSON, fallback if needed
+        # Try to parse as JSON
         try:
             import json
+            
+            # Clean up the response in case there's extra text
+            if ai_response.startswith('```json'):
+                ai_response = ai_response.replace('```json', '').replace('```', '').strip()
+            elif ai_response.startswith('```'):
+                ai_response = ai_response.replace('```', '').strip()
+                
             parsed_response = json.loads(ai_response)
-        except:
-            # Fallback simple detection without auto_message_prompt
-            word_detected = target_word.lower() in transcript.lower()
+            logger.info(f"Parsed response: {parsed_response}")
+            
+            # Validate the response structure
+            if not isinstance(parsed_response, dict):
+                raise ValueError("Response is not a dictionary")
+                
+            # Ensure required fields exist
+            parsed_response.setdefault('word_detected', False)
+            parsed_response.setdefault('detected_word', None)
+            parsed_response.setdefault('confidence', 0.0)
+            
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.warning(f"JSON parsing failed: {e}. Raw response: '{ai_response}'")
+            
+            # Fallback: simple keyword detection for common products
+            common_products = [
+                'pizza', 'coffee', 'flowers', 'flower', 'book', 'books', 'phone', 'shirt', 'shoes',
+                'chocolate', 'candy', 'wine', 'beer', 'bread', 'milk', 'eggs', 'cheese',
+                'laptop', 'computer', 'headphones', 'watch', 'jewelry', 'necklace', 'ring',
+                'toy', 'toys', 'game', 'games', 'food', 'drink', 'clothes', 'clothing'
+            ]
+            
+            transcript_lower = transcript.lower()
+            detected_product = None
+            
+            for product in common_products:
+                if product in transcript_lower:
+                    detected_product = product
+                    break
+            
             parsed_response = {
-                "word_detected": word_detected,
-                "detected_word": target_word if word_detected else None,
-                "confidence": 0.8
+                "word_detected": detected_product is not None,
+                "detected_word": detected_product,
+                "confidence": 0.8 if detected_product else 0.0,
+                "fallback_used": True
             }
+            logger.info(f"Using fallback detection: {parsed_response}")
         
         return Response(parsed_response)
         
     except Exception as e:
-        return Response({
-            "word_detected": False,
-            "error": str(e)
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f"Error in check_speech_for_word: {e}")
+        return Response(
+            {
+                "word_detected": False,
+                "detected_word": None,
+                "confidence": 0.0,
+                "error": str(e)
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(['POST'])

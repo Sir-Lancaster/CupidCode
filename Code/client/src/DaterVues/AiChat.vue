@@ -185,17 +185,18 @@ function startRecording() {
                 processingKeywordCheck = true
                 checkedTranscripts.add(transcript)
                 
-                console.log('Sending to OpenAI for word detection:', transcript)
+                console.log('🔍 Sending to OpenAI for product detection:', transcript)
                 
                 const response = await makeRequest('/api/check-speech-for-word/', 'post', {
-                    transcript: transcript,
-                    target_word: 'flower'
+                    transcript: transcript
                 })
 
                 if (response.word_detected) {
-                    console.log('OpenAI detected the word:', response.detected_word)
+                    console.log('✅ OpenAI detected a sellable product:', response.detected_word)
+                    
                     keywordDetectedInSession = true
                     const keyword = response.detected_word
+                    
                     if (!userLocation.value) {
                         try {
                             userLocation.value = await getCurrentLocation()
@@ -204,26 +205,34 @@ function startRecording() {
                         }
                     }
                     try {
+                        console.log('🚀 Creating AI gig for product:', keyword)
                         const gigResponse = await makeRequest('/api/ai-gig/create/', 'post', {
                             keyword: keyword,
                             user_location: userLocation.value
                         })
+                        
                         if (gigResponse.success) {
                             proposedGig.value = gigResponse.gig_data
                             showAIGig.value = true
-                            console.log(`🤖 AI Gig created for detected word: ${keyword}`)
+                            console.log(`🎉 AI Gig created successfully for: ${keyword}`)
                         } else {
-                            console.log(`❌ Could not create gig for ${keyword}: ${gigResponse.error}`)
+                            console.log(`❌ Could not create gig for ${keyword}:`, gigResponse.error)
                         }
                     } catch (error) {
-                        console.error('Error creating AI gig:', error)
+                        console.error('💥 Error creating AI gig:', error)
                     }
-                    console.log('🚫 Keyword detection disabled for remainder of this recording session')
+                    console.log('🚫 Product detection disabled for remainder of this recording session')
                 } else {
-                    console.log('❌ No keyword detected in:', transcript)
+                    console.log('❌ No sellable products detected in:', transcript)
+                    if (response.error) {
+                        console.error('🔥 API Error:', response.error)
+                    }
+                    if (response.fallback_used) {
+                        console.log('🔧 Fallback detection was used')
+                    }
                 }
             } catch (error) {
-                console.error('Error checking with OpenAI:', error)
+                console.error('💥 Error checking with OpenAI:', error)
             } finally {
                 processingKeywordCheck = false
             }
