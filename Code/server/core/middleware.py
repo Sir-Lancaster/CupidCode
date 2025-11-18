@@ -3,6 +3,19 @@ import os
 from django.http import StreamingHttpResponse
 
 
+class CrossOriginOpenerPolicyMiddleware:
+    """
+    Middleware to set Cross-Origin-Opener-Policy header for PayPal popup compatibility
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        response['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
+        return response
+
+
 def asset_proxy_middleware(next):
     def middleware(request):
         # checking for .
