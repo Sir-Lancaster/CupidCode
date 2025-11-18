@@ -37,6 +37,7 @@ urlpatterns = [
     path('manager/unsuspend/', views.unsuspend, name='unsuspend'),
     path('notifications/<int:pk>/', views.get_notifications, name='get_notifications'),
     path('google-maps-config/', views.get_google_maps_config, name='get_google_maps_config'),
+    path('session/', views.current_session, name='current_session'),
     path('paypal/config/', views.paypal_config, name='paypal_config'),
     path('check-speech-for-word/', views.check_speech_for_word, name='check_speech_for_word'),
     path('ai-gig/create/', views.create_ai_gig, name='create_ai_gig'),

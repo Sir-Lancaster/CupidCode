@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+import { makeRequest } from '../utils/make_request'
 // General
 import Login from '../components/Login.vue'
 import SignUp from '../components/SignUp.vue'
@@ -132,53 +133,55 @@ const router = createRouter({
 })
 
 // More lenient authentication guards
-router.beforeEach((to, from, next) => {
-  // Skip guards for login/public pages or non-protected routes
-  if (to.name === 'Login' || to.name === 'Register' || !to.params.id) {
-    next()
-    return
-  }
-  
-  // Extract user info from route
-  const routeUserId = to.params.id
-  const routePath = to.path
-  
-  // Determine route type (dater, cupid, manager)
-  let routeType = null
-  if (routePath.includes('/dater/')) routeType = 'dater'
-  else if (routePath.includes('/cupid/')) routeType = 'cupid'
-  else if (routePath.includes('/manager/')) routeType = 'manager'
-  
-  // If no route type detected, allow navigation (might be a public route)
-  if (!routeType) {
-    next()
-    return
-  }
-  
-  // Try to get stored user info
-  const storedUserId = localStorage.getItem('user_id')
-  const storedUserType = localStorage.getItem('user_type')
-  
-  // If no stored user info, try to extract from URL and store it
-  if (!storedUserId || !storedUserType) {
-    // Auto-set user info based on successful route access
-    // This helps with existing sessions where localStorage wasn't set
-    localStorage.setItem('user_id', routeUserId)
-    localStorage.setItem('user_type', routeType)
-    next()
-    return
-  }
-  
-  // If we have stored info, do basic validation
-  if (storedUserType !== routeType) {
-    console.warn(`Role mismatch: stored ${storedUserType} trying to access ${routeType} page`)
-    // Redirect to their correct home page
-    redirectToCorrectHome(storedUserType, storedUserId)
-    return
-  }
-  
-  // Allow navigation
-  next()
+router.beforeEach(async (to, from, next) => {
+    // Skip guards for login/public pages or non-protected routes
+    if (to.name === 'Login' || to.name === 'Register' || !to.params.id) {
+        next()
+        return
+    }
+
+    // Extract user info from route
+    const routeUserId = String(to.params.id)
+    const routePath = to.path
+
+    // Determine route type (dater, cupid, manager)
+    let routeType = null
+    if (routePath.includes('/dater/')) routeType = 'dater'
+    else if (routePath.includes('/cupid/')) routeType = 'cupid'
+    else if (routePath.includes('/manager/')) routeType = 'manager'
+
+    // If no route type detected, allow navigation (might be a public route)
+    if (!routeType) {
+        next()
+        return
+    }
+
+    // Validate against server-side session instead of trusting URL/localStorage
+    try {
+        const session = await makeRequest('/api/session/', 'get')
+        const serverUserId = String(session.id)
+        const serverUserRole = session.role
+
+        // If server reports a different role, redirect them to their own home
+        if (serverUserRole !== routeType) {
+            redirectToCorrectHome(serverUserRole, serverUserId)
+            return
+        }
+
+        // If the roles match but the IDs differ, deny navigation unless the user
+        // is a manager (managers are allowed to view management pages for others)
+        if (serverUserRole !== 'manager' && serverUserId !== routeUserId) {
+            redirectToCorrectHome(serverUserRole, serverUserId)
+            return
+        }
+
+        // All good
+        next()
+    } catch (err) {
+        // Server session missing or request failed — treat as unauthenticated
+        console.warn('Server session not available; redirecting to Login', err)
+        next({ name: 'Login' })
+    }
 })
 
 // Helper function to redirect to correct home

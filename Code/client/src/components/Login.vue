@@ -2,6 +2,7 @@
 import { makeRequest } from '../utils/make_request.js';
 import { ref } from 'vue';
 import router from '../router/index.js';
+import { setUserSession } from '../utils/auth.js';
 
 const email = ref('')
 const password = ref('')
@@ -30,6 +31,9 @@ async function login() {
         }
         else if (results.user && results.user['role']) {
             const role = results.user['role'].toLowerCase()
+            // Persist session client-side so the router guard can validate navigation.
+            // NOTE: this is a short-term compatibility fix; prefer server-set HttpOnly cookies.
+            setUserSession(results.user['id'], role)
             if (role === 'dater') {
                 router.push({name: 'DaterHome', params: {id: results.user['id']}})
             } else if (role === 'cupid') {
