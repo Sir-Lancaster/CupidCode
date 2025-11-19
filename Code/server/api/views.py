@@ -326,7 +326,6 @@ def rate_dater(request):
             Saved Feedback serialized
     """
     data = request.data
-    helpers.update_user_location(request.user, request.META['REMOTE_ADDR'])
     owner = request.user.id
     target = data['dater_id']
     gig = data['gig_id']
@@ -451,7 +450,6 @@ def rate_cupid(request):
             Saved Feedback serialized
     """
     data = request.data
-    helpers.update_user_location(request.user, request.META['REMOTE_ADDR'])
     owner = request.user.id
     target = data['cupid_id']
     gig = get_object_or_404(Gig, id=data['gig_id'])
@@ -575,7 +573,6 @@ def create_gig(request):
             If the gig was failed to be created, return a 400 status code.
     """
     data = request.data
-    helpers.update_user_location(request.user, request.META['REMOTE_ADDR'])
     dater = get_object_or_404(Dater, user_id=request.user.id)
     quest = Quest(budget=data['budget'], pickup_location=data['pickup_location'], items_requested=data['items_requested'], dropoff_location=data['dropoff_location'])
     quest.save()
@@ -844,7 +841,6 @@ def get_cupid_gigs(request, pk):
             A list of gigs (JSON)
     """
     cupid = get_object_or_404(Cupid, user_id=pk)
-    helpers.update_user_location(cupid.user, request.META['REMOTE_ADDR'])
     gigs = get_list_or_404(Gig, cupid=cupid)
     target = Gig.Status.COMPLETE if request.GET['complete'] == 'true' else Gig.Status.CLAIMED
     current_gigs = []
@@ -875,7 +871,6 @@ def get_dater_gigs(request, pk):
             A list of gigs (JSON)
     """
     dater = get_object_or_404(Dater, user_id=pk)
-    helpers.update_user_location(dater.user, request.META['REMOTE_ADDR'])
     gigs = get_list_or_404(Gig, dater=dater)
     serializer = GigSerializer(gigs, many=True)
     for gig in serializer.data:
