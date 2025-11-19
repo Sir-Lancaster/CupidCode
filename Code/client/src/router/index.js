@@ -10,8 +10,6 @@ import Suspended from '../components/Suspended.vue'
 
 // Dater specific
 import AiChat from '../DaterVues/AiChat.vue'
-
-import CupidCash from '../DaterVues/CupidCash.vue'
 import DaterProfile from '../DaterVues/DaterProfile.vue'
 import DaterFeedback from '../DaterVues/DaterFeedback.vue'
 import DaterGigs from '../DaterVues/DaterGigs.vue'
@@ -58,11 +56,6 @@ const routes = [
         path: '/dater/chat/:id',
         name: 'AiChat',
         component: AiChat
-    },
-    {
-        path: '/dater/balance/:id',
-        name: 'CupidCash',
-        component: CupidCash
     },
     {
         path: '/dater/profile/:id',
