@@ -1,6 +1,6 @@
 <script setup>
 import { makeRequest } from '../utils/make_request';
-import {onMounted, ref, watch} from 'vue';
+import {onMounted, ref} from 'vue';
 import router from '../router';
 import AIGigProposal from './components/AIGig.vue'
 import { getCurrentLocation } from '../utils/location_utils'

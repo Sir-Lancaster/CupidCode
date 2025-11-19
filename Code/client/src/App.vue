@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import router from './router/index.js';
 import { makeRequest } from './utils/make_request.js';
 import Popup from './components/Popup.vue'
 
@@ -18,12 +17,6 @@ const user_id = ref(null)
 const isNotLoginPage = computed(() => {
   return route.path !== '/' && route.path !== '/login'
 })
-
-async function getUser() {
-  const results = await makeRequest('api/user/', 'get', {
-    user_id: user_id
-  })
-}
 
 function updateUserId() {
   const id = parseInt(window.location.hash.split('/')[3]);

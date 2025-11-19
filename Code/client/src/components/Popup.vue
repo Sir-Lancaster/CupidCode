@@ -1,8 +1,3 @@
-<script setup>
-    import {ref, onMounted} from 'vue'
-
-    const popupActive = ref(false)
-</script>
 <template>
     <div class="popup" data-active="false">
         <slot />
