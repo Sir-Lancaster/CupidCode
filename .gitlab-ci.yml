@@ -2,7 +2,7 @@
 # This pipeline builds a Vue.js frontend, Django backend, and deploys to Azure VM with HTTPS
 
 # Base Docker image for all pipeline jobs - Node.js 18 for Vue.js build process
-image: node:18
+image: node:20
 
 # Define the three main stages of our CI/CD pipeline
 stages:
