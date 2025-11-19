@@ -7,12 +7,9 @@ import router from '../router/index.js';
 const email = ref('')
 const password = ref('')
 const accType = ref('dater')
-const phone = ref('')
-const addr = ref('')
 const fname = ref('')
 const lname = ref('')
 const username = ref('')
-const desc = ref('')
 const showError = ref(false)
 const errorMsg = ref('')
 const payemail = ref('')
@@ -25,18 +22,8 @@ const fieldErrors = ref({
     username: '',
     email: '',
     password: '',
-    phone: '',
-    addr: '',
     payemail: ''
 })
-
-// Dater specific 
-const str = ref('')
-const weak = ref('')
-const ntype = ref('')
-const interests = ref('')
-const goals = ref('')
-const past = ref('')
 
 function validateField(fieldName, value) {
     fieldErrors.value[fieldName] = ''
@@ -77,20 +64,6 @@ function validateField(fieldName, value) {
                 fieldErrors.value[fieldName] = 'Password must be at least 6 characters'
             }
             break
-        case 'phone':
-            if (!value.trim()) {
-                fieldErrors.value[fieldName] = 'Phone number is required'
-            } else if (!/^\d{10,}$/.test(value.replace(/\D/g, ''))) {
-                fieldErrors.value[fieldName] = 'Please enter a valid phone number (at least 10 digits)'
-            }
-            break
-        case 'addr':
-            if (!value.trim()) {
-                fieldErrors.value[fieldName] = 'Address is required'
-            } else if (value.trim().length < 10) {
-                fieldErrors.value[fieldName] = 'Please enter a complete address'
-            }
-            break
         case 'payemail':
             if (accType.value === 'cupid') {
                 if (!value.trim()) {
@@ -109,8 +82,6 @@ function validateAllFields() {
     validateField('username', username.value)
     validateField('email', email.value)
     validateField('password', password.value)
-    validateField('phone', phone.value)
-    validateField('addr', addr.value)
     
     if (accType.value === 'cupid') {
         validateField('payemail', payemail.value)
@@ -136,16 +107,7 @@ async function register() {
                 last_name: lname.value,
                 email: email.value,
                 password: password.value,
-                role: accType.value,
-                phone_number: phone.value,
-                location: addr.value,
-                description: desc.value || '',
-                dating_strengths: str.value || '',
-                dating_weaknesses: weak.value || '',
-                interests: interests.value || '',
-                past: past.value || '',
-                nerd_type: ntype.value || '',
-                relationship_goals: goals.value || ''
+                role: accType.value
             })
             
             if (results.Reason) {
@@ -165,8 +127,6 @@ async function register() {
                 email: email.value,
                 password: password.value,
                 role: accType.value,
-                phone_number: phone.value,
-                location: addr.value,
                 paypal_email: payemail.value
             })
             
@@ -305,64 +265,6 @@ function previewFile() {
                         :class="{ 'error-field': fieldErrors.password }"
                     />
                 </label>
-                <label class="form_input" for="phone">
-                    <span v-if="fieldErrors.phone" class="field-error">{{ fieldErrors.phone }}</span>
-                    Phone Number *
-                    <input 
-                        type="tel" 
-                        id="phone" 
-                        placeholder="8889991111" 
-                        v-model="phone" 
-                        required
-                        @blur="validateField('phone', phone)"
-                        :class="{ 'error-field': fieldErrors.phone }"
-                    />
-                </label>
-                <label class="form_input" for="address">
-                    <span v-if="fieldErrors.addr" class="field-error">{{ fieldErrors.addr }}</span>
-                    Address *
-                    <input 
-                        type="text" 
-                        id="address" 
-                        placeholder="1300 N 400 W Example Lane" 
-                        v-model="addr" 
-                        required
-                        @blur="validateField('addr', addr)"
-                        :class="{ 'error-field': fieldErrors.addr }"
-                    />
-                </label>
-                <label class="form_input" for="desc">
-                    Physical Description (optional)
-                    <textarea id="desc" v-model="desc" rows="4"></textarea>
-                </label>
-
-                <div v-if="accType === 'dater'" class="dater_fields">
-                    <h3>Dater Information (optional)</h3>
-                    <label class="form_input" for="nerd_type">
-                        Nerd Type
-                        <input type="text" id="nerd_type" v-model="ntype" placeholder="e.g., Gamer, Book Nerd, Tech Enthusiast"/>
-                    </label>
-                    <label class="form_input" for="goals">
-                        Relationship Goals
-                        <textarea id="goals" v-model="goals" rows="3"></textarea>
-                    </label>
-                    <label class="form_input" for="interests">
-                        Interests
-                        <textarea id="interests" v-model="interests" rows="3"></textarea>
-                    </label>
-                    <label class="form_input" for="past">
-                        Past Dating History
-                        <textarea id="past" v-model="past" rows="3"></textarea>
-                    </label>
-                    <label class="form_input" for="strengths">
-                        Dating Strengths
-                        <textarea id="strengths" v-model="str" rows="3"></textarea>
-                    </label>
-                    <label class="form_input" for="weaknesses">
-                        Dating Weaknesses
-                        <textarea id="weaknesses" v-model="weak" rows="3"></textarea>
-                    </label>
-                </div>
 
                 <div v-if="accType === 'cupid'" class="cupid_fields">
                     <h3>Cupid Information</h3>
@@ -390,6 +292,7 @@ function previewFile() {
         </div>
     </main>
 </template>
+
 
 <style scoped>
 main {
