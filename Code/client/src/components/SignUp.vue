@@ -6,7 +6,7 @@ import router from '../router/index.js';
 // For both accounts
 const email = ref('')
 const password = ref('')
-const accType = ref('')
+const accType = ref('dater')
 const phone = ref('')
 const addr = ref('')
 const fname = ref('')
@@ -15,7 +15,20 @@ const username = ref('')
 const desc = ref('')
 const showError = ref(false)
 const errorMsg = ref('')
+const payemail = ref('')
 let image = null 
+
+// Field-specific error tracking
+const fieldErrors = ref({
+    fname: '',
+    lname: '',
+    username: '',
+    email: '',
+    password: '',
+    phone: '',
+    addr: '',
+    payemail: ''
+})
 
 // Dater specific 
 const str = ref('')
@@ -25,12 +38,94 @@ const interests = ref('')
 const goals = ref('')
 const past = ref('')
 
+function validateField(fieldName, value) {
+    fieldErrors.value[fieldName] = ''
+    
+    switch (fieldName) {
+        case 'fname':
+            if (!value.trim()) {
+                fieldErrors.value[fieldName] = 'First name is required'
+            } else if (value.trim().length < 2) {
+                fieldErrors.value[fieldName] = 'First name must be at least 2 characters'
+            }
+            break
+        case 'lname':
+            if (!value.trim()) {
+                fieldErrors.value[fieldName] = 'Last name is required'
+            } else if (value.trim().length < 2) {
+                fieldErrors.value[fieldName] = 'Last name must be at least 2 characters'
+            }
+            break
+        case 'username':
+            if (!value.trim()) {
+                fieldErrors.value[fieldName] = 'Username is required'
+            } else if (value.trim().length < 3) {
+                fieldErrors.value[fieldName] = 'Username must be at least 3 characters'
+            }
+            break
+        case 'email':
+            if (!value.trim()) {
+                fieldErrors.value[fieldName] = 'Email is required'
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                fieldErrors.value[fieldName] = 'Please enter a valid email address'
+            }
+            break
+        case 'password':
+            if (!value) {
+                fieldErrors.value[fieldName] = 'Password is required'
+            } else if (value.length < 6) {
+                fieldErrors.value[fieldName] = 'Password must be at least 6 characters'
+            }
+            break
+        case 'phone':
+            if (!value.trim()) {
+                fieldErrors.value[fieldName] = 'Phone number is required'
+            } else if (!/^\d{10,}$/.test(value.replace(/\D/g, ''))) {
+                fieldErrors.value[fieldName] = 'Please enter a valid phone number (at least 10 digits)'
+            }
+            break
+        case 'addr':
+            if (!value.trim()) {
+                fieldErrors.value[fieldName] = 'Address is required'
+            } else if (value.trim().length < 10) {
+                fieldErrors.value[fieldName] = 'Please enter a complete address'
+            }
+            break
+        case 'payemail':
+            if (accType.value === 'cupid') {
+                if (!value.trim()) {
+                    fieldErrors.value[fieldName] = 'PayPal email is required for Cupid accounts'
+                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                    fieldErrors.value[fieldName] = 'Please enter a valid PayPal email address'
+                }
+            }
+            break
+    }
+}
+
+function validateAllFields() {
+    validateField('fname', fname.value)
+    validateField('lname', lname.value)
+    validateField('username', username.value)
+    validateField('email', email.value)
+    validateField('password', password.value)
+    validateField('phone', phone.value)
+    validateField('addr', addr.value)
+    
+    if (accType.value === 'cupid') {
+        validateField('payemail', payemail.value)
+    }
+    
+    // Check if any field has errors
+    return Object.values(fieldErrors.value).every(error => error === '')
+}
+
 async function register() {
     try {
-        // Validate required fields
-        if (!email.value || !password.value || !accType.value || !phone.value || !addr.value) {
-            showError.value = true
-            errorMsg.value = 'Please fill in all required fields'
+        showError.value = false
+        errorMsg.value = ''
+        
+        if (!validateAllFields()) {
             return
         }
 
@@ -44,14 +139,6 @@ async function register() {
                 role: accType.value,
                 phone_number: phone.value,
                 location: addr.value,
-                description: desc.value,
-                //profile_picture: image,
-                dating_strengths: str.value,
-                dating_weaknesses: weak.value,
-                nerd_type: ntype.value,
-                interests: interests.value,
-                relationship_goals: goals.value,
-                past: past.value,
             })
             
             if (results.Reason) {
@@ -73,8 +160,7 @@ async function register() {
                 role: accType.value,
                 phone_number: phone.value,
                 location: addr.value,
-                description: desc.value,
-                //profile_picture: image
+                paypal_email: payemail.value
             })
             
             if (results.Reason) {
@@ -127,25 +213,41 @@ function previewFile() {
                 
                 <h3>Account Type</h3>
                 <div class="radios">
-                    <label class="radio_detail" for="cupid">
-                        Cupid 
-                        <input type="radio" id="cupid" name="accountType" value="cupid" v-model="accType"/>
-                    </label>
                     <label class="radio_detail" for="dater">
                         Dater
                         <input type="radio" id="dater" name="accountType" value="dater" v-model="accType"/>
+                    </label>
+                    <label class="radio_detail" for="cupid">
+                        Cupid 
+                        <input type="radio" id="cupid" name="accountType" value="cupid" v-model="accType"/>
                     </label>
                 </div>
 
                 <div class="name-picture-section">
                     <div class="name-fields">
                         <label class="form_input" for="fname">
+                            <span v-if="fieldErrors.fname" class="field-error">{{ fieldErrors.fname }}</span>
                             First Name *
-                            <input type="text" id="fname" placeholder="First Name" v-model="fname"/>
+                            <input 
+                                type="text" 
+                                id="fname" 
+                                placeholder="First Name" 
+                                v-model="fname"
+                                @blur="validateField('fname', fname)"
+                                :class="{ 'error-field': fieldErrors.fname }"
+                            />
                         </label>
                         <label class="form_input" for="lname">
+                            <span v-if="fieldErrors.lname" class="field-error">{{ fieldErrors.lname }}</span>
                             Last Name *
-                            <input type="text" id="lname" placeholder="Last Name" v-model="lname"/>
+                            <input 
+                                type="text" 
+                                id="lname" 
+                                placeholder="Last Name" 
+                                v-model="lname"
+                                @blur="validateField('lname', lname)"
+                                :class="{ 'error-field': fieldErrors.lname }"
+                            />
                         </label>
                     </div>
                     <div class="profile-picture-section">
@@ -159,32 +261,76 @@ function previewFile() {
                 </div>
 
                 <label class="form_input" for="username">
+                    <span v-if="fieldErrors.username" class="field-error">{{ fieldErrors.username }}</span>
                     Username *
-                    <input type="text" id="username" placeholder="username01" v-model="username"/>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        placeholder="username01" 
+                        v-model="username"
+                        @blur="validateField('username', username)"
+                        :class="{ 'error-field': fieldErrors.username }"
+                    />
                 </label>
                 <label class="form_input" for="email">
+                    <span v-if="fieldErrors.email" class="field-error">{{ fieldErrors.email }}</span>
                     Email *
-                    <input type="email" id="email" placeholder="example@email.com" v-model="email" required/>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        placeholder="example@email.com" 
+                        v-model="email" 
+                        required
+                        @blur="validateField('email', email)"
+                        :class="{ 'error-field': fieldErrors.email }"
+                    />
                 </label>
                 <label class="form_input" for="password">
+                    <span v-if="fieldErrors.password" class="field-error">{{ fieldErrors.password }}</span>
                     Password *
-                    <input type="password" id="password" placeholder="Password" v-model="password" required/>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        placeholder="Password" 
+                        v-model="password" 
+                        required
+                        @blur="validateField('password', password)"
+                        :class="{ 'error-field': fieldErrors.password }"
+                    />
                 </label>
                 <label class="form_input" for="phone">
+                    <span v-if="fieldErrors.phone" class="field-error">{{ fieldErrors.phone }}</span>
                     Phone Number *
-                    <input type="tel" id="phone" placeholder="8889991111" v-model="phone" required/>
+                    <input 
+                        type="tel" 
+                        id="phone" 
+                        placeholder="8889991111" 
+                        v-model="phone" 
+                        required
+                        @blur="validateField('phone', phone)"
+                        :class="{ 'error-field': fieldErrors.phone }"
+                    />
                 </label>
                 <label class="form_input" for="address">
+                    <span v-if="fieldErrors.addr" class="field-error">{{ fieldErrors.addr }}</span>
                     Address *
-                    <input type="text" id="address" placeholder="1300 N 400 W Example Lane" v-model="addr" required/>
+                    <input 
+                        type="text" 
+                        id="address" 
+                        placeholder="1300 N 400 W Example Lane" 
+                        v-model="addr" 
+                        required
+                        @blur="validateField('addr', addr)"
+                        :class="{ 'error-field': fieldErrors.addr }"
+                    />
                 </label>
                 <label class="form_input" for="desc">
-                    Physical Description
+                    Physical Description (optional)
                     <textarea id="desc" v-model="desc" rows="4"></textarea>
                 </label>
 
                 <div v-if="accType === 'dater'" class="dater_fields">
-                    <h3>Dater Information</h3>
+                    <h3>Dater Information (optional)</h3>
                     <label class="form_input" for="nerd_type">
                         Nerd Type
                         <input type="text" id="nerd_type" v-model="ntype" placeholder="e.g., Gamer, Book Nerd, Tech Enthusiast"/>
@@ -211,6 +357,23 @@ function previewFile() {
                     </label>
                 </div>
 
+                <div v-if="accType === 'cupid'" class="cupid_fields">
+                    <h3>Cupid Information</h3>
+                    <label class="form_input" for="payemail">
+                        <span v-if="fieldErrors.payemail" class="field-error">{{ fieldErrors.payemail }}</span>
+                        PayPal Email *
+                        <input 
+                            type="email" 
+                            id="payemail" 
+                            placeholder="example@email.com" 
+                            v-model="payemail" 
+                            required
+                            @blur="validateField('payemail', payemail)"
+                            :class="{ 'error-field': fieldErrors.payemail }"
+                        />
+                    </label>
+                </div>
+
                 <button @click="$emit('click-forward')" class="action-button send-button">Create Account</button>
             </form>
         </div>
@@ -234,10 +397,27 @@ main {
     text-align: center;
     color: var(--new-accent);
     background-color: rgba(251, 54, 64, 0.1);
-    margin: 10px;
+    margin: 10px 0;
     padding: 10px;
     border-radius: 4px;
     font-weight: bold;
+}
+
+.field-error {
+    display: block;
+    color: var(--new-accent);
+    background-color: rgba(251, 54, 64, 0.1);
+    font-size: 14px;
+    font-weight: bold;
+    padding: 5px 8px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    border-left: 3px solid var(--new-accent);
+}
+
+.error-field {
+    border-color: var(--new-accent) !important;
+    background-color: rgba(251, 54, 64, 0.05) !important;
 }
 
 .register_paper {
@@ -245,6 +425,7 @@ main {
     flex-flow: column wrap;
     background-color: var(--new-background);
     align-items: center;
+    width: 100%;
 }
 
 .form {
@@ -257,6 +438,7 @@ main {
     padding: 20px;
     margin-bottom: 20px;
     border-radius: 10px;
+    box-sizing: border-box;
 }
 
 .side_by_side {
@@ -306,6 +488,36 @@ h3 {
     align-items: flex-start;
 }
 
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    main {
+        padding: 10px;
+    }
+    
+    .form {
+        padding: 15px;
+        margin: 0 5px 20px 5px;
+    }
+    
+    .name-picture-section {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .name-fields {
+        width: 100%;
+    }
+    
+    .profile-picture-section {
+        width: 100%;
+    }
+    
+    .radios {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
 .name-fields {
     flex: 1;
 }
@@ -325,23 +537,26 @@ h3 {
 .form_input {
     display: flex;
     flex-direction: column;
-    padding: 8px;
+    padding: 8px 0;
     font-weight: bold;
+    width: 100%;
 }
 
 input, textarea {
     border: 3px rgba(128, 128, 128, 0.5) solid;
     border-radius: 4px;
-    width: auto;
+    width: 100%;
     padding: 8px;
-    margin: 10px;
+    margin: 5px 0;
     background-color: var(--new-background);
     color: var(--new-primary);
+    box-sizing: border-box;
 }
 
 input[type="file"] {
     border: none;
     color: var(--new-primary);
+    width: auto;
 }
 
 textarea {
@@ -350,6 +565,12 @@ textarea {
 }
 
 .dater_fields {
+    border-top: 2px solid var(--new-primary);
+    margin-top: 20px;
+    padding-top: 10px;
+}
+
+.cupid_fields {
     border-top: 2px solid var(--new-primary);
     margin-top: 20px;
     padding-top: 10px;
@@ -387,37 +608,39 @@ a:hover {
 }
 
 /* Custom Action Buttons */
-    .action-button {
-        background-color: var(--new-secondary);
-        border: 2px solid var(--new-primary);
-        border-radius: 8px;
-        padding: 12px 20px;
-        color: var(--new-primary);
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 44px;
-        min-width: 100px;
-    }
+.action-button {
+    background-color: var(--new-secondary);
+    border: 2px solid var(--new-primary);
+    border-radius: 8px;
+    padding: 12px 20px;
+    color: var(--new-primary);
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 100px;
+    margin: 10px 0;
+    box-sizing: border-box;
+}
 
-    .action-button:hover {
-        background-color: var(--new-primary);
-        color: var(--new-background);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(9, 161, 41, 0.3);
-    }
+.action-button:hover {
+    background-color: var(--new-primary);
+    color: var(--new-background);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(9, 161, 41, 0.3);
+}
 
-    .action-button:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 4px rgba(9, 161, 41, 0.2);
-    }
+.action-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(9, 161, 41, 0.2);
+}
 
-    .send-button {
-        background-color: var(--new-secondary);
-        border-color: var(--new-primary);
-    }
+.send-button {
+    background-color: var(--new-secondary);
+    border-color: var(--new-primary);
+}
 </style>
