@@ -208,28 +208,6 @@ def get_user(request, pk):
     return Response(return_data, status=status.HTTP_200_OK)
 
 
-@api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def delete_user(request, pk):
-    """
-    For a manager.
-    Delete a user
-
-    Args:
-        pk(int): The id of the user
-
-    Returns:
-        Response:
-            OK
-    """
-    if pk != request.user.id and request.user.is_staff is False:
-        return Response(status=status.HTTP_403_FORBIDDEN)
-    user = get_object_or_404(User, id=pk)
-    user.delete()
-    return Response(status=status.HTTP_200_OK)
-
-
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
@@ -410,28 +388,6 @@ def get_dater_ratings(request, pk):
     ratings = get_list_or_404(Feedback, target=dater.user)
     serializer = FeedbackSerializer(ratings, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-@api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def get_dater_avg_rating(request, pk):
-    """
-    For all users.
-    Returns the average rating of a specific dater.
-
-    Args:
-        request: information about the request
-        pk(int): the user_id as included in the URL
-    Returns:
-        Response:
-            rating(int): The dater's rating
-    """
-    try:
-        dater = helpers.authenticated_dater(pk, request.user)
-    except PermissionDenied:
-        return Response(status=status.HTTP_403_FORBIDDEN)
-    return Response({'rating:': dater.rating_sum / dater.rating_count}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -667,107 +623,6 @@ def get_cupid_avg_rating(request, pk):
     """
     cupid = helpers.authenticated_cupid(pk, request.user)
     return Response({'rating:': cupid.rating_sum / cupid.rating_count}, status=status.HTTP_200_OK)
-
-
-@api_view(['POST'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def cupid_accepting(request):
-    cupid = get_object_or_404(Cupid, user=request.user)
-    if request.data['choice']:
-        cupid.status = Cupid.Status.AVAILABLE
-        cupid.accepting_gigs = True
-    else:
-        cupid.accepting_gigs = False
-    cupid.save()
-    return Response(status=status.HTTP_200_OK)
-
-
-@api_view(['POST'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def cupid_transfer(request):
-    """
-    Performs financial transfer from a Cupid's balance to their bank account.
-
-    Args:
-        request: Information about the request.
-            request.post: The json data sent to the server.
-    Returns:
-        Response:
-            If the transfer went through successfully, return a 200 status code.
-            If the transfer failed, return a corresponding error status code (400 if on our end, 500 if on bank's end)
-    """
-    helpers.update_user_location(request.user, request.META['REMOTE_ADDR'])
-    cupid = get_object_or_404(Cupid, user_id=request.user.id)
-    bank_account = get_object_or_404(BankAccount, user=cupid.user)
-    amount = cupid.cupid_cash_balance
-    cupid.cupid_cash_balance = 0
-    cupid.save()
-    return Response({f"Transferring {amount} to {bank_account.routing_number}"},
-                    status=status.HTTP_200_OK)
-
-
-@api_view(['POST'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def save_bank_account(request):
-    """
-    For a cupid.
-    Creates a new bank account and saves it.
-
-    Args (request.post):
-       routing_number(str): The routing number
-       account_number(str): The account number
-
-    Returns:
-        Response:
-            serialized card.
-
-    """
-    data = request.data
-    helpers.update_user_location(request.user, request.META['REMOTE_ADDR'])
-    data['user'] = request.user.id
-    serializer = BankAccountSerializer(data=data)
-    return helpers.save_serializer(serializer)
-
-
-@api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def get_cupid_balance(request, pk):
-    """
-    Returns a number representing the Cupid's balance on their account.
-
-    Args:
-        request: Information about the request.
-        pk (int): ID for the requested Cupid.
-    Returns:
-        Response:
-            Balance on the Cupid's account (int).
-            If the account could not be found, return a 400 status code.
-    """
-    cupid = helpers.authenticated_cupid(pk, request.user)
-    return Response({'balance': cupid.cupid_cash_balance}, status=status.HTTP_200_OK)
-
-
-@api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def get_cupid_profile(request, pk):
-    """
-    Returns all details on a Cupid's profile (details from Cupid record).
-
-    Args:
-        request: Information about the request.
-        pk (int): ID for the requested Cupid.
-    Returns:
-        Response:
-            Requested details from Cupid's record (JSON)
-    """
-    cupid = helpers.authenticated_cupid(pk, request.user)
-    serializer = CupidSerializer(cupid)
-    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -1172,121 +1027,6 @@ def get_gigs(request, pk, count):
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def get_stores(request, pk):
-    """
-    Reaches out to an API with an address to get stores near that address location.
-
-    Args:
-        request: Information about the request.
-    Returns:
-        Response:
-            A list of nearby stores, including their specific location (JSON)
-    """
-    return helpers.get_response_from_yelp_api(pk, request, 'stores')
-
-
-@api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def get_activities(request, pk):
-    """
-    Reaches out to an API with an address to get possible activities near that address location.
-
-    Args:
-        request: Information about the request.
-    Returns:
-        Response:
-            A list of nearby activities, including their specific location (JSON)
-    """
-    return helpers.get_response_from_yelp_api(pk, request, 'activities')
-
-
-@api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def get_events(request, pk):
-    """
-    Reaches out to an API with an address to get current entertainment events near that address location.
-
-    Args:
-        request: Information about the request.
-    Returns:
-        Response:
-            A list of nearby events, including their specific location (JSON)
-    """
-    return helpers.get_response_from_yelp_api(pk, request, 'events')
-
-
-@api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def get_attractions(request, pk):
-    """
-    Reaches out to an API with an address to get attractions near that address location.
-
-    Args:
-        request: Information about the request.
-    Returns:
-        Response:
-            If the attractions were retrieved successfully, return a list of nearby attractions, including their specific location amd a 200 status code.
-            If the attractions were not retrieved successfully, return an error message and a 400 status code.
-    """
-    return helpers.get_response_from_yelp_api(pk, request, 'attractions')
-
-
-@api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def get_restaurants(request, pk):
-    """
-    Reaches out to an API with an address to get restaurants near that address location.
-
-    Args:
-        request: Information about the request.
-    Returns:
-        Response:
-            If the restaurants were retrieved successfully, return a list of nearby restaurants, including their specific location and a 200 status code.
-            If the restaurants were not retrieved successfully, return an error message and a 400 status code.
-    """
-    return helpers.get_response_from_yelp_api(pk, request, 'restaurants')
-
-
-@api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def get_user_location(request, pk):
-    """
-    For gigs, the location of the user is needed to determine the delivery location of the gig.
-
-    Args:
-        request: Information about the request.
-        pk (int): The id of the user to get the location of.
-    Returns:
-        Response:
-            If the location of the user was retrieved successfully, return the user location and a 200 status code.
-            If the location of the user was not retrieved successfully, return an error message and a 400 status code.
-
-    """
-    if pk != request.user.id:
-        return Response(status=status.HTTP_403_FORBIDDEN)
-
-    user = get_object_or_404(User, id=pk)
-    serializer = helpers.initialize_serializer(user)
-    if serializer is None:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    if serializer.is_valid():
-        serializer.save()
-        return Response(
-            {'location': serializer.validated_data['location']},
-            status=status.HTTP_200_OK,
-        )
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated, IsAdminUser])
 def get_cupids(request):
     """
@@ -1585,61 +1325,6 @@ def unsuspend(request):
     
     return helpers.retrieved_response(serializer)
 
-
-@api_view(['POST'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def speech_to_text(request):
-    """
-    For a Dater.
-    Convert an audio file to text. When the audio is converted to text, the text is sent to the external AI service.
-    The response from the AI service is analyzed and a gig could be created based on the response.
-
-    Args:
-        request: Information about the request.
-            request.post: The json data sent to the server.
-                audio (json): The audio to convert to text.
-                    audio['type'] (str): The type of audio file.
-                    audio['data'] (str): The audio file in base64 format.
-    Returns:
-        Response:
-            If the audio was converted to text successfully and indicate if a gig was created or not, return a 200 status code.
-            If the audio was not converted to text successfully or a gig could not be created, return an error message and a 400 status code.
-    """
-    data = request.data
-    dater = get_object_or_404(Dater, user_id=data['user_id'])
-    audio_data = data['audio']
-    try:
-        message = helpers.get_message_from_audio(audio_data, dater)
-        if message == "Error processing audio":
-            return Response(
-                {'error': message},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        response = helpers.get_ai_response(message)
-        return helpers.process_ai_response(dater, response)
-    except speech_recognition.UnknownValueError:
-        return Response(
-            {'error': 'Could not understand the audio.'},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-    except speech_recognition.RequestError as e:
-        return Response(
-            {'error': 'Could not request results; {0}'.format(e)},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['POST'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def email_notification(request):
-    data = request.data
-    recipient = get_object_or_404(User, id=data['user_id'])
-    message = data['message']
-    return helpers.send_email(recipient, message)
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, BasicAuthentication])

@@ -109,29 +109,6 @@ def authenticated_dater(pk, user):
     return get_object_or_404(Dater, user_id=pk)
 
 
-def authenticated_cupid(pk, user):
-    """
-    Retrieve a Cupid object only if the authenticated user matches the requested primary key.
-
-    Ensures that users can only access their own Cupid profile. If the provided primary key
-    does not match the authenticated user's ID, a PermissionDenied exception is raised.
-
-    Args:
-        pk (int): The primary key of the user to retrieve.
-        user (User): The currently authenticated user.
-
-    Returns:
-        Cupid: The Cupid object associated with the given user ID.
-
-    Raises:
-        PermissionDenied: If the provided primary key does not match the authenticated user.
-        Http404: If no matching Cupid object exists.
-    """
-    if pk != user.id:
-        raise PermissionDenied()
-    return get_object_or_404(Cupid, user_id=pk)
-
-
 def save_profile(request, user, serializer):
     """
     Validate, save, and authenticate a user profile based on the provided serializer.
@@ -279,7 +256,7 @@ def save_calendar(request):
     try:
         data = request.data
         # TODO: Either us or the frontend needs to determine a planned location, then save the geo coords
-        data['location'] = get_location_string(request.META['REMOTE_ADDR'])
+        # data['location'] = get_location_string(request.META['REMOTE_ADDR'])
         data['dater'] = request.user.id
         serializer = DateSerializer(data=data)
         return save_serializer(serializer)
