@@ -1,6 +1,5 @@
 <script setup>
-import {ref, onMounted, computed} from 'vue';
-import router from '../router/index.js'
+import {ref, onMounted} from 'vue';
 import { makeRequest } from '../utils/make_request';
 import { getCurrentLocation, filterGigsByRange } from '../utils/location_utils';
 
@@ -13,8 +12,6 @@ const user_id  = parseInt(window.location.hash.split('/')[3])
 const gigCount = 0
 const gigs = ref([])
 const activeGigs = ref([])
-const reward = ref(0)
-const rewardShow = ref(false)
 const showMap = ref(false) 
 const selectedGig = ref(null) 
 const currentLocation = ref(null)
@@ -102,13 +99,6 @@ async function getData() {
         }
     }
 }
-
-function displayReward(amount) {
-    reward.value = amount
-    rewardShow.value = true
-    setTimeout(() => {rewardShow.value = false},1500)
-}
-
 
 function openMap(gig) {
     selectedGig.value = gig

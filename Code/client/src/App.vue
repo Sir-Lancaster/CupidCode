@@ -19,7 +19,9 @@ const isNotLoginPage = computed(() => {
 })
 
 function updateUserId() {
-  const id = parseInt(window.location.hash.split('/')[3]);
+  const parts = window.location.hash.split('/').filter(p => p && p !== '#');
+  const lastPart = parts[parts.length - 1];
+  const id = parseInt(lastPart);
   const before = user_id.value
   if (!isNaN(id) && id > 0) {
     user_id.value = id;
