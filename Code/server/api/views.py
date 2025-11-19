@@ -77,7 +77,6 @@ def create_user(request):
     """
     # Prepare data input
     data = request.data
-    data['location'] = helpers.get_location_string(request.META['REMOTE_ADDR'])
     data['role'] = data['role'].lower()
     # Create user
     user_serializer = UserSerializer(data=data)
@@ -121,12 +120,6 @@ def sign_in(request):
 
     if not email or not password:
         return Response({'Reason': 'Missing email or password'}, status=status.HTTP_400_BAD_REQUEST)
-
-    # try to capture location but do not fail login if location lookup errors
-    try:
-        data['location'] = helpers.get_location_string(request.META.get('REMOTE_ADDR', ''))
-    except Exception:
-        logger.exception("Failed to get location for sign_in")
 
     try:
         user_obj = User.objects.filter(email__iexact=email).first()
@@ -216,7 +209,6 @@ def send_chat_message(request):
             message(str): The AI's response
     """
     data = request.data
-    # data['location'] = helpers.get_location_string(request.META['REMOTE_ADDR'])
     user_id = request.user.id
     message = data['message']
     # save a message to database
@@ -419,7 +411,6 @@ def set_dater_profile(request):
     """
     data = request.data
     data['user'] = request.user.id
-    data['location'] = helpers.get_location_string(request.META['REMOTE_ADDR'])
     dater = get_object_or_404(Dater, user_id=request.user.id)
     serializer = DaterSerializer(dater, data=data)
     user_serializer = UserSerializer(request.user, data=data, partial=True)
@@ -538,7 +529,6 @@ def set_cupid_profile(request):
             If the profile failed to be created or changed (insufficent permissions, bad data, or error), return a 400 status code.
     """
     data = request.data
-    data['location'] = helpers.get_location_string(request.META['REMOTE_ADDR'])
     data['user'] = request.user.id
     cupid = get_object_or_404(Cupid, user_id=request.user.id)
     serializer = CupidSerializer(cupid, data=data)
@@ -728,7 +718,6 @@ def complete_gig(request):
         }
     """
     data = request.data
-    data['location'] = helpers.get_location_string(request.META['REMOTE_ADDR'])
     gig = get_object_or_404(Gig, id=data['gig_id'])
     serializer = GigSerializer(
         gig,
@@ -773,8 +762,6 @@ def drop_gig(request):
             If the gig could not be dropped, was already dropped, or does not have a Cupid assigned, return a 400 status code.
     """
     data = request.data
-    # This doesn't do much, should update the cupid's location instead
-    data['location'] = helpers.get_location_string(request.META['REMOTE_ADDR'])
     gig = get_object_or_404(Gig, id=data['gig_id'])
     if gig.cupid != request.user.cupid:
         return Response(status=status.HTTP_403_FORBIDDEN)
