@@ -1160,6 +1160,13 @@ def get_gigs(request, pk, count):
     if count != 0:
         near_gigs = near_gigs[:count]
     serializer = GigSerializer(near_gigs, many=True)
+    
+    # Add dater names to the serialized data
+    for gig in serializer.data:
+        user = User.objects.get(id=gig['dater'])
+        gig['dater'] = f'{user.first_name} {user.last_name}'
+        gig['dater_id'] = user.id
+    
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 

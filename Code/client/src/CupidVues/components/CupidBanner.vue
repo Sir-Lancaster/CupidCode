@@ -103,7 +103,7 @@ onMounted(() => {
         
         <button @click="navigateTo('GigDetails', { id: user_id })" class="nav-item">
           <span class="material-symbols-outlined">search</span>
-          Find Gigs
+          Active Gigs
         </button>
         
         <button @click="navigateTo('GigComplete', { id: user_id })" class="nav-item">

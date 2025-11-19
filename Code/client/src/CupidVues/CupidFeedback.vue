@@ -161,6 +161,16 @@ main {
     margin-bottom: 12px;
 }
 
+/* Disable heart hover effects on feedback pages */
+.hearts-row :deep(.heart) {
+    pointer-events: none;
+}
+
+.hearts-row :deep(.heart):hover {
+    transform: none;
+    filter: none;
+}
+
 /* Rating Row with Text */
 .rating-row {
     display: flex;
