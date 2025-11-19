@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
-from .models import Dater, Cupid, User, Message, Gig, Quest, Date, Feedback, PaymentCard, BankAccount
+from .models import Dater, Cupid, User, Message, Gig, Quest, Date, Feedback
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -74,17 +74,4 @@ class DateSerializer(serializers.ModelSerializer):
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
-        fields = '__all__'
-
-
-class PaymentCardSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = PaymentCard
-        fields = '__all__'
-
-
-class BankAccountSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BankAccount
         fields = '__all__'
