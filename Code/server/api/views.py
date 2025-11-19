@@ -23,24 +23,16 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
-# Miscellaneous utils
-import speech_recognition
-
 # Local
 from .serializers import (
     UserSerializer,
     DaterSerializer,
     CupidSerializer,
-    ManagerSerializer,
     MessageSerializer,
     GigSerializer,
-    DateSerializer,
-    FeedbackSerializer,
-    PaymentCardSerializer,
-    BankAccountSerializer,
-    QuestSerializer,
+    FeedbackSerializer
 )
-from .models import (User, Dater, Cupid, Gig, Quest, Message, Date, Feedback, PaymentCard, BankAccount)
+from .models import (User, Dater, Cupid, Gig, Quest, Message, Feedback)
 from . import helpers
 from .paypal_service import send_payout_to_cupid
 
@@ -390,77 +382,6 @@ def get_dater_ratings(request, pk):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-@api_view(['POST'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def dater_transfer(request):
-    """
-    For a dater.
-    Charges the dater's card and updates their balance.
-
-    Args (request.post):
-        card_id(int): The id of the card to charge
-        amount(float): The amount to transfer
-    Returns:
-        Response:
-            OK
-    """
-    data = request.data
-    data['location'] = helpers.get_location_string(request.META['REMOTE_ADDR'])
-    dater = get_object_or_404(Dater, user=request.user)
-    card = get_object_or_404(PaymentCard, id=data['card_id'])
-    if dater is None or card is None:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-    if card.user != dater.user:
-        return Response(
-            {"error: you don't have a card with that id"},
-            status=status.HTTP_403_FORBIDDEN,
-        )
-    dater.cupid_cash_balance += data['amount']
-    # Card would be charged amount if it were real.
-    dater.save()
-    return Response({f'Card charged {data["amount"]}'}, status=status.HTTP_200_OK)
-
-
-@api_view(['POST'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def save_card(request):
-    """
-    For a dater.
-    Creates a new payment card and saves it.
-
-    Args (request.post):
-       name_on_card(str): The name on the card
-       card_number(str): The card number
-       cvv(str): The 3 digits on the back
-       expiration(str): MM/YY expiration date
-
-    Returns:
-        Response:
-            serialized card.
-    """
-
-    data = request.data
-    helpers.update_user_location(request.user, request.META['REMOTE_ADDR'])
-    data['user'] = request.user.id
-    serializer = PaymentCardSerializer(data=data)
-    return helpers.save_serializer(serializer)
-
-
-@api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def get_cards(request, pk):
-    try:
-        dater = helpers.authenticated_dater(pk, request.user)
-    except PermissionDenied:
-        return Response(status=status.HTTP_403_FORBIDDEN)
-    cards = get_list_or_404(PaymentCard, user=request.user)
-    serializer = PaymentCardSerializer(cards, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
-
-
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
@@ -481,29 +402,6 @@ def get_dater_balance(request, pk):
     except PermissionDenied:
         return Response(status=status.HTTP_403_FORBIDDEN)
     return Response({'balance': dater.cupid_cash_balance}, status=status.HTTP_200_OK)
-
-
-@api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def get_dater_profile(request, pk):
-    """
-    For daters.
-    Returns the profile information of the dater.
-
-    Args:
-        request: information about the request
-        pk(int): the user_id as included in the URL
-    Returns:
-        Response:
-            The dater serialized
-    """
-    try:
-        dater = helpers.authenticated_dater(pk, request.user)
-    except PermissionDenied:
-        return Response(status=status.HTTP_403_FORBIDDEN)
-    serializer = DaterSerializer(dater)
-    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
