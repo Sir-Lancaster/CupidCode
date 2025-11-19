@@ -193,6 +193,50 @@ def get_user(request, pk):
     return Response(return_data, status=status.HTTP_200_OK)
 
 
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def current_session(request):
+    """
+    Return basic information about the currently authenticated user.
+
+    This endpoint is intended for client-side route guards to validate the
+    server-side session (it does not accept any user-supplied IDs).
+    """
+    try:
+        user = request.user
+        return Response({
+            'id': user.id,
+            'role': getattr(user, 'role', None),
+            'is_staff': getattr(user, 'is_staff', False),
+            'username': getattr(user, 'username', None),
+        }, status=status.HTTP_200_OK)
+    except Exception:
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_user(request, pk):
+    """
+    For a manager.
+    Delete a user
+
+    Args:
+        pk(int): The id of the user
+
+    Returns:
+        Response:
+            OK
+    """
+    if pk != request.user.id and request.user.is_staff is False:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    user = get_object_or_404(User, id=pk)
+    user.delete()
+    return Response(status=status.HTTP_200_OK)
+
+
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
