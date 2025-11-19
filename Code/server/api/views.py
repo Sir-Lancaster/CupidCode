@@ -872,7 +872,7 @@ def get_cupid_gigs(request, pk):
             A list of gigs (JSON)
     """
     cupid = get_object_or_404(Cupid, user_id=pk)
-    gigs = get_list_or_404(Gig, cupid=cupid)
+    gigs = Gig.objects.filter(cupid=cupid)
     target = Gig.Status.COMPLETE if request.GET['complete'] == 'true' else Gig.Status.CLAIMED
     current_gigs = []
     for gig in gigs:
