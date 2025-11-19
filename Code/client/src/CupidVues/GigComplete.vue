@@ -15,7 +15,7 @@
     const heartState = ref([false,false,false,false,false])
     const rating = ref(0)
 
-    const user_id  = parseInt(window.location.hash.split('/')[4]) //Gets the id from the router
+    const user_id  = parseInt(window.location.hash.split('/')[3]) //Gets the id from the router
 
     async function getData() {
         gigs.value = await makeRequest(`api/cupid/gigs/${user_id}?complete=true`)
