@@ -139,6 +139,13 @@ async function register() {
                 role: accType.value,
                 phone_number: phone.value,
                 location: addr.value,
+                description: desc.value || '',
+                dating_strengths: str.value || '',
+                dating_weaknesses: weak.value || '',
+                interests: interests.value || '',
+                past: past.value || '',
+                nerd_type: ntype.value || '',
+                relationship_goals: goals.value || ''
             })
             
             if (results.Reason) {
