@@ -902,7 +902,7 @@ def get_dater_gigs(request, pk):
             A list of gigs (JSON)
     """
     dater = get_object_or_404(Dater, user_id=pk)
-    gigs = get_list_or_404(Gig, dater=dater)
+    gigs = Gig.objects.filter(dater=dater)
     serializer = GigSerializer(gigs, many=True)
     for gig in serializer.data:
         try:
