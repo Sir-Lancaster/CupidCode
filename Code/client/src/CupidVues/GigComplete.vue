@@ -48,12 +48,25 @@
 
     function checkHeart(e) {
         const target = e.target.parentNode
-        rating.value = Number(target.dataset.index) + 1
-        for (let i = 0; i <= rating.value; i++){
-            heartState.value[i] = true
-        }
-        for (let i = rating.value; i < 5; i++){
-            heartState.value[i] = false
+        const clickedRating = Number(target.dataset.index) + 1
+        
+        // If clicking on the same heart that represents current rating, reset to 0
+        if (clickedRating === rating.value) {
+            rating.value = 0
+            // Set all hearts to false
+            for (let i = 0; i < 5; i++) {
+                heartState.value[i] = false
+            }
+        } else {
+            // Set new rating
+            rating.value = clickedRating
+            // Update heart states
+            for (let i = 0; i < rating.value; i++) {
+                heartState.value[i] = true
+            }
+            for (let i = rating.value; i < 5; i++) {
+                heartState.value[i] = false
+            }
         }
     }
 

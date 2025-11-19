@@ -399,7 +399,7 @@ onMounted(getChats)
         display: flex;
         justify-content: space-between;
         align-items: center;
-        z-index: 999; /* Lowered from 1002 to be below banner popup */
+        z-index: 900; /* Lowered from 999 to be below banner popup */
         margin-bottom: 0;
     }
 
@@ -527,7 +527,7 @@ onMounted(getChats)
         display: flex;
         flex-direction: column;
         gap: 16px;
-        padding-bottom: 60px; /* Increased bottom padding */
+        padding-bottom: 70px; /* Increased bottom padding */
         min-height: 100%; /* Ensure it fills available space */
     }
 
@@ -601,14 +601,14 @@ onMounted(getChats)
         background-color: var(--new-background);
         border-top: 2px solid var(--new-primary);
         padding: 16px;
-        z-index: 1000; /* Increased z-index to be above navbar */
+        z-index: 900; /* Lowered from 1000 to be below banner popup */
     }
 
     /* Mobile: Account for bottom navbar */
     @media (max-width: 768px) {
         .input-container {
-            bottom: 80px; /* Increased to be clearly above navbar */
-            z-index: 1001; /* Higher than navbar z-index */
+            bottom: 95px; /* Increased to be clearly above navbar */
+            z-index: 901; /* Slightly higher than header but still below banner popup */
         }
     }
 

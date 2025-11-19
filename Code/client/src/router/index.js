@@ -1,7 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 // General
 import Login from '../components/Login.vue'
-import Welcome from '../components/Welcome.vue'
 import SignUp from '../components/SignUp.vue'
 import NotFound from '../components/NotFound.vue'
 import DaterHome from '../DaterVues/DaterHome.vue'
@@ -11,7 +10,7 @@ import Suspended from '../components/Suspended.vue'
 
 // Dater specific
 import AiChat from '../DaterVues/AiChat.vue'
-import AiListen from '../DaterVues/AiListen.vue'
+
 import CupidCash from '../DaterVues/CupidCash.vue'
 import DaterProfile from '../DaterVues/DaterProfile.vue'
 import DaterFeedback from '../DaterVues/DaterFeedback.vue'
@@ -59,11 +58,6 @@ const routes = [
         path: '/dater/chat/:id',
         name: 'AiChat',
         component: AiChat
-    },
-    {
-        path: '/dater/listen/:id',
-        name: 'AiListen',
-        component: AiListen
     },
     {
         path: '/dater/balance/:id',
