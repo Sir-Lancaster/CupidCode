@@ -1,7 +1,7 @@
-import cookie from "cookie";
+import { parse } from "cookie";
 
 export async function makeRequest(uri, method = "get", body = {}) {
-  const parsedCookie = cookie.parse(document.cookie)
+  const parsedCookie = parse(document.cookie);
   const options = {
     method,
     headers: {
@@ -44,7 +44,7 @@ export async function makeRequest(uri, method = "get", body = {}) {
 }
 
 export async function logoutRequest() {
-    const parsedCookie = cookie.parse(document.cookie)
+    const parsedCookie = parse(document.cookie);
     const options = {
         'method':'get',
         headers: {
