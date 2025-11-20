@@ -1,67 +1,28 @@
-# Cupid Code Start Guide
+# WORKING STARTER CODE INSTALLATION STEPS:
+1. Ensure you have python, poetry, node, and npm installed globally
+2. Run `git clone [path to the repo]`
+3. Run `cd Code/`
+4. Run `poetry shell`
+5. Run `poetry install`
+6. Run `cd server/`
+7. Run `python manage.py migrate`
+8. Run `touch .env`
+9. Run `code .env` (or open the file in whichever text editor you like)
+10. Reference .env.example for what is required in your .env, it is located [here](server/.env.example)
+11. Run `python manage.py runserver`
+12. Open a new terminal tab and navigate to project root
+13. Run `cd Code/`
+14. Run `poetry shell`
+15. Run `cd client/`
+16. Run `npm install`
+17. Run `npm audit fix` (This won't fix all of the vulnerabilities but at least some)
+18. Run `npm run dev`
+19. Visit `http://localhost:8000`
 
-## Automated Cupid Code Setup
 
-### Do once
+Additionally, some information about what else you might need:
+an Account for an api key for Google Maps, Twilio, Paypal, and OpenAI
 
-1. Make sure you have installed poetry, npm, python, and tmux
-2. make sure you are in the Code directory
-3. Run `poetry install` in the Code directory to make sure the poetry.lock file exists/is up to date.
-4. Run `npm install` in the client directory to make sure current npm packages are installed
-5. Run `chmod +x setup.sh start.sh stop.sh restart.sh` to make the shell scripts executable
-6. run `./setup.sh` to install poetry, install npm_modules, create the .env file, install python dependencies, and create the database
+We deployed to the cloud using Microsoft Azure, we used default settings and made sure ports 80 and 443, for HTTP and HTTPs traffic respectively. You will have to find a third party app to get a valid URL from, we used https://www.noip.com/login?ref_url=console
 
-### Running the server
-
-After the setup is complete, you can
-- run `./start.sh` to start the django server and the vue.js middleware
-- run `./stop.sh` to stop the django server and the vue.js middleware
-- run `./restart.sh` to restart the django server and the vue.js middleware
-- run `./setup.sh` to reinstall the project if changes are made to the .env file or the poetry.lock file
-
-### Tmux Commands
-- `tmux ls` to see what sessions are running
-- `tmux kill-session -t my_session` to kill the session
-- `tmux a -t my_session` to attach to the session
-- `Ctrl b d` or `Ctrl b :detach` Detach from currently attached session 
-
--------------
-
-## Manual Cupid Code Setup
-
-### Getting Started
-
-Run `poetry install` in Code directory to make sure the poetry.lock file exists/is up to date.
-
-Run `npm install` in the client directory to make sure current npm packages are installed
-
-### Django
-
-In `server`, create your own .env file. You can copy the data in the .env.example file 
-
-DO NOT remove or rename the .env.example file!! Only copy from it!
-
-Activate your shell using `poetry shell`
-
-In `server`, run `python manage.py makemigrations` and `python manage.py migrate`
-
-### Vue
-In `client`, run `npm install` to get all dependies. 
-
-Make sure you do this anytime the package.json file is changed since node_modules will always be gitignored.
-
-### Running the server
-
-In one terminal, run `python mangae.py runserver` in `server`
-    
-*Make sure you're in the poetry shell first*
-
-In another terminal, run `npm run dev` in `client`
-
-Visit the app at `http://localhost:8000`
-
-### Additional Notes
-
-VSCode will underline all imports and uses of imports in `server` with yellow if your shell is not activated. This is okay! This is just how VSCode interprets the version management. It counts them as missing if you're coding w/o the shell management. If you want the lines gone then code with the shell active and use the quick fix to set it to the Poetry environment it will remove the underlines.
-
-If you get any yellow underlines in `client` then you likely have not updated your node_modules. Run `npm install` and it will solve that issue!
+On GitLab you will need to set up CI/CD environment variables for the public and private keys in order for the [YAML](../.gitlab-ci.yml) file to work. The deploy scripts folder is used by the YAML.
