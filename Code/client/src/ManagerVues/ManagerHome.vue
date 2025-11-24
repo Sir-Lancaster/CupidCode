@@ -59,27 +59,28 @@ async function getCurrActiveTotal() {
 
 async function getGigData() {
   try {
-    // Get gig rate
+    // Get gig rate - handle potential division by zero
     const rate_res = await makeRequest('/api/manager/gig_rate/')
-    rate.value = rate_res.gig_rate
+    rate.value = typeof rate_res.gig_rate === 'number' ? rate_res.gig_rate : 0
 
     // Get total gig count
     const count_res = await makeRequest('/api/manager/gig_count/')
-    gigs.value = count_res.count
+    gigs.value = count_res.count || 0
 
-    // Get completion rate
+    // Get completion rate - ensure it's between 0 and 1
     const completed_res = await makeRequest('/api/manager/gig_complete_rate/')
-    completed.value = completed_res.gig_complete_rate
+    const completionRate = completed_res.gig_complete_rate || 0
+    completed.value = Math.max(0, Math.min(1, completionRate)) // Clamp between 0 and 1
 
     // Get drop rate
     const dropped_res = await makeRequest('/api/manager/gig_drop_rate/')
-    dropped.value = dropped_res.drop_rate
+    dropped.value = typeof dropped_res.drop_rate === 'number' ? dropped_res.drop_rate : 0
   } catch (error) {
     console.error('Error fetching gig data:', error)
-    rate.value = 'Error'
-    gigs.value = 'Error'
-    completed.value = 'Error'
-    dropped.value = 'Error'
+    rate.value = 0
+    gigs.value = 0
+    completed.value = 0
+    dropped.value = 0
   }
 }
 
@@ -90,42 +91,54 @@ function toPDF() {
 
 // Calculate recent activity (last 24 hours) using real data
 const recentActivityData = computed(() => {
-  const totalGigs = gigs.value || 0
-  const completionRate = completed.value || 0
-  const gigRatePerHour = rate.value || 0
-  const dropRatePerHour = dropped.value || 0
-  
-  if (totalGigs === 'Error' || gigRatePerHour === 'Error') {
+  try {
+    const totalGigs = typeof gigs.value === 'number' ? gigs.value : 0
+    const completionRate = typeof completed.value === 'number' ? completed.value : 0
+    const gigRatePerHour = typeof rate.value === 'number' ? rate.value : 0
+    const dropRatePerHour = typeof dropped.value === 'number' ? dropped.value : 0
+    
+    if (totalGigs === 0 && gigRatePerHour === 0) {
+      return []
+    }
+    
+    // Calculate actual numbers for LAST 24 HOURS
+    const completedToday = Math.max(0, Math.floor(totalGigs * completionRate))
+    const createdToday = Math.max(0, Math.floor(gigRatePerHour * 24))
+    const droppedToday = Math.max(0, Math.floor(dropRatePerHour * 24))
+    
+    return [
+      { 
+        label: 'Created Today', 
+        value: createdToday,
+        color: 'var(--new-light-blue)'
+      },
+      { 
+        label: 'Completed Today', 
+        value: completedToday,
+        color: 'var(--new-primary)'
+      },
+      { 
+        label: 'Dropped Today', 
+        value: droppedToday,
+        color: 'var(--new-accent)'
+      }
+    ]
+  } catch (error) {
+    console.error('Error calculating recent activity data:', error)
     return []
   }
-  
-  // Calculate actual numbers for LAST 24 HOURS
-  const completedToday = Math.floor(totalGigs * completionRate) // Completed gigs from last 24 hours
-  const createdToday = Math.floor(gigRatePerHour * 24) // Gigs created per hour * 24 hours
-  const droppedToday = Math.floor(dropRatePerHour * 24) // Drops per hour * 24 hours
-  
-  return [
-    { 
-      label: 'Created Today', 
-      value: createdToday,
-      color: 'var(--new-light-blue)'
-    },
-    { 
-      label: 'Completed Today', 
-      value: completedToday,
-      color: 'var(--new-primary)'
-    },
-    { 
-      label: 'Dropped Today', 
-      value: droppedToday,
-      color: 'var(--new-accent)'
-    }
-  ]
 })
 
 const maxValue = computed(() => {
-  if (recentActivityData.value.length === 0) return 10
-  return Math.max(...recentActivityData.value.map(d => d.value), 5) // Minimum of 5 for scale
+  try {
+    if (recentActivityData.value.length === 0) return 10
+    const values = recentActivityData.value.map(d => d.value).filter(v => typeof v === 'number' && !isNaN(v))
+    if (values.length === 0) return 10
+    return Math.max(...values, 5) // Minimum of 5 for scale
+  } catch (error) {
+    console.error('Error calculating max value:', error)
+    return 10
+  }
 })
 
 onMounted(async () => {
@@ -153,10 +166,10 @@ onMounted(async () => {
                 <div class="chart-section">
                     <h3>Recent Activity (Last 24 Hours)</h3>
                     <figure class="graph-container">
-                        <div v-if="gigs === 'Error' || rate === 'Error'" class="graph-placeholder">
+                        <div v-if="recentActivityData.length === 0" class="graph-placeholder">
                             <span class="material-symbols-outlined">bar_chart</span>
-                            <p>Activity Data Unavailable</p>
-                            <span class="placeholder-subtitle">Error loading recent activity data</span>
+                            <p>No Activity Data Available</p>
+                            <span class="placeholder-subtitle">No gig activity in the last 24 hours</span>
                         </div>
                         
                         <div v-else class="bar-chart-container">
@@ -182,9 +195,9 @@ onMounted(async () => {
                                     v-for="(item, index) in recentActivityData"
                                     :key="item.label"
                                     :x="100 + index * 120"
-                                    :y="250 - (item.value / maxValue * 220)"
+                                    :y="250 - Math.max(1, (item.value / maxValue * 220))"
                                     width="80"
-                                    :height="(item.value / maxValue * 220)"
+                                    :height="Math.max(1, (item.value / maxValue * 220))"
                                     :fill="item.color"
                                     stroke="var(--new-background)"
                                     stroke-width="2"
@@ -197,7 +210,7 @@ onMounted(async () => {
                                     v-for="(item, index) in recentActivityData"
                                     :key="`value-${index}`"
                                     :x="140 + index * 120"
-                                    :y="250 - (item.value / maxValue * 220) - 8"
+                                    :y="250 - Math.max(1, (item.value / maxValue * 220)) - 8"
                                     text-anchor="middle"
                                     fill="var(--new-primary)"
                                     font-size="14"
@@ -222,7 +235,11 @@ onMounted(async () => {
                             </svg>
                         </div>
                         
-                        <figcaption>Activity for the last 24 hours (Rates: {{ typeof rate === 'number' ? rate.toFixed(1) : rate }} gigs/hr created, {{ typeof dropped === 'number' ? dropped.toFixed(1) : dropped }} drops/hr)</figcaption>
+                        <figcaption>
+                            Activity for the last 24 hours 
+                            (Rates: {{ typeof rate === 'number' ? rate.toFixed(1) : '0.0' }} gigs/hr created, 
+                            {{ typeof dropped === 'number' ? dropped.toFixed(1) : '0.0' }} drops/hr)
+                        </figcaption>
                     </figure>
                 </div>
 
@@ -257,15 +274,15 @@ onMounted(async () => {
                             <span class="stat-label">Total Gigs</span>
                         </div>
                         <div class="stat-widget gigs">
-                            <h4 class="stat-number">{{ typeof rate === 'number' ? rate.toFixed(1) : rate }}</h4>
+                            <h4 class="stat-number">{{ typeof rate === 'number' ? rate.toFixed(1) : '0.0' }}</h4>
                             <span class="stat-label">Gigs per Hour</span>
                         </div>
                         <div class="stat-widget completed">
-                            <h4 class="stat-number">{{ typeof completed === 'number' ? (completed * 100).toFixed(1) + '%' : completed }}</h4>
+                            <h4 class="stat-number">{{ typeof completed === 'number' ? (completed * 100).toFixed(1) + '%' : '0.0%' }}</h4>
                             <span class="stat-label">Completion Rate</span>
                         </div>
                         <div class="stat-widget dropped">
-                            <h4 class="stat-number">{{ typeof dropped === 'number' ? dropped.toFixed(1) : dropped }}</h4>
+                            <h4 class="stat-number">{{ typeof dropped === 'number' ? dropped.toFixed(1) : '0.0' }}</h4>
                             <span class="stat-label">Drops per Hour</span>
                         </div>
                     </div>

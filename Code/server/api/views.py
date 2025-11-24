@@ -1181,13 +1181,19 @@ def get_gig_complete_rate(request):
             If the rate of gigs that are completed was not retrieved successfully, return an error message and a 400 status code.
     """
     try:
-        yesterday = datetime.now() - timedelta(days=1)  # Fixed: removed datetime. prefix
+        yesterday = datetime.now() - timedelta(days=1)
         gigs_from_past_day = Gig.objects.filter(date_time_of_request__range=(yesterday, datetime.now()))
         if gigs_from_past_day is None:
-            return Response(status=status.HTTP_400_BAD_REQUEST)  # Fixed: added status=
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         number_of_completed_gigs = gigs_from_past_day.filter(status=2).count()
         number_of_gigs = Gig.objects.all().count()
-        gig_complete_rate = number_of_completed_gigs / number_of_gigs
+        
+        # Fix division by zero
+        if number_of_gigs == 0:
+            gig_complete_rate = 0.0
+        else:
+            gig_complete_rate = number_of_completed_gigs / number_of_gigs
+            
         return Response(data={"gig_complete_rate": gig_complete_rate}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': e}, status=status.HTTP_400_BAD_REQUEST)
