@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('test', async ({ page }) => {
-  await page.goto('http://localhost:8000/#/');
+  await page.goto('https://cupidcode.zapto.org/#/');
   await page.getByRole('textbox', { name: 'Email' }).click();
   await page.getByRole('textbox', { name: 'Email' }).fill('dater@dater.com');
   await page.getByRole('textbox', { name: 'Password' }).click();
