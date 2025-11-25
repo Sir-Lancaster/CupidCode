@@ -138,7 +138,7 @@ Located in the top-left banner, provides comprehensive navigation:
 **AI Gig Creation Integration:**
 - AI can detect when you need emergency assistance
 - Automatically suggests creating gigs for any product
-- PayPal payment processing built into AI-suggested gigs
+- for how to fill out payments, see [Creating a Gig](#creating-a-gig)
 
 ![AI gig](images/AI-found-gig-page.png)
 ---
