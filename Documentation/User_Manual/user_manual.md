@@ -90,6 +90,8 @@ Cupid Code is a dating assistance platform that connects Daters with AI-powered 
 3. Click any tile to access that feature - all navigation uses your user ID automatically
 4. The interface adapts responsively between mobile and desktop layouts
 
+![Dater home page](images/Dater-home.png)
+
 ---
 
 ### Navigation Options
@@ -114,16 +116,19 @@ Located in the top-left banner, provides comprehensive navigation:
 - **Accessibility**: Toggle light/dark mode
 - **Logout**: Sign out of your account
 
+![Dater navigation](images/Dater-navigation.png)
 ---
 
 ### Using AI Chat
 
+![AI chat](images/AI-chat-page.png)
 **Getting AI Dating Advice:**
 1. Click "AI Chat" from dashboard or navigation
 2. View welcoming interface with chat icon and instructions
 3. Type questions in the message input field at the bottom
 4. Press Enter or click send button to receive AI responses
 5. Conversation history displays with user messages (right-aligned) and AI responses (left-aligned with robot icon)
+6. Use "Clear" button to hide messages (preserves history)
 
 **Advanced Voice Features:**
 1. **Voice Input**: Click microphone button to start speech recording
@@ -131,13 +136,13 @@ Located in the top-left banner, provides comprehensive navigation:
    - Real-time transcript appears in message field
    - Click microphone again to stop early
 2. **Smart Keyword Detection**: AI monitors speech for emergency keywords and can suggest creating gigs automatically
-3. **Conversation Management**: Use "Clear" button to hide messages (preserves history)
 
 **AI Gig Creation Integration:**
 - AI can detect when you need emergency assistance
 - Automatically suggests creating gigs for any product
 - PayPal payment processing built into AI-suggested gigs
 
+![AI gig](images/AI-found-gig-page.png)
 ---
 
 ### Managing Your Gigs
@@ -149,6 +154,7 @@ Located in the top-left banner, provides comprehensive navigation:
 - View detailed gig information including items requested, budget, and locations
 - **Cancel**: Remove gig if no longer needed (available until claimed)
 - Empty state message: "You do not have any pending gigs"
+![dater gigs](images/Dater-gigs-page.png)
 
 **2. Claimed Gigs:**
 - Active assistance requests assigned to specific Cupids
@@ -156,6 +162,7 @@ Located in the top-left banner, provides comprehensive navigation:
 - **Cancel**: Still available if circumstances change
 - **Complete**: Mark as finished when service is received (triggers payment processing)
 - Empty state message: "You have no active gigs"
+![dater claimed](images/Dater-gigs-claimed.png)
 
 **3. Complete Gigs:**
 - Finished assistance requests ready for feedback
@@ -169,16 +176,9 @@ Located in the top-left banner, provides comprehensive navigation:
 3. **Written Feedback**: Optional text area for detailed service review
 4. **Submit Process**: Click "Send" to submit rating and feedback
 5. **Cancel Option**: Exit rating without submitting
+![dater complete](images/Dater-gigs-complete.png)
 
-**Gig Data Display:**
-Each gig tile shows:
-- Dater information and request details
-- Items requested and specific requirements
-- Budget allocation for assistance
-- Pickup location (where Cupid collects items)
-- Dropoff location (where items are delivered)
 
----
 
 ## Cupid Guide
 
