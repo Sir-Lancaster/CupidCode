@@ -77,16 +77,6 @@ Cupid Code is a dating assistance platform that connects Daters with AI-powered 
 
 ## Dater Guide
 
-### Dater Overview
-
-As a Dater, you have access to AI-powered dating advice, emergency assistance from Cupids, and comprehensive gig management. The platform provides both mobile and desktop navigation options to ensure seamless access across all devices.
-
-#### Dater Table of Contents
-- [Accessing the Dater Dashboard](#accessing-the-dater-dashboard) - Navigate your main home screen and widget tiles
-- [Navigation Options](#navigation-options) - Understanding the mobile bottom bar and hamburger menu
-- [Using AI Chat](#using-ai-chat) - Get dating advice with voice and text features
-- [Managing Your Gigs](#managing-your-gigs) - Track assistance requests through all stages
-
 ---
 
 ### Accessing the Dater Dashboard
