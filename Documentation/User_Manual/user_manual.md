@@ -77,8 +77,6 @@ Cupid Code is a dating assistance platform that connects Daters with AI-powered 
 
 ## Dater Guide
 
----
-
 ### Accessing the Dater Dashboard
 
 **How to Navigate the Dater Home:**
@@ -178,7 +176,135 @@ Located in the top-left banner, provides comprehensive navigation:
 5. **Cancel Option**: Exit rating without submitting
 ![dater complete](images/Dater-gigs-complete.png)
 
+---
 
+### Creating a Gig
+
+![Create Gig form interface 1/2](./images/Dater-Create-Gig-1.jpg)
+![Create Gig form inteface 2/2](./images/Dater-Create-Gig-2.jpg)
+
+**How to Create a Gig:**
+1. Click "Create Gig" from the navigation menu
+2. Fill out the gig request form with the following information:
+   - **Item**: Brief description of what you need (e.g., "Flowers, Movie Tickets, etc")
+   - **Pickup Location**: Where the Cupid should collect items (enter address. EX: 100 N 100 E, 84321)
+   - **Dropoff Location**: Where to deliver (your date location - enter address or use map). In the event that your drop off address is the same as your pickup address, click the checkbox called: "Same as pickup address"
+   - **Budget**: Set maximum amount you're willing to pay in Cupid Cash
+3. Review all information carefully
+4. Click "Create Gig" to advance to the payment step. 
+![Payment](./images/Gig-Payment.jpg)
+
+#### **PayPal Checkout**
+![Payment1](./images/PayPal-PopOut.jpg)
+
+5. Press the PayPal button to open the pop out window leading to the PayPal checkout page. Log into paypal using the following information:
+  - Email: Dater@personal.example.com
+  - Password: I-Am-A-Dater
+**Note:**
+  - Paypal will default to using a phone number as dual authentication, to get to password authentication, click "try annother way", then "Use Password Instead."
+  ![Payment2](./images/Paypal-Password-1.jpg)
+  ![Payment3](./images/Paypal-Password-2.jpg)
+
+6. After loggin in, use the Credit Union account to pay for the gig, then click "Pay"
+![Payment4](./images/PayPal-CheckOut.jpg)
+
+7. Once the gig is created, the page will redirect to the gigs page. 
+**Gig Creation Tips:**
+- Be specific in your quest details to ensure Cupids understand your needs
+- Allow reasonable time between creation and dropoff time
+- Set a fair budget that accounts for distance and item costs
+- Double-check your dropoff location is accurate
+- Include any special instructions in the quest details
+
+**What Happens Next:**
+1. Your gig becomes available for Cupids to accept
+2. You'll receive a notification when a Cupid accepts your gig
+3. The Cupid will complete the delivery at your specified time and location
+4. You'll be prompted to rate the Cupid after completion
+
+---
+
+### Managing Your Calendar
+
+![Calendar0](./images/Calendar-1.jpg)
+![Calendar1](./images/Calendar-2.jpg)
+
+**How to Use Your Calendar:**
+1. Click "Calendar" from the navigation menu
+2. View all your planned and completed dates in a grid layout
+3. Add new dates to track your dating schedule
+
+**Adding a New Date to Your Calendar:**
+1. Fill out the date creation form:
+   - **Choose the Day**: Select the date from the calendar picker
+   - **Where are you Going?** Enter the complete address:
+     - Street Address (required)
+     - APT/Unit (optional)
+     - City (required)
+     - State (required)
+     - Zip Code (required)
+   - **What will you be doing?** Describe your planned date activity
+   - **Max budget for Gigs**: Set the maximum amount ($XX.XX) you're willing to spend on gigs for this date
+2. Click the "Add Date" button to save the date to your calendar
+
+**Understanding Date Statuses:**
+- **Planned**: Date is scheduled and upcoming
+- **Completed**: Date has been finished
+- Use the "Change Status" button on each date card to toggle between planned and completed
+
+**Calendar Features:**
+- View all dates in an organized grid layout
+- Each date card displays:
+  - Date
+  - Location/Address
+  - Description of activities
+  - Current status (Planned/Completed)
+- Change status of dates with one click
+- Track your dating activity and budget planning
+
+**Calendar Tips:**
+- Add dates in advance to plan your gig budget accordingly
+- Update status after completing dates to keep your calendar organized
+- Use the description field to remember details about planned activities
+- Set realistic budgets based on what gigs you might need during the date
+
+---
+
+### Dater Profile
+
+![Profile1](./images/Dater-profile-1.jpg)
+![Profile2](./images/Dater-Profile-2.jpg)
+![Profile3](./images/Dater-Profile-3.jpg)
+![Profile4](./images/Dater-Profile-4.jpg)
+
+**How to Manage Your Profile:**
+1. Click "Profile" from the navigation menu
+2. View and edit your profile information:
+   - **Profile Picture**: Click to upload a new photo
+   - **Name**: Your display name
+   - **Email**: Contact email (used for login)
+   - **Location**: Your general area (helps match with nearby Cupids)
+   - **Phone number**: Your contact information
+   - **Bio**: Optional descriptions about yourself
+     - Physical description
+     - Nerd Type
+     - Interests
+     - Relationship Goals
+     - Past Dating History
+     - Dating Strengths
+     - Dating Weaknesses
+
+**Updating Your Profile:**
+1. The Profile Page is automatically in "edit mode"
+2. Make desired changes to any field
+3. Click "Save Changes" to update your information
+4. Changes take effect immediately
+
+**Important Profile Tips:**
+- Keep your location updated for accurate Cupid matching
+- Add a profile picture to personalize your account
+- Verify your payment information is current
+- Review notification settings to stay informed about gig updates
 
 ## Cupid Guide
 
