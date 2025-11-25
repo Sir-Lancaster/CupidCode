@@ -77,7 +77,116 @@ Cupid Code is a dating assistance platform that connects Daters with AI-powered 
 
 ## Dater Guide
 
+### Dater Overview
 
+As a Dater, you have access to AI-powered dating advice, emergency assistance from Cupids, and comprehensive gig management. The platform provides both mobile and desktop navigation options to ensure seamless access across all devices.
+
+#### Dater Table of Contents
+- [Accessing the Dater Dashboard](#accessing-the-dater-dashboard) - Navigate your main home screen and widget tiles
+- [Navigation Options](#navigation-options) - Understanding the mobile bottom bar and hamburger menu
+- [Using AI Chat](#using-ai-chat) - Get dating advice with voice and text features
+- [Managing Your Gigs](#managing-your-gigs) - Track assistance requests through all stages
+
+---
+
+### Accessing the Dater Dashboard
+
+**How to Navigate the Dater Home:**
+1. Upon logging in as a Dater, you'll see your main dashboard with navigation tiles
+2. The dashboard displays three primary action tiles:
+   - **AI Chat**: Access conversational AI for dating advice and emergency gig creation
+   - **My Gigs**: View and manage all your assistance requests across three status categories
+   - **Create Gig**: Post new requests for Cupid assistance with delivery or emergency help
+3. Click any tile to access that feature - all navigation uses your user ID automatically
+4. The interface adapts responsively between mobile and desktop layouts
+
+---
+
+### Navigation Options
+
+**Mobile Bottom Navigation Bar:**
+- **Home**: Returns to the main Dater dashboard
+- **AI**: Direct access to AI Chat functionality  
+- **Profile**: Manage your account settings and personal information
+
+**Desktop/Tablet Top Navigation:**
+- Same three options positioned below the banner for larger screens
+
+**Hamburger Menu (Available on all screens):**
+Located in the top-left banner, provides comprehensive navigation:
+- **Home**: Return to dashboard
+- **AI Chat**: Access conversational AI assistant
+- **Profile**: Manage account settings  
+- **Gigs**: View and manage assistance requests
+- **Create Gig**: Post new assistance requests
+- **Calendar**: View scheduled dates and events
+- **Feedback**: Provide platform feedback
+- **Accessibility**: Toggle light/dark mode
+- **Logout**: Sign out of your account
+
+---
+
+### Using AI Chat
+
+**Getting AI Dating Advice:**
+1. Click "AI Chat" from dashboard or navigation
+2. View welcoming interface with chat icon and instructions
+3. Type questions in the message input field at the bottom
+4. Press Enter or click send button to receive AI responses
+5. Conversation history displays with user messages (right-aligned) and AI responses (left-aligned with robot icon)
+
+**Advanced Voice Features:**
+1. **Voice Input**: Click microphone button to start speech recording
+   - Records up to 30 seconds automatically
+   - Real-time transcript appears in message field
+   - Click microphone again to stop early
+2. **Smart Keyword Detection**: AI monitors speech for emergency keywords and can suggest creating gigs automatically
+3. **Conversation Management**: Use "Clear" button to hide messages (preserves history)
+
+**AI Gig Creation Integration:**
+- AI can detect when you need emergency assistance
+- Automatically suggests creating gigs for any product
+- PayPal payment processing built into AI-suggested gigs
+
+---
+
+### Managing Your Gigs
+
+**Understanding Gig Status Categories:**
+
+**1. Unclaimed Gigs:**
+- Recently posted assistance requests waiting for Cupid assignment
+- View detailed gig information including items requested, budget, and locations
+- **Cancel**: Remove gig if no longer needed (available until claimed)
+- Empty state message: "You do not have any pending gigs"
+
+**2. Claimed Gigs:**
+- Active assistance requests assigned to specific Cupids
+- Monitor progress of ongoing assistance
+- **Cancel**: Still available if circumstances change
+- **Complete**: Mark as finished when service is received (triggers payment processing)
+- Empty state message: "You have no active gigs"
+
+**3. Complete Gigs:**
+- Finished assistance requests ready for feedback
+- **Rate Cupid**: Comprehensive rating system with 1-5 heart interface
+- View past gig history and Cupid performance
+- Empty state message: "You have no complete gigs"
+
+**Rating System:**
+1. Click "Rate Cupid" on any completed gig
+2. **Heart Rating**: Click hearts to select 1-5 rating (click same heart to reset)
+3. **Written Feedback**: Optional text area for detailed service review
+4. **Submit Process**: Click "Send" to submit rating and feedback
+5. **Cancel Option**: Exit rating without submitting
+
+**Gig Data Display:**
+Each gig tile shows:
+- Dater information and request details
+- Items requested and specific requirements
+- Budget allocation for assistance
+- Pickup location (where Cupid collects items)
+- Dropoff location (where items are delivered)
 
 ---
 
