@@ -306,9 +306,165 @@ Located in the top-left banner, provides comprehensive navigation:
 - Verify your payment information is current
 - Review notification settings to stay informed about gig updates
 
+---
+
+### Viewing Your Feedback
+
+![Dater Feedback page](images/Dater-Feedback.png)
+
+**How to View Your Feedback:**
+
+![Dater Feedback navigation](images/Dater-Feedback-Navigation.png)
+
+1. Click "Feedback" from the navigation menu or hamburger menu
+2. View all feedback you've received from Cupids who completed your gigs
+3. Each feedback card displays:
+   - **Heart Rating**: Visual 1-5 heart rating from the Cupid
+   - **Rating Score**: Numerical rating (e.g., "3/5 Hearts")
+   - **Written Feedback**: The Cupid's message about their experience with you
+
+**Understanding Your Feedback:**
+- Feedback helps you understand how Cupids perceive working with you
+- Higher ratings make you a more appealing client for Cupids
+- Use feedback to improve your gig requests and interactions
+
+**Feedback Display:**
+
+![Feedback cards showing ratings and messages](images/Dater-Feedback-Card.png)
+
+- These Feedback card will be displayed in a responsive grid layout
+- On mobile: Single column of cards
+- On tablet: 2-3 cards per row
+- On desktop: Up to 4 cards per row
+- Cards show hearts that cannot be clicked (display only)
+- Each card maintains a square aspect ratio for visual consistency
+
+**Tips for Better Feedback:**
+- Be clear and specific in your gig requests
+- Be available at the dropoff location on time
+- Communicate promptly if there are changes
+- Rate your Cupids fairly to encourage reciprocal good ratings
+- Provide helpful information in your gig details
+
+---
+
 ## Cupid Guide
 
+### Cupid Overview
 
+As a Cupid, you earn money by completing gigs for Daters. Your role involves accepting delivery requests, purchasing items, and delivering them to Daters during their dates. The Cupid interface provides tools for finding available gigs, managing active deliveries, and tracking your earnings.
+
+#### Cupid Table of Contents
+- [Accessing the Cupid Dashboard](#accessing-the-cupid-dashboard) - Navigate your main interface
+- [Finding and Claiming Gigs](#finding-and-claiming-gigs) - Browse and accept available gigs
+- [Managing Active Gigs](#managing-active-gigs) - Track your current deliveries
+- [Viewing Completed Gigs](#viewing-completed-gigs) - Review past gigs and rate Daters
+- [Cupid Feedback](#cupid-feedback) - View ratings and feedback from Daters
+- [Cupid Profile](#cupid-profile) - Manage your account and payment settings
+
+#### Key Cupid Responsibilities:
+- **Find Gigs**: Browse available delivery requests within your range
+- **Complete Deliveries**: Purchase and deliver items on time
+- **Earn Money**: Get paid in Cupid Cash for completed gigs
+- **Provide Service**: Maintain high ratings through quality service
+- **Manage Availability**: Control when you're accepting new gigs
+
+---
+
+### Viewing Completed Gigs
+
+![Cupid Completed Gigs page](images/Cupid-Completed-Gigs.png)
+
+**How to View Your Completed Gigs:**
+
+![Cupid Completed Gigs navigation](images/Cupid-Completed-Gigs-Navigation.png)
+
+1. Click "Completed Gigs" from the navigation menu
+2. View all gigs you've successfully completed
+3. Each completed gig displays:
+   - **Dater Information**: Name of the Dater you helped
+   - **Items Requested**: What you delivered
+   - **Budget**: Amount earned from the gig
+   - **Pickup Location**: Where you collected the items
+   - **Rate Dater Button**: Submit feedback for the Dater
+
+**Rating Daters:**
+
+![Rate Dater popup with heart rating system](images/Cupid-Rate-Dater-Popup.png)
+
+1. Click "Rate Dater" on any completed gig card
+2. A popup will appear with rating options:
+   - **Heart Rating**: Click hearts to select 1-5 rating
+     - Click on a heart to set rating (e.g., click 3rd heart for 3/5)
+     - Hearts automatically fill/unfill based on your selection
+   - **Written Feedback**: Optional text area to describe your experience
+3. Click "Send" to submit your rating
+4. Click "Cancel" to close without submitting
+
+**Completed Gigs Display:**
+
+![Completed gig tiles with Rate Dater buttons](images/Cupid-Completed-Gig-Tile.png)
+
+- These gig tiles are displayed in a responsive tile layout
+- On mobile: 2 tiles per row (minimum 280px width)
+- On tablet: 3 tiles per row
+- On desktop: 4-5 tiles per row (220-300px each)
+- Large screens: Up to 5 tiles per row
+- Empty state message: "No completed gigs yet."
+
+**Rating Tips:**
+- Rate honestly to help maintain platform quality
+- Consider punctuality, clear communication, and gig accuracy
+- Provide constructive written feedback when appropriate
+- Your ratings help other Cupids understand Dater reliability
+
+---
+
+### Cupid Feedback
+
+![Cupid Feedback page](images/Cupid-Feedback.png)
+
+**How to View Your Feedback:**
+
+![Cupid Feedback navigation](images/Cupid-Feedback-Navigation.png)
+
+1. Click "Feedback" from the navigation menu or hamburger menu
+2. View all feedback you've received from Daters whose gigs you completed
+3. Each feedback card displays:
+   - **Heart Rating**: Visual 1-5 heart rating from the Dater
+   - **Rating Score**: Numerical rating (e.g., "4/5 Hearts")
+   - **Written Feedback**: The Dater's message about your service
+
+**Understanding Your Feedback:**
+- Feedback reflects your performance and service quality
+- Higher ratings increase your appeal to Daters
+- Use feedback to improve your delivery service
+
+**Feedback Display:**
+
+![Feedback cards showing ratings and messages](images/Cupid-Feedback-Card.png)
+
+- These Feedback cards are displayed in a responsive grid layout
+- On mobile: Single column of cards (250px minimum)
+- On tablet: 2-3 cards per row
+- On desktop: Up to 4 cards per row (300px each)
+- Cards maintain square aspect ratio for visual consistency
+- Hearts are display-only (cannot be clicked)
+
+**Maintaining Good Ratings:**
+- Deliver items on time
+- Communicate any delays or issues promptly
+- Purchase correct items as requested
+- Be professional and courteous
+- Follow special instructions carefully
+- Deliver to correct location
+- Handle items with care
+
+**Impact of Ratings:**
+- Your average rating is visible to Daters
+- Higher ratings may lead to more gig opportunities
+- Consistently low ratings may affect your account standing
+- Good feedback builds trust with the Dater community
 
 ---
 
