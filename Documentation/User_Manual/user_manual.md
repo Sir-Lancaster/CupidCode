@@ -41,8 +41,6 @@ Cupid Code is a dating assistance platform that connects Daters with AI-powered 
 
 **Cupid** - User who provides delivery and assistance services to Daters
 
-**Cupid Cash** - Virtual currency used to pay for gigs and services
-
 **Dater** - User seeking dating assistance and advice
 
 **Dropoff Location** - Where Cupid delivers items (usually the date location)
@@ -63,15 +61,49 @@ Cupid Code is a dating assistance platform that connects Daters with AI-powered 
 ## Getting Started
 
 ### Creating an Account
-1. Visit the Cupid Code website
-2. Click "Sign Up" 
-3. Choose your account type: Dater or Cupid
-4. Fill in required information
-5. Complete your profile
+
+1. **Access the Website**: Navigate to https://cupidcode.zapto.org/#/ in your web browser
+
+![go to create acount page](images/createAcount.png)
+
+2. **Navigate to Registration**: On the login page, click the "Don't have an account? Sign up here!" link (highlighted in red) to access the registration form
+
+![empty create acount](images/emptycreate.png)
+
+3. **Start Registration**: You'll see the empty registration form with fields for your information and role selection
+
+![create acount dater complete](images/datercomplete.png)
+
+4. **Complete Dater Registration**: Fill in all required fields:
+   - First Name and Last Name
+   - Email address (will be your username)
+   - Password and confirm password
+   - Phone number
+   - Select "Dater" as your role
+   - Complete the Dater-specific fields (interests, dating goals, etc.)
+   - Click "Create Account" when finished
+
+![selecting create cupid](images/selectcupid.png)
+
+5. **Alternative: Select Cupid Role**: If you want to become a Cupid instead, select "Cupid" from the role dropdown
+
+![create acount dater complete](images/cupidcomplete.png)
+
+6. **Complete Cupid Registration**: Fill in all required fields for Cupid account:
+   - First Name and Last Name  
+   - Email address (will be your username)
+   - Password and confirm password
+   - Phone number
+   - PayPal email for receiving payments
+   - Select "Cupid" as your role
+   - Click "Create Account" when finished
 
 ### Logging In
-- Use your email and password to sign in
-- You'll be redirected to your role-specific dashboard
+
+![login page](images/logginpage.png)
+2. **Enter Credentials**: On the main login page, enter your email and password
+3. **Sign In**: Click the "Sign In" button
+4. **Automatic Redirect**: You'll be redirected to your role-specific dashboard based on your account type
 
 ---
 
@@ -515,8 +547,8 @@ As a Manager, you have administrative control over the Cupid Code platform. Your
 1. The navigation menu on the left shows three main options:
    - **Home**: Returns to the main dashboard with platform overview
    - **Cupids**: Manage all Cupid accounts and view their performance
-   - **Daters**: Manage all Dater accounts and monitor their activity
-2. Click on any navigation item to access that section
+   - **Daters**: Manage all Dater accounts and monitor their a- for how to fill out payments, see [Creating a Gig](#creating-a-gig)
+ction
 3. Below the navigation section is a toggle to turn light mode on or off
   - by default light mode is off
 4. Below the light mode toggle is the logout button 
@@ -616,7 +648,6 @@ As a Manager, you have administrative control over the Cupid Code platform. Your
 **Gig not showing up?**
 - Ensure you're within the service area
 - Check your availability settings (Cupids)
-- Verify sufficient Cupid Cash balance (Daters)
 
 **Payment issues?**
 - Verify PayPal email is correct (Cupids)
