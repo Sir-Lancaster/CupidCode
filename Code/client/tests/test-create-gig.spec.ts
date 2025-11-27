@@ -26,6 +26,7 @@ test('test', async ({ page }) => {
   await page.getByRole('spinbutton', { name: 'Budget ($)' }).fill('10');
 
   // submit the form
+  await page.waitForTimeout(1000); // wait for a second to avoid flakiness
   await page.getByText('Create Gig Item Pickup').click();
   await page.getByRole('button', { name: 'Create Gig', exact: true }).click();
 
@@ -53,7 +54,6 @@ test('test', async ({ page }) => {
   await popup.getByRole('button', { name: 'Log In' }).click();
   await popup.getByRole('button', { name: 'Pay $' }).click();
 
-  // Back to the main page
+  // Back to the playwright page instance
   await expect(page.locator('div').filter({ hasText: 'Items requested: Flowers' }).nth(2)).toBeVisible();
-  await page.waitForTimeout(5000); // Wait for 5 seconds to observe the result -- remove in production
 });
