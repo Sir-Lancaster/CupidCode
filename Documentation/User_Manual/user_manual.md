@@ -415,6 +415,8 @@ As a Cupid, you earn money by completing gigs for Daters. Your role involves acc
    - **Profile**: Manage your account settings and payment information
 4. All navigation uses your user ID automatically
 
+![Cupid navigation menu](images/Cupid-navigation.png)
+
 ---
 
 ### Cupid Home
@@ -422,6 +424,8 @@ As a Cupid, you earn money by completing gigs for Daters. Your role involves acc
 **Understanding the Cupid Home Dashboard:**
 
 The Cupid Home page provides an overview of your Cupid account and quick access to all main features.
+
+![Cupid home dashboard](images/Cupid-home-1.png)
 
 #### Dashboard Navigation Tiles
 
@@ -463,6 +467,8 @@ The Cupid Home page automatically uses your current location to show relevant gi
 
 This section displays all gigs available for you to claim within your location range.
 
+![Cupid available gigs](images/Cupid-home-2.png)
+
 **Understanding Gig Cards:**
 
 Each gig tile displays:
@@ -487,6 +493,8 @@ Each gig tile displays:
    - **Dropoff Location**: Where you'll deliver the items (usually the Dater's location)
 3. Review the route and distance
 4. Click outside the map or close button to return to the gig list
+
+![Cupid gig map view](images/Cupid-map.png)
 
 **Tips for Finding the Right Gigs:**
 
@@ -522,6 +530,8 @@ Active gigs are assignments you've claimed and are currently working on. These s
 **Managing Active Gigs:**
 
 For each active gig, you have three action buttons:
+
+![Cupid active gigs section](images/Cupid-Active-Gigs-active.png)
 
 1. **Complete Button**
    - Marks the gig as finished after you've completed the delivery
@@ -563,6 +573,8 @@ Available gigs are new requests from Daters that are waiting for Cupids to claim
 3. Click the **"Claim"** button to accept the gig
 4. The gig immediately moves to your Active section
 5. Success message confirms the claim
+
+![Cupid available gigs section](images/Cupid-Active-Gigs-available.png)
 
 **Reviewing Gig Details:**
 
@@ -684,6 +696,9 @@ Available gigs are new requests from Daters that are waiting for Cupids to claim
 **How to Manage Your Profile:**
 
 Your profile is essential for your success as a Cupid. It contains your personal information and critical payment details.
+
+![Cupid profile page 1](images/Cupid-Profile-1.png)
+![Cupid profile page 2](images/Cupid-Profile-2.png)
 
 **How to Access Your Profile:**
 
