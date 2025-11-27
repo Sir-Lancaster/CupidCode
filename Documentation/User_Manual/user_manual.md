@@ -388,11 +388,12 @@ As a Cupid, you earn money by completing gigs for Daters. Your role involves acc
 
 #### Cupid Table of Contents
 - [Accessing the Cupid Dashboard](#accessing-the-cupid-dashboard) - Navigate your main interface
-- [Finding and Claiming Gigs](#finding-and-claiming-gigs) - Browse and accept available gigs
-- [Managing Active Gigs](#managing-active-gigs) - Track your current deliveries
+- [Cupid Home](#cupid-home) - Understand the main dashboard and quick access tiles
+- [Finding and Managing Gigs](#finding-and-managing-gigs) - Search for available gigs and manage active assignments
 - [Viewing Completed Gigs](#viewing-completed-gigs) - Review past gigs and rate Daters
 - [Cupid Feedback](#cupid-feedback) - View ratings and feedback from Daters
 - [Cupid Profile](#cupid-profile) - Manage your account and payment settings
+
 
 #### Key Cupid Responsibilities:
 - **Find Gigs**: Browse available delivery requests within your range
@@ -400,6 +401,196 @@ As a Cupid, you earn money by completing gigs for Daters. Your role involves acc
 - **Earn Money**: Get paid in Cupid Cash for completed gigs
 - **Provide Service**: Maintain high ratings through quality service
 - **Manage Availability**: Control when you're accepting new gigs
+
+---
+
+### Accessing the Cupid Dashboard
+
+**How to Navigate the Cupid Dashboard:**
+1. Upon logging in as a Cupid, you'll see your main dashboard with the Cupid Home page
+2. The dashboard displays key navigation tiles for quick access to main features
+3. The top navigation bar and hamburger menu provide access to:
+   - **Home**: Returns to the main Cupid dashboard
+   - **Find Gig**: Browse and manage available and active gigs
+   - **Profile**: Manage your account settings and payment information
+4. All navigation uses your user ID automatically
+
+![Cupid navigation menu](images/Cupid-navigation.png)
+
+---
+
+### Cupid Home
+
+**Understanding the Cupid Home Dashboard:**
+
+The Cupid Home page provides an overview of your Cupid account and quick access to all main features.
+
+![Cupid home dashboard](images/Cupid-home-1.png)
+
+#### Dashboard Navigation Tiles
+
+1. **Profile Tile**
+   - Icon: Person
+   - Label: "Profile"
+   - Description: "Manage your profile"
+   - Click to access your profile and update personal information
+
+2. **Active Gigs Tile**
+   - Icon: Search
+   - Label: "Active Gigs"
+   - Description: "Search for available gigs"
+   - Click to view and manage all available gigs that you can claim
+
+3. **Past Gigs Tile**
+   - Icon: Assignment Turned In
+   - Label: "Past Gigs"
+   - Description: "View completed gigs"
+   - Click to view your completed gigs and provide feedback ratings
+
+**Location-Based Gig Filtering:**
+
+The Cupid Home page automatically uses your current location to show relevant gigs within your service range.
+
+- **Location Status Indicators**:
+  - **Success (Green)**: "Showing gigs within [X] miles" - Your location has been detected and gigs are filtered by your range
+  - **Warning (Red)**: "Location unavailable - showing all gigs" - Your location could not be accessed; all gigs are displayed
+  - **Loading**: "Getting your location..." - The system is currently determining your location
+
+**How to Use Location Features:**
+
+1. Allow the application to access your location when prompted by your browser
+2. If successful, gigs will be filtered based on your set range
+3. You can update your gig range in your profile settings
+4. If location access is denied, all available gigs will be shown
+
+#### Available Gigs Section
+
+This section displays all gigs available for you to claim within your location range.
+
+![Cupid available gigs](images/Cupid-home-2.png)
+
+**Understanding Gig Cards:**
+
+Each gig tile displays:
+- Items requested (what the Dater needs)
+- Budget amount (how much they're willing to pay)
+- Pickup and dropoff locations
+- Any special instructions or notes
+
+**How to Claim a Gig:**
+
+1. Browse the available gigs displayed on the page
+2. Review the gig details to understand what's needed
+3. Click the **"Claim"** button on the gig card you want to accept
+4. The gig will move to your active gigs and you'll receive confirmation
+5. If the claim is unsuccessful, an error message will display
+
+**How to View Gig Details on a Map:**
+
+1. Click the **"Map"** button on any gig card
+2. A map modal will open showing:
+   - **Pickup Location**: Where you'll collect the items (usually a store)
+   - **Dropoff Location**: Where you'll deliver the items (usually the Dater's location)
+3. Review the route and distance
+4. Click outside the map or close button to return to the gig list
+
+![Cupid gig map view](images/Cupid-map.png)
+
+**Tips for Finding the Right Gigs:**
+
+- Start by reviewing gigs within a reasonable distance
+- Check the budget to ensure it's fair compensation
+- Read any special instructions carefully
+- Consider the pickup and dropoff locations for travel time
+
+---
+
+### Finding and Managing Gigs
+
+**Understanding Gig Categories:**
+
+The Find Gig page (Active Gigs page) is divided into two sections: Active and Available.
+
+#### Active Gigs Section
+
+**What are Active Gigs?**
+
+Active gigs are assignments you've claimed and are currently working on. These show your ongoing obligations to Daters.
+
+**Viewing Your Active Gigs:**
+
+1. Click "Active Gigs" from the navigation or the dashboard tile
+2. Active gigs appear in a separate section at the top of the page
+3. Each gig card displays:
+   - Items requested
+   - Budget
+   - Pickup and dropoff locations
+   - Current status
+
+**Managing Active Gigs:**
+
+For each active gig, you have three action buttons:
+
+![Cupid active gigs section](images/Cupid-Active-Gigs-active.png)
+
+1. **Complete Button**
+   - Marks the gig as finished after you've completed the delivery
+   - Click when you've delivered the items to the Dater
+   - A confirmation popup will show the reward amount (your payment)
+   - The reward amount will briefly display on screen
+   - Gig moves to your completed gigs list
+
+2. **Drop Button**
+   - Allows you to cancel the gig if you can no longer complete it
+   - Use this if circumstances change and you cannot deliver
+   - Gig becomes available again for other Cupids to claim
+
+3. **Map Button**
+   - Opens the map modal showing pickup and dropoff locations
+   - Helps you plan your route
+   - Shows the distance you'll need to travel
+
+**Empty State:**
+- "You are not currently on any gigs." - You have no active assignments
+
+#### Available Gigs Section
+
+**What are Available Gigs?**
+
+Available gigs are new requests from Daters that are waiting for Cupids to claim them. These are opportunities to earn money.
+
+**Viewing Available Gigs:**
+
+1. The Available section appears below the Active Gigs
+2. All unclaimed gigs within your range are displayed
+3. Gigs are color-coded:
+   - Border color indicates whether they're newly available or have been waiting
+
+**Claiming Available Gigs:**
+
+1. Browse through the available gigs
+2. Review the gig details and budget
+3. Click the **"Claim"** button to accept the gig
+4. The gig immediately moves to your Active section
+5. Success message confirms the claim
+
+![Cupid available gigs section](images/Cupid-Active-Gigs-available.png)
+
+**Reviewing Gig Details:**
+
+1. Click the **"Map"** button to view pickup and dropoff locations
+2. Review the travel distance and route
+3. Plan your time accordingly
+
+**Empty State:**
+- "There are no gigs available." - No new gigs are currently waiting to be claimed
+
+**Filtering and Sorting Tips:**
+
+- Recently posted gigs may appear first
+- Gigs are organized by distance from your current location
+- Higher budget gigs tend to attract more Cupids, so claim quickly if interested
+- Consider peak hours when many gigs become available
 
 ---
 
@@ -496,7 +687,105 @@ As a Cupid, you earn money by completing gigs for Daters. Your role involves acc
 - Your average rating is visible to Daters
 - Higher ratings may lead to more gig opportunities
 - Consistently low ratings may affect your account standing
-- Good feedback builds trust with the Dater community
+- Good feedback builds trust with the Dater community### Cupid Overview
+
+---
+
+### Cupid Profile
+
+**How to Manage Your Profile:**
+
+Your profile is essential for your success as a Cupid. It contains your personal information and critical payment details.
+
+![Cupid profile page 1](images/Cupid-Profile-1.png)
+![Cupid profile page 2](images/Cupid-Profile-2.png)
+
+**How to Access Your Profile:**
+
+1. Click "Profile" from the navigation menu or the dashboard tile
+2. Your profile page will load with all your information displayed
+
+#### Profile Information Display
+
+Your profile shows the following information:
+
+**Account Statistics:**
+- **Gigs Successful**: Number of completed gigs (display format: "X gigs successful of Y")
+- **Total Gigs**: Total number of completed plus failed gigs
+
+**Personal Information:**
+- **Email**: Your account email address (used for login)
+- **Username**: Your unique username on the platform
+- **First Name**: Your first name
+- **Last Name**: Your last name
+- **Phone Number**: Your contact phone number
+
+**Cupid-Specific Information:**
+- **Gig Range**: Your service radius in miles (how far from your location you're willing to travel)
+- **Gigs Completed**: Number of successfully completed gigs
+- **Gigs Failed**: Number of gigs you've dropped or failed to complete
+
+#### Updating Your Profile
+
+**How to Edit Your Information:**
+
+1. All editable fields display as input boxes
+2. Click on any field to modify the information
+
+**Fields You Can Update:**
+
+1. **First Name**
+   - Click the field and enter your first name
+   
+2. **Last Name**
+   - Click the field and enter your last name
+
+3. **Phone Number**
+   - Click the field and enter your contact phone number
+   - Format: 10-digit phone number
+
+4. **Range**
+   - Click the field and enter your desired service radius in miles
+   - This determines which gigs are shown to you
+   - Default is 10 miles, can be adjusted based on your availability
+
+5. **PayPal Email** (Critical for Payment)
+   - Click the field and enter the email address associated with your PayPal account
+   - **This is required to receive payments for completed gigs**
+   - Earnings will be transferred to this PayPal account
+   - Verify this email is correct and active
+   - You can change this anytime if you use a different PayPal account
+
+#### Saving Your Changes
+
+1. After making edits to your profile fields
+2. Click the **"Update Profile"** button at the bottom of the form
+3. All changes are saved immediately
+
+#### Important Profile Tips
+
+- **Keep PayPal Email Current**: Ensure your PayPal email is always up-to-date to receive payments
+- **Update Your Range**: Adjust your gig range based on your vehicle and availability
+- **Build Your Reputation**: Maintain a high completion rate and positive ratings
+- **Contact Information**: Keep your phone number updated so Daters can reach you if needed
+- **Professional Presence**: Use a professional phone number and keep all information accurate
+
+#### Understanding Your Statistics
+
+- **Success Rate**: Compare your gigs completed vs. gigs failed
+  - Consistently completing gigs builds your reputation
+
+- **Gig Range Impact**: Your range setting affects:
+  - Which gigs are available to you
+  - How many gigs you see on the Find Gig page
+  - Your earning potential (larger range = more opportunities)
+
+#### Payment Processing
+
+- Payments are processed through PayPal
+- When you complete a gig, the payment is transferred to your PayPal account
+- Ensure your PayPal email is verified to receive funds
+- Check your PayPal account for direct payment verification
 
 ---
 
