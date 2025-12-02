@@ -6,7 +6,25 @@
 - [Getting Started](#getting-started)
 - **User Types:**
   - [Dater Guide](#dater-guide)
-  - [Cupid Guide](#cupid-guide) 
+    - [Dater Overview](#dater-overview)
+    - [Accessing the Dater Dashboard](#accessing-the-dater-dashboard)
+    - [Navigation Options](#navigation-options)
+    - [Using AI Chat](#using-ai-chat)
+    - [How AI Gig Creation Works](#how-ai-gig-creation-works)
+    - [Managing Your Gigs](#managing-your-gigs)
+    - [Creating a Gig](#creating-a-gig)
+    - [PayPal Checkout Process](#paypal-checkout-process)
+    - [Managing Your Calendar](#managing-your-calendar)
+    - [Dater Profile](#dater-profile)
+    - [Viewing Your Feedback](#viewing-your-feedback)
+  - [Cupid Guide](#cupid-guide)
+    - [Cupid Overview](#cupid-overview)
+    - [Accessing the Cupid Dashboard](#accessing-the-cupid-dashboard)
+    - [Cupid Home](#cupid-home)
+    - [Finding and Managing Gigs](#finding-and-managing-gigs)
+    - [Viewing Completed Gigs](#viewing-completed-gigs)
+    - [Cupid Feedback](#cupid-feedback)
+    - [Cupid Profile](#cupid-profile)
   - [Manager Guide](#manager-guide)
     - [Manager Overview](#manager-overview)
     - [Accessing the Manager Dashboard](#accessing-the-manager-dashboard)
@@ -109,6 +127,32 @@ Cupid Code is a dating assistance platform that connects Daters with AI-powered 
 
 ## Dater Guide
 
+### Dater Overview
+
+As a Dater, you have access to AI-powered dating advice and emergency assistance from real people called Cupids. Whether you need last-minute flowers for a date, restaurant recommendations, or just someone to talk through your dating anxiety, Cupid Code connects you with the help you need.
+
+#### Dater Table of Contents
+- [Accessing the Dater Dashboard](#accessing-the-dater-dashboard) - Navigate your main interface and understand the dashboard tiles
+- [Navigation Options](#navigation-options) - Learn about mobile/desktop navigation and the hamburger menu
+- [Using AI Chat](#using-ai-chat) - Get dating advice and create emergency gigs with voice input
+- [How AI Gig Creation Works](#how-ai-gig-creation-works) - Voice-activated emergency gig creation process
+- [Managing Your Gigs](#managing-your-gigs) - Track unclaimed, claimed, and completed assistance requests
+- [Creating a Gig](#creating-a-gig) - Post new requests with PayPal payment integration
+- [PayPal Checkout Process](#paypal-checkout-process) - Complete payment for gigs using PayPal
+- [Managing Your Calendar](#managing-your-calendar) - Plan dates and track your dating schedule
+- [Dater Profile](#dater-profile) - Manage personal information and dating preferences
+- [Viewing Your Feedback](#viewing-your-feedback) - See ratings and feedback from Cupids
+
+#### Key Dater Features:
+- **AI Dating Assistant**: Get personalized advice and conversation help
+- **Emergency Assistance**: Request real-time help during dates
+- **Gig Management**: Track all your assistance requests from creation to completion
+- **Calendar Integration**: Plan dates and coordinate with gig scheduling
+- **Payment System**: Secure PayPal integration for gig payments
+- **Feedback System**: Rate Cupids and view your own ratings
+
+---
+
 ### Accessing the Dater Dashboard
 
 **How to Navigate the Dater Home:**
@@ -142,7 +186,7 @@ Located in the top-left banner, provides comprehensive navigation:
 - **Gigs**: View and manage assistance requests
 - **Create Gig**: Post new assistance requests
 - **Calendar**: View scheduled dates and events
-- **Feedback**: Provide platform feedback
+- **Feedback**: Provide feedback from cupids
 - **Accessibility**: Toggle light/dark mode
 - **Logout**: Sign out of your account
 
@@ -170,47 +214,123 @@ Located in the top-left banner, provides comprehensive navigation:
 **AI Gig Creation Integration:**
 - AI can detect when you need emergency assistance
 - Automatically suggests creating gigs for any product
-- for how to fill out payments, see [Creating a Gig](#creating-a-gig)
+- **Voice-Only Feature**: AI gig creation only works with voice input, not typed messages
+- For payment processing, see [PayPal Checkout Process](#paypal-checkout-process)
 
 ![AI gig](images/AI-found-gig-page.png)
+
+---
+
+### How AI Gig Creation Works
+
+The AI assistant can automatically detect when you mention products in your conversations and help you create gigs instantly through voice commands only:
+
+1. **Voice Detection Process:**
+   - Use the microphone button to speak naturally about your dating situation
+   - **Important**: Simply speak what you need - do NOT press the send button
+   - The AI analyzes your speech in real-time for product keywords (flowers, coffee, chocolates, etc.)
+   - If a product is detected, you'll see an automatic popup suggesting gig creation
+   - **Note**: Pressing the send button will NOT create a gig - AI gig creation only works through voice detection
+
+2. **AI Gig Creation Steps:**
+   - When the AI detects a product, it will show: "I detected you might need [PRODUCT]. Would you like me to help you create a gig?"
+   - The AI uses Google Places API to find nearby stores that sell the detected item
+   - Your current location is used to find the closest available pickup location
+   - The system automatically fills in:
+     - **Item**: The detected product (e.g., "Flowers")
+     - **Pickup Location**: Nearest store address (e.g., "Walmart Supercenter, 123 Main St")
+     - **Dropoff Location**: Your current coordinates or manually enter your date location
+   - **Budget**: You must manually enter your desired budget amount (this is not auto-filled)
+
+3. **Review and Confirm:**
+   - Review the automatically generated gig details
+   - **Required**: Enter your budget amount for the gig
+   - Modify any other fields if needed (specific item details, dropoff location)
+   - Proceed to [PayPal Checkout Process](#paypal-checkout-process) to complete payment
+   - Once payment is complete, your gig becomes available for Cupids to claim
+
+**AI Detection Examples:**
+- "I need flowers for my date" → Detects "flowers" → Finds florists nearby
+- "Should I bring coffee?" → Detects "coffee" → Finds coffee shops nearby  
+- "Maybe I should get chocolates" → Detects "chocolates" → Finds stores selling candy
+
+**Tips for AI Gig Creation:**
+- **Voice Only**: This feature only works with voice input through the microphone
+- **Don't Press Send**: Speak naturally without pressing the send button
+- Speak clearly when mentioning products you need
+- Allow location access for accurate pickup location suggestions
+- Review the AI-suggested pickup location before confirming
+- The AI works best with common products (food, flowers, gifts, etc.)
+- Always set your budget before completing the gig creation
+
 ---
 
 ### Managing Your Gigs
 
 **Understanding Gig Status Categories:**
 
+The "My Gigs" page shows all your assistance requests organized by their current status. Each category represents a different stage in the gig lifecycle.
+
 **1. Unclaimed Gigs:**
 - Recently posted assistance requests waiting for Cupid assignment
-- View detailed gig information including items requested, budget, and locations
-- **Cancel**: Remove gig if no longer needed (available until claimed)
+- **What you see**: Gig details including items requested, budget, pickup/dropoff locations
+- **Available Actions**: 
+  - **Cancel**: Remove gig if no longer needed (only available until claimed by a Cupid)
+- **What happens next**: Once a Cupid claims your gig, it moves to "Claimed Gigs"
+- **Timeline**: Most gigs are claimed within 15-30 minutes during peak hours
 - Empty state message: "You do not have any pending gigs"
+
 ![dater gigs](images/Dater-gigs-page.png)
 
 **2. Claimed Gigs:**
 - Active assistance requests assigned to specific Cupids
-- Monitor progress of ongoing assistance
-- **Cancel**: Still available if circumstances change
-- **Complete**: Mark as finished when service is received (triggers payment processing)
+- **What you see**: Same gig details plus the Cupid's name who accepted it
+- **Available Actions**: 
+  - **Cancel**: Still available if circumstances change (Cupid will be notified)
+  - **Complete**: Mark as finished when service is received (triggers payment processing to Cupid)
+- **What happens**: The assigned Cupid is now working on your request
+- **Expected timeline**: Most gigs are completed within 30-60 minutes of being claimed
+- **Communication**: Cupids may contact you if they need clarification on pickup/dropoff details
 - Empty state message: "You have no active gigs"
+
 ![dater claimed](images/Dater-gigs-claimed.png)
 
 **3. Complete Gigs:**
 - Finished assistance requests ready for feedback
-- **Rate Cupid**: Comprehensive rating system with 1-5 heart interface
-- View past gig history and Cupid performance
+- **What you see**: Completed gig details and delivery confirmation
+- **Available Actions**: 
+  - **Rate Cupid**: Provide feedback about the service quality
+- **Why rating matters**: Your ratings help other Daters choose reliable Cupids
 - Empty state message: "You have no complete gigs"
 
-**Rating System:**
+**Important Gig Management Notes:**
+- You'll receive notifications when gigs are claimed, completed, or dropped
+- **Refresh the page** to see the most up-to-date gig statuses and any new feedback you've received
+- **When to refresh**: After creating gigs, when checking for status updates, or if you've been on the page for a while and want to see new feedback
+- Cancelled gigs are permanently removed and cannot be recovered
+- Completed gigs remain in your history for future reference
+
+**Rating System Process:**
 1. Click "Rate Cupid" on any completed gig
-2. **Heart Rating**: Click hearts to select 1-5 rating (click same heart to reset)
+2. **Heart Rating**: Click hearts to select 1-5 rating 
+   - 1 heart = Poor service
+   - 3 hearts = Satisfactory service  
+   - 5 hearts = Excellent service
+   - Click the same heart again to reset your rating
 3. **Written Feedback**: Optional text area for detailed service review
+   - Mention timeliness, item quality, communication, etc.
 4. **Submit Process**: Click "Send" to submit rating and feedback
-5. **Cancel Option**: Exit rating without submitting
+5. **Cancel Option**: Exit rating popup without submitting
+
 ![dater complete](images/Dater-gigs-complete.png)
 
 ---
 
 ### Creating a Gig
+
+**Understanding the Create Gig Page:**
+
+The "Create Gig" page allows you to post new assistance requests for Cupids to claim. This is where you create detailed delivery requests that will be visible to all available Cupids in your area.
 
 ![Create Gig form interface 1/2](./images/Dater-Create-Gig-1.jpg)
 ![Create Gig form inteface 2/2](./images/Dater-Create-Gig-2.jpg)
@@ -221,26 +341,11 @@ Located in the top-left banner, provides comprehensive navigation:
    - **Item**: Brief description of what you need (e.g., "Flowers, Movie Tickets, etc")
    - **Pickup Location**: Where the Cupid should collect items (enter address. EX: 100 N 100 E, 84321)
    - **Dropoff Location**: Where to deliver (your date location - enter address or use map). In the event that your drop off address is the same as your pickup address, click the checkbox called: "Same as pickup address"
-   - **Budget**: Set maximum amount you're willing to pay in Cupid Cash
+   - **Budget**: Set maximum amount you're willing to pay  
 3. Review all information carefully
-4. Click "Create Gig" to advance to the payment step. 
-![Payment](./images/Gig-Payment.jpg)
+4. Click "Create Gig" to advance to the payment step
+5. Complete payment using the [PayPal Checkout Process](#paypal-checkout-process)
 
-#### **PayPal Checkout**
-![Payment1](./images/PayPal-PopOut.jpg)
-
-5. Press the PayPal button to open the pop out window leading to the PayPal checkout page. Log into paypal using the following information:
-  - Email: Dater@personal.example.com
-  - Password: I-Am-A-Dater
-**Note:**
-  - Paypal will default to using a phone number as dual authentication, to get to password authentication, click "try annother way", then "Use Password Instead."
-  ![Payment2](./images/Paypal-Password-1.jpg)
-  ![Payment3](./images/Paypal-Password-2.jpg)
-
-6. After loggin in, use the Credit Union account to pay for the gig, then click "Pay"
-![Payment4](./images/PayPal-CheckOut.jpg)
-
-7. Once the gig is created, the page will redirect to the gigs page. 
 **Gig Creation Tips:**
 - Be specific in your quest details to ensure Cupids understand your needs
 - Allow reasonable time between creation and dropoff time
@@ -253,6 +358,58 @@ Located in the top-left banner, provides comprehensive navigation:
 2. You'll receive a notification when a Cupid accepts your gig
 3. The Cupid will complete the delivery at your specified time and location
 4. You'll be prompted to rate the Cupid after completion
+
+---
+
+### PayPal Checkout Process
+
+This section explains how to complete payment for gigs using PayPal. This process is used when creating gigs manually or through AI assistance.
+
+![Payment](./images/Gig-Payment.jpg)
+
+**Starting the PayPal Checkout:**
+1. After completing your gig creation form, you'll see the payment page
+2. Review your gig details and total amount
+3. Press the PayPal button to open the popup window leading to PayPal checkout
+
+![Payment1](./images/PayPal-PopOut.jpg)
+
+**PayPal Authentication Steps:**
+
+1. Log into PayPal using the test account information:
+   - Email: Dater@personal.example.com
+   - Password: I-Am-A-Dater
+
+![Payment2](./images/Paypal-Password-1.jpg)
+
+**Important Note:**
+PayPal will default to using phone number authentication. To use password authentication instead:
+1. Click "Try another way"
+2. Then click "Use Password Instead"
+
+
+![Payment3](./images/Paypal-Password-2.jpg)
+   - Password: I-Am-A-Dater
+
+**Completing the Payment:**
+1. After logging in, you'll see your available payment methods
+2. Use the Credit Union account to pay for the gig
+3. Review the payment details
+4. Click "Pay" to complete the transaction
+
+![Payment4](./images/PayPal-CheckOut.jpg)
+
+**After Payment Completion:**
+1. The PayPal window will close automatically
+2. You'll be redirected back to the Cupid Code gigs page
+3. Your newly created gig will appear in your "Unclaimed Gigs" section
+4. You'll receive a confirmation that your gig has been posted
+
+**Payment Tips:**
+- Ensure you have a stable internet connection during payment
+- Do not close the PayPal popup window manually
+- If payment fails, you can retry by creating the gig again
+- Your gig will only be posted after successful payment completion
 
 ---
 
@@ -342,7 +499,11 @@ Located in the top-left banner, provides comprehensive navigation:
 
 ### Viewing Your Feedback
 
-![Dater Feedback page](images/Dater-Feedback.png)
+
+
+**Understanding Your Feedback Page:**
+
+This page shows all the ratings and reviews you've received from Cupids who completed your gigs. Your feedback helps you understand how Cupids perceive working with you and can help you improve your future gig requests.
 
 **How to View Your Feedback:**
 
@@ -355,28 +516,60 @@ Located in the top-left banner, provides comprehensive navigation:
    - **Rating Score**: Numerical rating (e.g., "3/5 Hearts")
    - **Written Feedback**: The Cupid's message about their experience with you
 
-**Understanding Your Feedback:**
-- Feedback helps you understand how Cupids perceive working with you
-- Higher ratings make you a more appealing client for Cupids
-- Use feedback to improve your gig requests and interactions
+![Dater Feedback page](images/Dater-Feedback.png)
+
+**What Ratings Mean:**
+- **5 Hearts**: Excellent client - clear instructions, punctual, courteous
+- **4 Hearts**: Good client - mostly smooth experience with minor issues
+- **3 Hearts**: Average client - adequate but room for improvement
+- **2 Hearts**: Difficult client - unclear instructions, late, or rude
+- **1 Heart**: Poor client - major issues with communication or behavior
+
+**Common Feedback Themes:**
+- **Communication**: "Very clear instructions" vs "Confusing pickup details"
+- **Punctuality**: "Was waiting at dropoff" vs "Not available when I arrived"
+- **Courtesy**: "Very polite and thankful" vs "Seemed impatient"
+- **Accuracy**: "Perfect gig details" vs "Location was wrong"
+
+**Why Good Feedback Matters:**
+- **Cupid Attraction**: Higher ratings make you a more appealing client
+- **Faster Service**: Cupids prefer working with well-rated Daters
+- **Platform Standing**: Consistently good ratings improve your account status
+- **Community Trust**: Good feedback builds trust within the Cupid community
+
+**Improving Your Ratings as a Dater:**
+
+**Communication Excellence:**
+- **Clear Instructions**: Provide specific, detailed pickup and dropoff information
+- **Availability**: Be reachable by phone if Cupids need clarification
+- **Updates**: Inform Cupids if there are changes to timing or location
+- **Specifications**: Be clear about any special requirements for items
+
+**Professional Interaction:**
+- **Punctuality**: Be at the dropoff location when the Cupid arrives
+- **Courtesy**: Be polite and appreciative of the Cupid's service
+- **Fair Expectations**: Set reasonable budgets and timeframes
+- **Gratitude**: Thank Cupids for their service
+
+**Gig Quality Tips:**
+- **Accurate Locations**: Double-check all addresses before posting
+- **Fair Budgets**: Set budgets that account for distance and effort
+- **Realistic Timing**: Allow adequate time for pickup and delivery
+- **Clear Details**: Specify exactly what items you need
 
 **Feedback Display:**
 
 ![Feedback cards showing ratings and messages](images/Dater-Feedback-Card.png)
 
-- These Feedback card will be displayed in a responsive grid layout
-- On mobile: Single column of cards
-- On tablet: 2-3 cards per row
-- On desktop: Up to 4 cards per row
-- Cards show hearts that cannot be clicked (display only)
+- Responsive grid layout adapts to different screen sizes
+- Hearts are display-only (cannot be clicked on feedback page)
 - Each card maintains a square aspect ratio for visual consistency
 
-**Tips for Better Feedback:**
-- Be clear and specific in your gig requests
-- Be available at the dropoff location on time
-- Communicate promptly if there are changes
-- Rate your Cupids fairly to encourage reciprocal good ratings
-- Provide helpful information in your gig details
+**Using Feedback for Improvement:**
+- **Learn from Comments**: Pay attention to constructive feedback
+- **Address Patterns**: If multiple Cupids mention the same issue, work to improve
+- **Ask Questions**: If feedback is unclear, consider how to communicate better
+- **Appreciate Service**: Remember that Cupids are helping make your dates successful
 
 ---
 
@@ -387,18 +580,25 @@ Located in the top-left banner, provides comprehensive navigation:
 As a Cupid, you earn money by completing gigs for Daters. Your role involves accepting delivery requests, purchasing items, and delivering them to Daters during their dates. The Cupid interface provides tools for finding available gigs, managing active deliveries, and tracking your earnings.
 
 #### Cupid Table of Contents
-- [Accessing the Cupid Dashboard](#accessing-the-cupid-dashboard) - Navigate your main interface
-- [Cupid Home](#cupid-home) - Understand the main dashboard and quick access tiles
+- [Accessing the Cupid Dashboard](#accessing-the-cupid-dashboard) - Navigate your main interface and understand the dashboard
+- [Cupid Home](#cupid-home) - Understand the main dashboard, location filtering, and quick access tiles
 - [Finding and Managing Gigs](#finding-and-managing-gigs) - Search for available gigs and manage active assignments
 - [Viewing Completed Gigs](#viewing-completed-gigs) - Review past gigs and rate Daters
 - [Cupid Feedback](#cupid-feedback) - View ratings and feedback from Daters
-- [Cupid Profile](#cupid-profile) - Manage your account and payment settings
+- [Cupid Profile](#cupid-profile) - Manage your account, payment settings, and service range
 
+#### Key Cupid Features:
+- **Gig Marketplace**: Browse and claim delivery requests from Daters
+- **Location-Based Filtering**: See gigs within your service range
+- **Real-Time Payments**: Get paid immediately through PayPal when claiming gigs
+- **Map Integration**: View pickup and dropoff locations before accepting gigs
+- **Earnings Tracking**: Monitor your completed gigs and payment history
+- **Rating System**: Build your reputation through Dater feedback
 
 #### Key Cupid Responsibilities:
 - **Find Gigs**: Browse available delivery requests within your range
 - **Complete Deliveries**: Purchase and deliver items on time
-- **Earn Money**: Get paid in Cupid Cash for completed gigs
+- **Earn Money**: Get paid for completed gigs
 - **Provide Service**: Maintain high ratings through quality service
 - **Manage Availability**: Control when you're accepting new gigs
 
@@ -409,10 +609,15 @@ As a Cupid, you earn money by completing gigs for Daters. Your role involves acc
 **How to Navigate the Cupid Dashboard:**
 1. Upon logging in as a Cupid, you'll see your main dashboard with the Cupid Home page
 2. The dashboard displays key navigation tiles for quick access to main features
-3. The top navigation bar and hamburger menu provide access to:
+3. The top navigation bar access to:
    - **Home**: Returns to the main Cupid dashboard
-   - **Find Gig**: Browse and manage available and active gigs
+   - **Active Gig**: Browse and manage available and active gigs
+   - **Completed Gigs**: Browse all completed gig and rate the daters 
    - **Profile**: Manage your account settings and payment information
+4. hamburger menu provides access to all the pages the navigation bar does as well as:
+   - **Feedback**: Provide feedback from daters
+   - **Accessibility**: Toggle light/dark mode
+   - **Logout**: Sign out of your account
 4. All navigation uses your user ID automatically
 
 ![Cupid navigation menu](images/Cupid-navigation.png)
@@ -427,25 +632,14 @@ The Cupid Home page provides an overview of your Cupid account and quick access 
 
 ![Cupid home dashboard](images/Cupid-home-1.png)
 
-#### Dashboard Navigation Tiles
-
-1. **Profile Tile**
-   - Icon: Person
-   - Label: "Profile"
-   - Description: "Manage your profile"
-   - Click to access your profile and update personal information
-
-2. **Active Gigs Tile**
-   - Icon: Search
-   - Label: "Active Gigs"
-   - Description: "Search for available gigs"
-   - Click to view and manage all available gigs that you can claim
-
-3. **Past Gigs Tile**
-   - Icon: Assignment Turned In
-   - Label: "Past Gigs"
-   - Description: "View completed gigs"
-   - Click to view your completed gigs and provide feedback ratings
+**How to Navigate the Cupid Home:**
+1. Upon logging in as a Cupid, you'll see your main dashboard with navigation tiles
+2. The dashboard displays three primary action tiles:
+   - **Profile**: Access and update your personal information and payment settings
+   - **Active Gigs**: View and manage available gigs that you can claim
+   - **Past Gigs**: View your completed gigs and provide feedback ratings
+3. Click any tile to access that feature - all navigation uses your user ID automatically
+4. The interface adapts responsively between mobile and desktop layouts
 
 **Location-Based Gig Filtering:**
 
@@ -458,10 +652,10 @@ The Cupid Home page automatically uses your current location to show relevant gi
 
 **How to Use Location Features:**
 
-1. Allow the application to access your location when prompted by your browser
+1. **Allow location access** when prompted by your browser (required for location-based features)
 2. If successful, gigs will be filtered based on your set range
 3. You can update your gig range in your profile settings
-4. If location access is denied, all available gigs will be shown
+4. **Note**: Location access is mandatory for location-based gig filtering to work
 
 #### Available Gigs Section
 
@@ -479,25 +673,26 @@ Each gig tile displays:
 
 **How to Claim a Gig:**
 
-1. Browse the available gigs displayed on the page
-2. Review the gig details to understand what's needed
-3. Click the **"Claim"** button on the gig card you want to accept
-4. The gig will move to your active gigs and you'll receive confirmation
-5. If the claim is unsuccessful, an error message will display
+1. **Review Available Gigs**: Browse the gigs displayed on the page
+2. **Check Details**: Review pickup/dropoff locations and ensure they're reasonable for you
+3. **Verify Payment Setup**: Ensure your PayPal email is configured in your profile (required for payment)
+4. **Claim the Gig**: Click the **"Claim"** button on the gig you want to accept
+5. **Immediate Payment**: You'll receive 10% of the budget immediately via PayPal when claiming
+6. **Confirmation**: The page will refresh and the gig moves to your active gigs
+7. **Important**: **Refresh the page** to see updated available gigs and your new active assignments
 
 **How to View Gig Details on a Map:**
 
 1. Click the **"Map"** button on any gig card
 2. A map modal will open showing:
    - **Pickup Location**: Where you'll collect the items (usually a store)
-   - **Dropoff Location**: Where you'll deliver the items (usually the Dater's location)
+   - **Dropoff Location**: Where you'll deliver the items (usually a Dater's location)
 3. Review the route and distance
-4. Click outside the map or close button to return to the gig list
+4. Click the close button to return to the gig list
 
 ![Cupid gig map view](images/Cupid-map.png)
 
 **Tips for Finding the Right Gigs:**
-
 - Start by reviewing gigs within a reasonable distance
 - Check the budget to ensure it's fair compensation
 - Read any special instructions carefully
@@ -509,7 +704,7 @@ Each gig tile displays:
 
 **Understanding Gig Categories:**
 
-The Find Gig page (Active Gigs page) is divided into two sections: Active and Available.
+The Active Gigs page is divided into two sections: Active and Available.
 
 #### Active Gigs Section
 
@@ -533,22 +728,44 @@ For each active gig, you have three action buttons:
 
 ![Cupid active gigs section](images/Cupid-Active-Gigs-active.png)
 
-1. **Complete Button**
-   - Marks the gig as finished after you've completed the delivery
-   - Click when you've delivered the items to the Dater
-   - A confirmation popup will show the reward amount (your payment)
-   - The reward amount will briefly display on screen
-   - Gig moves to your completed gigs list
+1. **Complete Button (Green)**
+   - **When to use**: After you've successfully delivered the items to the Dater
+   - **Process**: 
+     - Click when delivery is finished
+     - A confirmation popup shows the completion
+     - Gig moves to your completed gigs list
+     - Your completion stats are updated
+   - **Important**: Only click Complete when the Dater has actually received their items
 
-2. **Drop Button**
-   - Allows you to cancel the gig if you can no longer complete it
-   - Use this if circumstances change and you cannot deliver
-   - Gig becomes available again for other Cupids to claim
+2. **Drop Button (Red)**
+   - **When to use**: If you can no longer complete the delivery due to circumstances
+   - **Process**:
+     - Click to release yourself from the gig
+     - Gig becomes available for other Cupids to claim
+     - Your "gigs failed" count increases
+     - Dater is notified of the drop
+   - **Use responsibly**: Frequent drops affect your reputation
 
-3. **Map Button**
-   - Opens the map modal showing pickup and dropoff locations
-   - Helps you plan your route
-   - Shows the distance you'll need to travel
+3. **Map Button (Blue)**
+   - **Purpose**: Plan your delivery route efficiently
+   - **Features**:
+     - Shows pickup location (where to collect items)
+     - Shows dropoff location (where to deliver to Dater)
+     - Displays driving directions and estimated distance
+   - **How to use**: Click to open map modal, review route, close when done
+
+**Active Gigs Workflow:**
+1. **After Claiming**: Gig appears in your Active section
+2. **Plan Route**: Use Map button to plan efficient pickup and delivery
+3. **Go to Pickup**: Visit the pickup location to collect items
+4. **Complete Delivery**: Bring items to the Dater at the dropoff location
+5. **Mark Complete**: Click Complete button only after successful delivery
+6. **Optional**: Drop if you encounter issues that prevent completion
+
+**Expected Timelines:**
+- **Quick Items** (coffee, flowers): 30-45 minutes
+- **Shopping Items** (groceries, gifts): 45-90 minutes
+- **Special Requests**: Coordinate with Dater for timing
 
 **Empty State:**
 - "You are not currently on any gigs." - You have no active assignments
@@ -557,30 +774,34 @@ For each active gig, you have three action buttons:
 
 **What are Available Gigs?**
 
-Available gigs are new requests from Daters that are waiting for Cupids to claim them. These are opportunities to earn money.
+Available gigs are new requests from Daters waiting for Cupids to claim them. These are opportunities to earn money.
 
 **Viewing Available Gigs:**
 
-1. The Available section appears below the Active Gigs
-2. All unclaimed gigs within your range are displayed
-3. Gigs are color-coded:
-   - Border color indicates whether they're newly available or have been waiting
+1. **Location Check**: Gigs are filtered based on your range setting in profile
+2. **Budget Review**: Ensure the budget is fair for the distance and effort required
+3. **Timing**: Consider pickup and dropoff locations for travel time
+4. **Item Type**: Some items (flowers) may be time-sensitive
 
 **Claiming Available Gigs:**
 
 1. Browse through the available gigs
 2. Review the gig details and budget
 3. Click the **"Claim"** button to accept the gig
-4. The gig immediately moves to your Active section
+4. **Immediate Payment**: You receive 10% of budget via PayPal instantly
 5. Success message confirms the claim
+6. **Important**: **Refresh the page** to see updated available gigs
 
 ![Cupid available gigs section](images/Cupid-Active-Gigs-available.png)
 
 **Reviewing Gig Details:**
 
-1. Click the **"Map"** button to view pickup and dropoff locations
-2. Review the travel distance and route
-3. Plan your time accordingly
+1. Click the **"Map"** button on any gig card
+2. A map modal will open showing:
+   - **Pickup Location**: Where you'll collect the items (usually a store)
+   - **Dropoff Location**: Where you'll deliver the items (usually a Dater's location)
+3. Review the route and distance
+4. Click outside the map or close button to return to the gig list
 
 **Empty State:**
 - "There are no gigs available." - No new gigs are currently waiting to be claimed
@@ -596,63 +817,90 @@ Available gigs are new requests from Daters that are waiting for Cupids to claim
 
 ### Viewing Completed Gigs
 
-![Cupid Completed Gigs page](images/Cupid-Completed-Gigs.png)
+**Purpose of Completed Gigs Page:**
+
+This page allows you to review your delivery history and provide feedback on your experience working with different Daters. Your feedback helps other Cupids understand what to expect when accepting gigs from specific Daters.
+
 
 **How to View Your Completed Gigs:**
 
 ![Cupid Completed Gigs navigation](images/Cupid-Completed-Gigs-Navigation.png)
 
-1. Click "Completed Gigs" from the navigation menu
+1. Click "Completed Gigs" from the navigation menu or "Past Gigs" tile from home
+
+![Cupid Completed Gigs page](images/Cupid-Completed-Gigs.png)
+
 2. View all gigs you've successfully completed
 3. Each completed gig displays:
    - **Dater Information**: Name of the Dater you helped
    - **Items Requested**: What you delivered
-   - **Budget**: Amount earned from the gig
+   - **Budget**: Amount earned from the gig (10% of budget received upon claiming)
    - **Pickup Location**: Where you collected the items
    - **Rate Dater Button**: Submit feedback for the Dater
 
-**Rating Daters:**
+**Why Rate Daters:**
+- **Help Other Cupids**: Your ratings help fellow Cupids know what to expect
+- **Platform Quality**: Good ratings encourage Daters to be clear and respectful
+- **Communication Quality**: Rate how well Daters communicated their needs
+
+**Rating Daters Process:**
 
 ![Rate Dater popup with heart rating system](images/Cupid-Rate-Dater-Popup.png)
 
-1. Click "Rate Dater" on any completed gig card
-2. A popup will appear with rating options:
-   - **Heart Rating**: Click hearts to select 1-5 rating
-     - Click on a heart to set rating (e.g., click 3rd heart for 3/5)
-     - Hearts automatically fill/unfill based on your selection
+1. **Open Rating**: Click "Rate Dater" on any completed gig card
+2. **Rating Popup Appears** with two sections:
+   - **Heart Rating System**: Click hearts to select 1-5 rating
+     - **1-2 Hearts**: Poor experience (unclear instructions, rude, no-show)
+     - **3 Hearts**: Average experience (some issues but manageable)
+     - **4-5 Hearts**: Good to excellent experience (clear, helpful, punctual)
    - **Written Feedback**: Optional text area to describe your experience
-3. Click "Send" to submit your rating
-4. Click "Cancel" to close without submitting
+
+3. **Rating Guidelines:**
+   - **Communication**: Did they provide clear pickup/dropoff instructions?
+   - **Availability**: Were they available at the dropoff location on time?
+   - **Courtesy**: Were they polite and respectful?
+   - **Accuracy**: Were their gig details accurate?
+
+4. **Submit Options:**
+   - **Send**: Submit your rating and feedback
+   - **Cancel**: Close without submitting
+
+**Rating Tips for Cupids:**
+- **Be Fair**: Rate based on the Dater's behavior, not external factors
+- **Be Specific**: In written feedback, mention what went well or could improve
+- **Be Professional**: Keep feedback constructive and respectful
+- **Be Honest**: Your ratings help maintain platform quality
 
 **Completed Gigs Display:**
 
 ![Completed gig tiles with Rate Dater buttons](images/Cupid-Completed-Gig-Tile.png)
 
-- These gig tiles are displayed in a responsive tile layout
-- On mobile: 2 tiles per row (minimum 280px width)
-- On tablet: 3 tiles per row
-- On desktop: 4-5 tiles per row (220-300px each)
-- Large screens: Up to 5 tiles per row
+- Responsive tile layout adapts to your screen size
 - Empty state message: "No completed gigs yet."
+- Each tile shows essential delivery information for easy reference
 
-**Rating Tips:**
-- Rate honestly to help maintain platform quality
-- Consider punctuality, clear communication, and gig accuracy
-- Provide constructive written feedback when appropriate
-- Your ratings help other Cupids understand Dater reliability
+**Using Your History:**
+- **Track Earnings**: Review how much you've earned from different gig types
+- **Learn Patterns**: See which pickup locations are most convenient for you
+- **Build Reputation**: Consistent completions build your credibility with Daters
 
 ---
 
 ### Cupid Feedback
 
-![Cupid Feedback page](images/Cupid-Feedback.png)
+**Understanding Your Feedback Page:**
+
+This page shows all the ratings and reviews you've received from Daters whose gigs you completed. Your feedback reflects your performance as a Cupid and helps you understand how Daters perceive your service quality.
 
 **How to View Your Feedback:**
 
 ![Cupid Feedback navigation](images/Cupid-Feedback-Navigation.png)
 
 1. Click "Feedback" from the navigation menu or hamburger menu
-2. View all feedback you've received from Daters whose gigs you completed
+
+![Cupid Feedback page](images/Cupid-Feedback.png)
+
+2. View all feedback you've received from Daters
 3. Each feedback card displays:
    - **Heart Rating**: Visual 1-5 heart rating from the Dater
    - **Rating Score**: Numerical rating (e.g., "4/5 Hearts")
@@ -836,11 +1084,10 @@ As a Manager, you have administrative control over the Cupid Code platform. Your
 1. The navigation menu on the left shows three main options:
    - **Home**: Returns to the main dashboard with platform overview
    - **Cupids**: Manage all Cupid accounts and view their performance
-   - **Daters**: Manage all Dater accounts and monitor their a- for how to fill out payments, see [Creating a Gig](#creating-a-gig)
-ction
-3. Below the navigation section is a toggle to turn light mode on or off
-  - by default light mode is off
-4. Below the light mode toggle is the logout button 
+   - **Daters**: Manage all Dater accounts and monitor their activities
+2. Below the navigation section is a toggle to turn light mode on or off
+   - by default light mode is off
+3. Below the light mode toggle is the logout button 
 
 ---
 
@@ -948,6 +1195,7 @@ ction
 - Use the in-app support features
 - Contact customer service via email
 - Report bugs through the feedback system
+- **Form Validation Issues**: If form submission fails, verify all required sections are filled out and check the top of the page for validation error messages explaining what needs to be corrected
 
 ---
 
