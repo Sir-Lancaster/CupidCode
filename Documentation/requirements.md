@@ -209,7 +209,7 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 1. **General End-users**
   - Interact with a sleek, contemporary user interface. **(M)**
   - Adjust account settings using a variety of managerial tools. **(M)**
-  - Link more than one payment method to finance services. **(M)**
+  - Link more than one payment method to finance services. **(W)**
   - Utilize an organized task management system. **(M)**
   - Switch easily between application roles. **(S)**
   - Opt to use a mobile application for portability and ease. **(C)**
@@ -218,22 +218,22 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   - Receive push alerts to receive real-time assistance. **(M)**
   - Engage in meaningful dialogue with an AI chatbot. **(M)**
   - Allow AI chatbot to listen during dates. **(M)**
-  - Swipe on potential matches by linking an external dating service. **(S)**
-  - Work with a fully integrated match-finder that offers all standard dating app support (i.e. messaging). **(C)**
+  - Swipe on potential matches by linking an external dating service. **(W)**
+  - Work with a fully integrated match-finder that offers all standard dating app support (i.e. messaging). **(W)**
 
 3. **Cupid End-users**
   - Have several gig management tools to organize gigs. **(M)**
   - Update a connected dater's software in real time. **(M)**
   - Access a variety of third-party services to assist dater. **(M)**
-  - Ability to message the dater with updates, pointers, etc. **(S)**
+  - Ability to message the dater with updates, pointers, etc. **(W)**
   - Navigate using a Google Maps API or similar. **(C)**
 
 4. **Married/Coupled End-users**
-  - Provide a relationship timeline of past date nights and milestones. **(S)**
-  - Provide shared calendar sync for couples. **(S)**
-  - Suggest gifts based on spouse preferences and past data. **(S)**
-  - Support joint profile preferences for couples. **(S)**
-  - Suggest family‑inclusive activities when desired. **(C)**
+  - Provide a relationship timeline of past date nights and milestones. **(W)**
+  - Provide shared calendar sync for couples. **(W)**
+  - Suggest gifts based on spouse preferences and past data. **(W)**
+  - Support joint profile preferences for couples. **(W)**
+  - Suggest family‑inclusive activities when desired. **(W)**
 
 ## User Stories 
 
@@ -356,14 +356,12 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   _From categories: Functional_
 - Connection to Stripe and PayPal payment processing APIs
   _From categories: Functional_
-  - Change the color schemes **(M)**
+  - Change the color schemes
   _From categories: Nonfuctional_
 - General users can interact with a sleek, contemporary user interface.
   _From categories: User, and Nonfunctional_
 - General users can adjust account settings using a variety of managerial tools.
   _From categories: User_
-- General users can link more than one payment method to finance services.
-  _From categories: User, Buisness_
 - General users can utilize an organized task management system.
   _From categories: User_
 - Daters can receive push alerts to receive real-time assistance.
@@ -400,16 +398,8 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
 ### Should
 
-- Integrate shared calendar sync for couples.
-  _From categories: Functional, User_
-- Provide a relationship timeline of past date nights and milestones.
-  _From categories: User_
 - Suggest anniversary/birthday plans from saved preferences.
   _From categories: Functional_
-- Suggest gifts based on spouse preferences and past data.
-  _From categories: User_
-- Support joint profile preferences for couples.
-  _From categories: User_
 - Support married users as an adjacent audience (without changing core goals).
   _From categories: Business_
 - Date planning interface.
@@ -419,10 +409,6 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 - Date plan editing capability for user.
   _From categories: Functional_
 - General users can switch easily between application roles.
-  _From categories: User_
-- Swipe on potential matches by linking an external dating service.
-  _From categories: User_
-- Ability to message the dater with updates, pointers, etc.
   _From categories: User_
 - Provide personalized recommendations to create a tailored user experience. 
   _From categories: Buisness_
@@ -471,8 +457,6 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   _From categories: Nonfunctional_
 - Record change history for shared features (who edited joint preferences or calendar sync) to provide an audit trail.
   _From categories: Nonfunctional_
-- Suggest family‑inclusive activities when desired.
-  _From categories: User_
 - Integrate a weather API so the agentic AI can plan appropriate activities and give relevant suggestions
   _From categories: Functional_
 - AI capability to give feedback after a date
@@ -485,17 +469,15 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   _From categories: Functional_
 - Integrate location services for real-time updates on the location of Cupids
   _From categories: Functional_
+- General users can opt to use a mobile application for portability and ease.
+  _From categories: User_
+- Cupids can navigate using a Google Maps API or similar.
+  _From categories: User_
 
 ### Won't
 
 - Microtransactions
   _From categories: Functional_
-- General users can opt to use a mobile application for portability and ease.
-  _From categories: User_
-- Daters can work with a fully integrated match-finder that offers all standard dating app support (i.e. messaging).
-  _From categories: User_
-- Cupids can navigate using a Google Maps API or similar.
-  _From categories: User_
 - Support multiple languages to enable global accessibility. 
   _From categories: Buisness_
 - Provide text-to-speech functionality to support visually impaired users. 
@@ -516,6 +498,24 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   _From categories: Buisness_
 - Support subscription billing (tiers for singles/married users).
   _From categories: Business_  
+- Link more than one payment method to finance services.
+  _From categories: User_
+- Work with a fully integrated match-finder that offers all standard dating app support (i.e. messaging).
+  _From categories: User_
+- Swipe on potential matches by linking an external dating service.
+  _From categories: User_
+- Have ability to message the dater with updates, pointers, etc.
+  _From categories: User_
+- Provide a relationship timeline of past date nights and milestones.
+  _From categories: User_
+- Provide shared calendar sync for couples.
+  _From categories: User_
+- Suggest gifts based on spouse preferences and past data.
+  _From categories: User_
+- Support joint profile preferences for couples.
+  _From categories: User_
+- Suggest family‑inclusive activities when desired.
+  _From categories: User_
 
 ## Use Case Diagrams
 
