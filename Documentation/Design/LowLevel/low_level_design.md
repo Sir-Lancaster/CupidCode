@@ -80,6 +80,17 @@ graph TD
   BE -->|retrieve secrets/keys\nvia managed identity| KV
 ```
 
+#### Implementation Status (current codebase reality)
+- Azure DNS + TLS: (Not Implemented)
+- CDN / Static Hosting for SPA: (Not Implemented)
+- Azure App Service/containers + autoscaling: (Not Implemented)
+- Database: PostgreSQL managed (Not Implemented; SQLite in repo)
+- Background processing: Celery + Redis (Not Implemented)
+- Secrets management: Azure Key Vault (Not Implemented)
+- Payment gateway: PayPal (Implemented), Stripe (Not Implemented)
+- AI provider integrations: (Not Implemented)
+- Notifications: SendGrid/Twilio (Partially Implemented)
+
 ---
 
 ### Component interactions (detailed sequences)
@@ -126,37 +137,37 @@ Below are two canonical interaction paths showing call patterns, responsibilitie
 
 - **Vue SPA**  
   - **Build:** Node 18+, build pipeline (Vite/webpack) in CI producing optimized static assets.  
-  - **Runtime:** served from CDN backed by Azure Blob Storage / Static Website or Azure Front Door.  
+  - **Runtime:** served from CDN backed by Azure Blob Storage / Static Website or Azure Front Door. (Not Implemented)  
   - **Responsibilities:** UI/UX, local validation, audio capture (MediaDevices / WebRTC), offline caching and local state (Pinia/Vuex), push subscription registration, optimistic updates for gig statuses.
 
 - **Django Backend (Monolith)**  
   - **Structure:** Django project with well-scoped apps: `accounts`, `profiles`, `couples`, `gigs`, `payments`, `ai`, `notifications`, `analytics`, `audit`.  
-  - **Runtime:** ASGI server (Daphne/uvicorn) for long-lived connections (Channels) + Gunicorn WSGI workers for synchronous workloads. Containerized using Docker; hosted in Azure App Service (or optionally AKS for future scaling).  
-  - **Concurrency:** Use ASGI for WebSocket endpoints (Channels + Redis channel layer). WSGI for standard REST workloads. Keep CPU-bound work in background workers.
+  - **Runtime:** ASGI server (Daphne/uvicorn) for long-lived connections (Channels) + Gunicorn WSGI workers for synchronous workloads. Containerized using Docker; hosted in Azure App Service (or optionally AKS for future scaling). (Not Implemented)  
+  - **Concurrency:** Use ASGI for WebSocket endpoints (Channels + Redis channel layer). WSGI for standard REST workloads. Keep CPU-bound work in background workers. (Not Implemented)
 
 - **Background processing**  
-  - **Celery** with **Redis** as broker and result backend (or RabbitMQ if stronger delivery semantics are required).  
+  - **Celery** with **Redis** as broker and result backend (or RabbitMQ if stronger delivery semantics are required). (Not Implemented)  
   - **Tasks:** notification sending, scheduled reminders, AI orchestration, payment reconciliations, periodic audits, CSV imports (bulk ETL).  
   - Workers run in separate containers with limited privileges (no direct access to production secrets beyond scoped service identities).
 
 - **Database**  
-  - **PostgreSQL (managed)** on Azure with TLS enforced, encryption at rest (AES-256), automated backups and point-in-time recovery.  
+  - **PostgreSQL (managed)** on Azure with TLS enforced, encryption at rest (AES-256), automated backups and point-in-time recovery. (Not Implemented; SQLite used in repo)  
   - Use `pgbouncer` when under heavy concurrency to reduce DB connection churn. Optionally add read replicas for analytics and reporting workloads to isolate them from transactional load.
 
 - **Secrets & Keys**  
-  - **Azure Key Vault** for API keys, JWT signing keys, envelope encryption keys. Backend uses Managed Identity to fetch secrets at runtime; CI uses ephemeral deploy secrets from pipeline-integrated vault.
+  - **Azure Key Vault** for API keys, JWT signing keys, envelope encryption keys. Backend uses Managed Identity to fetch secrets at runtime; CI uses ephemeral deploy secrets from pipeline-integrated vault. (Not Implemented)
 
 - **Third-party integrations**  
-  - **Payments:** Stripe (PaymentIntents, webhooks); do not store PAN/CVV. Store `stripe_customer_id`, `payment_method_id` tokens and transaction metadata. Use idempotency keys on create flows.  
-  - **AI provider(s):** external LLM + ASR providers (audio + text). All calls authenticated with Key Vault keys; worker proxies audio to provider to keep PII out of direct client→provider paths.  
-  - **Notifications:** Twilio / SendGrid or equivalent; webhook verification and retry logic for delivery.
+  - **Payments:** PayPal (Implemented); Stripe (Not Implemented). Idempotency keys and Stripe webhooks (Not Implemented). Do not store PAN/CVV.  
+  - **AI provider(s):** external LLM + ASR providers (audio + text). (Not Implemented)  
+  - **Notifications:** Twilio / SendGrid or equivalent; webhook verification and retry logic for delivery. (Partially Implemented)
 
 ---
 
 ### API design (examples & conventions)
 
 - **Versioning:** `/api/v1/...` — increment major versions for breaking changes.  
-- **Auth:** Bearer JWT short lived + refresh token (rotating). Admin actions require `admin` scope and step-up MFA.  
+- **Auth:** Bearer JWT short lived + refresh token (rotating). Admin actions require `admin` scope and step-up MFA. (Not Implemented)  
 - **Response envelope:**
   ```json
   {
@@ -171,8 +182,9 @@ Below are two canonical interaction paths showing call patterns, responsibilitie
   - `GET /api/v1/profile` — returns profile (obeys privacy flags).  
   - `POST /api/v1/gigs` — create gig (validates budget, tokenizes payment intent).  
   - `POST /api/v1/ai/sessions` — start audio coaching session (returns session id, WebSocket URL).  
-  - `POST /webhooks/stripe` — verified webhook handler (idempotent).
+  - `POST /webhooks/stripe` — verified webhook handler (idempotent). (Not Implemented)
 - **Real-time:** `/ws/ai-session/:id` for audio + coaching stream (ASGI Channels).  
+  (Not Implemented)
 - **Error handling:** idempotency keys for payment endpoints; 4xx for client errors with machine-readable codes; 5xx for server errors with correlation id logged. Include `retry-after` headers where rate-limiting is applied.
 
 ---
@@ -215,6 +227,8 @@ Primary tables (suggested, abbreviated). Use UUID PKs and timestamps (`timestamp
 ---
 
 ### Operational & infra details (CI/CD, runbooks, scaling)
+
+Note: The items in this section (CI/CD pipelines, containerization, autoscaling, `pgbouncer`, monitoring/Insights, SIEM) are (Not Implemented) in the current codebase.
 
 - **CI/CD:** GitHub Actions or Azure DevOps pipelines:
   - Steps: lint → unit tests → integration tests → build frontend → publish artifacts → stage deploy → smoke tests → manual approval → prod deploy.  
@@ -1322,6 +1336,17 @@ Implementation notes:
 
 > **Purpose:** expand the high level security section into a concrete low-level design (LLD). The LLD defines the threat model, concrete mitigations (passwords, payments, PII, TLS), an authentication token design (JWT + refresh), alternatives considered, detection & logging, key operational practices, a security threat table, and a diagram showing how data is protected *in transit* and *at rest*.
 
+#### Implementation Status (current codebase reality)
+- Password hashing with Argon2id: (Not Implemented) — Django defaults present; no argon2 dependency.
+- JWT access tokens + rotating refresh tokens: (Not Implemented)
+- OAuth2/OIDC SSO: (Not Implemented)
+- Field-level/envelope encryption for PII: (Not Implemented)
+- Secrets management via Azure Key Vault: (Not Implemented)
+- TLS 1.3 enforcement, HSTS, CSP/SRI headers: (Not Implemented)
+- SIEM/immutable audit logs: (Not Implemented)
+- Stripe tokenization/webhooks/idempotency: (Not Implemented); PayPal is (Implemented).
+- Rate limiting/circuit breakers: (Not Implemented)
+
 ---
 
 ### Threat model (summary)
@@ -1357,7 +1382,7 @@ We define the threat model by listing the most relevant attack classes for Cupid
 
 ### Concrete mitigations — low level details
 
-#### Passwords — Argon2
+#### Passwords — Argon2 (Not Implemented)
 - **Algorithm:** **Argon2id** (resistant to side-channel and GPU attacks).  
 - **Storage:** store `hash = Argon2id(password, salt, params)` and keep the `salt` per account. Do **not** store raw passwords.  
 - **Recommended starting parameters:** *benchmark on your production-like hardware and tune; example starting point*:
@@ -1371,7 +1396,7 @@ We define the threat model by listing the most relevant attack classes for Cupid
   - Password reset flow: one-time token with short TTL, single-use, store hashed reset tokens, log reset events.
   - On algorithm or parameter updates, rehash on next successful login (rehash on verify).
 
-#### Authentication tokens — chosen pattern: **JWT access tokens + rotating refresh tokens**
+#### Authentication tokens — chosen pattern: **JWT access tokens + rotating refresh tokens** (Not Implemented)
 **Why JWT + refresh?**  
 - JWTs are stateless, compact, and convenient for APIs and SPAs. Combined with very short-lifetime access tokens + a secure refresh mechanism you get excellent UX and security.
 - We mitigate JWT downsides by: *short access TTL, refresh token rotation, server side refresh token revocation, and storing refresh tokens hashed*.
@@ -1396,14 +1421,14 @@ We define the threat model by listing the most relevant attack classes for Cupid
 
 > **Note:** For endpoints used by third parties (webhooks, server-to-server), use client credentials with short-lived certs or OAuth2 client tokens — never reuse user tokens.
 
-#### Payments — Stripe (no raw cards)
+#### Payments — Stripe (no raw cards) (Not Implemented; PayPal Implemented)
 - **Card capture:** use **Stripe Elements** or Payment Intents flow; card data is collected by Stripe client SDK and never touches our servers.  
 - **Server side:** store only `stripe_customer_id`, `payment_method_id`, and `payment_intent_id`. No PAN/CVV stored.  
 - **Webhooks:** validate signatures (use Stripe webhook signing secret), verify event type and idempotency to avoid double processing. Use idempotency keys on payment creation.  
 - **PCI scope:** by delegating capture and storage to Stripe we reduce PCI obligations; still follow Stripe recommended server hardening. Log only non-sensitive metadata.  
 - **Refunds / disputes:** require admin authorization workflows (two-person approval or step-up MFA) and record audit events.
 
-#### PII & Field-level encryption (addresses, calendar entries)
+#### PII & Field-level encryption (addresses, calendar entries) (Not Implemented)
 - **Pattern:** **Envelope encryption** (DEK wrapped by KEK).
   - For each sensitive field (e.g., `address`, `calendar_note`), generate a random Data Encryption Key (DEK) and encrypt the plaintext with an authenticated algorithm (AES-256-GCM) producing ciphertext + associated tag and IV.
   - Encrypt (wrap) each DEK with a Key Encryption Key (KEK) stored in **Azure Key Vault** using the Key Vault wrap/unwrap API.
@@ -1415,7 +1440,7 @@ We define the threat model by listing the most relevant attack classes for Cupid
 - **Search & indexing:** avoid storing plaintext. For required searches use hashed or tokenized indexes (e.g., salted HMAC for dedupe), or store a derived search token hashed with a separate key. Document privacy tradeoffs.
 - **Retention and deletion:** support complete deletion by removing both ciphertext rows and wrapped DEK metadata; when requested, sanitize backups as feasible.
 
-#### TLS everywhere
+#### TLS everywhere (Not Implemented)
 - **Enforce TLS 1.3** for all external and internal connections where supported: client ↔ App, App ↔ DB, App ↔ Key Vault, App ↔ third parties (Stripe, AI).
 - **Server configuration:** prefer ciphers supporting forward secrecy — ECDHE with AES-GCM or ChaCha20-Poly1305.
 - **HSTS:** set `Strict-Transport-Security` with `includeSubDomains` and `preload` (after careful testing).
@@ -1453,7 +1478,7 @@ We define the threat model by listing the most relevant attack classes for Cupid
 
 ---
 
-### Detection, logging, monitoring & alerting (low level)
+### Detection, logging, monitoring & alerting (low level) (Not Implemented)
 - **Audit logs:** write immutable logs for auth events, admin actions, payments, PII access, and key unwraps. Store logs in append-only store with integrity measures (write-once blob or SIEM ingest).
 - **Application logs:** structured JSON logs with correlation IDs (not containing PII). Redact or hash PII before logging.
 - **Monitoring:** Application Insights / Azure Monitor for traces, metrics, latency, exception rates.
@@ -1465,7 +1490,7 @@ We define the threat model by listing the most relevant attack classes for Cupid
 
 ---
 
-### Operational security & SDLC (practical controls)
+### Operational security & SDLC (practical controls) (Not Implemented)
 - **Secure SDLC:** require code reviews, SAST (bandit/semgrep), DAST scans on staging, dependency scanning (Dependabot/renovate), and secret scanning in CI.
 - **CI/CD:** separate pipelines for dev/staging/prod. Use ephemeral deploy tokens and require approvals for production deploys. CI reads secrets from Key Vault using managed identity.
 - **Access management:** enforce Azure AD SSO for developers and admins; require MFA; regularly audit access lists and roles.

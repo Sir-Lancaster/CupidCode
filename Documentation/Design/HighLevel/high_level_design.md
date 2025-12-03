@@ -132,15 +132,15 @@ This style was chosen because:
 Cupid Code will be deployed in **three environments**: local development, staging/testing, and production. Each environment mirrors the core setup to ensure smooth promotion of code between stages.  
 
 - **Frontend (Vue.js):**  
-  Compiled into static assets and served via **Azure App Service** or a **CDN** for fast delivery.  
+  Compiled into static assets and served via **Azure App Service** or a **CDN** for fast delivery (Not Implemented).  
 - **Backend (Django):**  
-  Runs in an **Azure App Service container** with autoscaling enabled for higher loads. Handles API requests, business logic, and orchestration of external services.  
+  Runs in an **Azure App Service container** with autoscaling enabled for higher loads (Not Implemented). Handles API requests, business logic, and orchestration of external services.  
 - **Database (PostgreSQL):**  
-  Deployed as a **managed Azure Database for PostgreSQL** instance. Configured with automatic backups, encryption at rest, and role-based access controls.  
+  Deployed as a **managed Azure Database for PostgreSQL** instance (Not Implemented). Configured with automatic backups, encryption at rest, and role-based access controls.  
 - **Secrets Management:**  
-  Sensitive keys (API keys, DB credentials) stored in **Azure Key Vault**, never hardcoded.  
+  Sensitive keys (API keys, DB credentials) stored in **Azure Key Vault**, never hardcoded (Not Implemented).  
 - **Networking & DNS:**  
-  Deployed behind **Azure Application Gateway** with HTTPS termination. DNS configured via a custom domain with TLS certificates auto-renewed by **Azure Certificate Manager**.  
+  Deployed behind **Azure Application Gateway** with HTTPS termination (Not Implemented). DNS configured via a custom domain with TLS certificates auto-renewed by **Azure Certificate Manager** (Not Implemented).  
 
 This setup ensures **fast iteration for developers**, **secure production hosting**, and **cloud-native scalability**.
 
@@ -154,8 +154,8 @@ Cupid Code follows a **three-tier separation of concerns** with clear boundaries
 
 2. **Backend (Application Layer)**  
    - Django monolith structured into modular apps (auth, scheduling, payments, notifications, AI).  
-   - Celery + Redis handle background jobs like reminders, notifications, and AI feedback.  
-   - Integrates with third-party services: Stripe/PayPal (payments), AI APIs, email/SMS notification providers.  
+  - Celery + Redis handle background jobs like reminders, notifications, and AI feedback (Not Implemented).  
+  - Integrates with third-party services: PayPal (payments) (Implemented), Stripe (Not Implemented), AI APIs (Not Implemented), email/SMS providers via SendGrid/Twilio (Partially Implemented).  
 
 3. **Database (Data Layer)**  
    - PostgreSQL stores user accounts, schedules, orders, and logs.  
@@ -851,29 +851,29 @@ This section summarizes the highest-priority threats for Cupid Code and concrete
 ### Layered Controls (by layer)
 #### Frontend (Vue)
 - Enforce HTTPS everywhere (HSTS).  
-- CSP headers; subresource integrity for critical third-party scripts.  
+- CSP headers; subresource integrity for critical third-party scripts (Not Implemented).  
 - Input validation on UI (but do not rely on it — always validate server side).  
-- Use secure storage patterns: avoid persistent storage of sensitive tokens in localStorage; prefer short-lived tokens in memory, or HttpOnly cookies with proper SameSite settings for session cookies.  
+- Use secure storage patterns: avoid persistent storage of sensitive tokens in localStorage; prefer short-lived tokens in memory, or HttpOnly cookies with proper SameSite settings for session cookies (Not Implemented).  
 - Obfuscate (never "securely hide") sensitive UI elements for couples (e.g., “surprise” flags) until consent reveals them.
 
 #### Backend (Django)
 - Use Django’s security middleware: CSRF, X-Frame-Options, XSS protections.  
-- Centralized auth using Django + OAuth2/OIDC for SSO options (Google, GitHub) with verified email.  
-- Granular RBAC enforcement at both view and object level (row-level checks where necessary).  
+- Centralized auth using Django + OAuth2/OIDC for SSO options (Google, GitHub) with verified email (Not Implemented).  
+- Granular RBAC enforcement at both view and object level (row-level checks where necessary) (Not Implemented).  
 - Use parameterized queries exclusively; restrict any raw SQL to reviewed, tested code.  
 - All background workers run with limited permissions; service accounts scoped to required resources.
 
 #### Data Layer (Postgres, blob storage)
-- Encryption at rest (DB-managed or Azure-managed AES-256).  
-- Encrypted backups and snapshots.  
-- Field-level encryption for PII such as addresses; use envelope encryption keys stored in Key Vault.  
-- Tokenize payment instruments: store only processor tokens (Stripe PaymentMethod IDs) and transaction metadata.
+- Encryption at rest (DB-managed or Azure-managed AES-256) (Not Implemented).  
+- Encrypted backups and snapshots (Not Implemented).  
+- Field-level encryption for PII such as addresses; use envelope encryption keys stored in Key Vault (Not Implemented).  
+- Tokenize payment instruments: store only processor tokens (Stripe PaymentMethod IDs) and transaction metadata (Not Implemented).  
 
 #### Infrastructure / Cloud
-- Secrets in Azure Key Vault; access with managed identities and RBAC.  
-- TLS 1.3 across all endpoints; strict cipher suites.  
-- Azure-native logging and monitoring (integrate with SIEM / Azure Sentinel).  
-- Network-level controls: private subnets for DB, limited inbound rules, and API gateway rate limiting.
+- Secrets in Azure Key Vault; access with managed identities and RBAC (Not Implemented).  
+- TLS 1.3 across all endpoints; strict cipher suites (Not Implemented).  
+- Azure-native logging and monitoring (integrate with SIEM / Azure Sentinel) (Not Implemented).  
+- Network-level controls: private subnets for DB, limited inbound rules, and API gateway rate limiting (Not Implemented).  
 
 ---
 
@@ -884,6 +884,7 @@ This section summarizes the highest-priority threats for Cupid Code and concrete
 - **Addresses & Calendar data:** treat addresses as sensitive PII. Use field-level encryption (envelope encryption) for these fields; decrypt only in server memory and only when needed by a business flow (e.g., displaying to the user or sharing with an assigned Cupid, with user consent). For couple-shared data, honor per-partner consent flags before decryption.  
 - **Payment/Card handling:** do not store PANs or CVV. Use Stripe Elements / Payment Intents to collect card data directly and receive a token/PaymentMethod id that can be used server-side. Keep PCI scope minimal by delegating card capture and storage to the payment processor. Log only non-sensitive transaction metadata.  
 - **Token scopes and lifetime:** use OAuth2 scopes for granular API tokens (e.g., `read:profile`, `write:gigs`, `admin:billing`). Keep access tokens short-lived (minutes to hours) and use refresh tokens with rotation and revocation. Implement token revocation lists and immediate session invalidation after password changes or account deletion.
+ (Not Implemented for: At-rest encryption, Secrets & Key Rotation via Key Vault, Field-level encryption for addresses, Stripe tokenization, OAuth2 scopes/short-lived tokens.)
 
 ---
 
@@ -911,6 +912,7 @@ Define clear roles and least-privilege permissions. Enforce both coarse-grained 
 - All privileged endpoints require an `admin` scope and step-up MFA.  
 - Periodic automated audits of role assignments; revoke stale privileges.  
 - Implement consent flags for couples: features like “hide surprise gift” are enforced in the authorization layer — decryption and display logic check consent before revealing.
+ (Not Implemented for: object-level permissions, admin scopes with step-up MFA, automated audits of role assignments, consent flags enforcement.)
 
 ---
 
@@ -922,6 +924,7 @@ Define clear roles and least-privilege permissions. Enforce both coarse-grained 
 - **Payments / PCI:** remain out of PCI-scope by relying on Stripe/PayPal for card storage and processing. Ensure server interactions with payment APIs follow recommended best practices (server-side verification of webhooks, idempotency keys).  
 - **Legal & privacy policy:** publish a clear privacy policy describing data use, retention, and sharing. Provide opt-outs for marketing and telemetry. Maintain a data processing addendum if working with processors in GDPR jurisdictions.  
 - **Testing & audits:** plan regular security scans (SAST/DAST), quarterly dependency vulnerability scans, and at least annual penetration testing. Consider a bug-bounty or coordinated vulnerability disclosure program as the product grows.
+ (Not Implemented for: age gating verification, data export/deletion tooling, immutable audit logs/SIEM integration, Stripe/PayPal PCI out-of-scope setup, formal privacy policy, SAST/DAST and vulnerability scanning.)
 
 ---
 
@@ -931,6 +934,7 @@ Define clear roles and least-privilege permissions. Enforce both coarse-grained 
 - **Access management:** enforce MFA for all developer and admin accounts; use role-based access to Azure resources; periodic access reviews.  
 - **Monitoring & alerting:** integrate application logs and Azure activity logs into a SIEM (Azure Sentinel recommended). Create runbooks for critical alerts.  
 - **Incident response:** maintain an incident response playbook (containment, forensics, user notification timelines), contacts for legal/regulatory obligations, and pre-defined communication templates for breach notifications. Test the IR playbook with tabletop exercises.
+ (Not Implemented for: SAST/secret scanning in CI, environment-separated pipelines with approvals, MFA for developers/admins, SIEM integration/runbooks, incident response playbook.)
 
 ## 9. Risks and Mitigation
 
