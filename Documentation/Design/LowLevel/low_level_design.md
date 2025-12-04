@@ -346,7 +346,7 @@ sequenceDiagram
 
 **Responsibilities**
 
-The authentication system manages user registration through the create_user() endpoint, which creates User instances with role-based profiles (Dater, Cupid, Manager) and automatically logs users in upon successful creation. User login is handled by sign_in(), which authenticates credentials using Django's built-in functions and returns serialized user data based on role. The system enforces authorization through helper functions like authenticated_dater() and authenticated_cupid() that validate user permissions before accessing protected resources. Session management relies on Django's JWT framework, while logout functionality clears sessions through the logout_view(). The custom User model extends AbstractUser to include role designation and phone numbers, enabling role-based access control throughout the application where users can only access resources appropriate to their assigned role.
+The authentication system manages user registration through the create_user() endpoint, which creates User instances with role-based profiles (Dater, Cupid, Manager) and automatically logs users in upon successful creation. User login is handled by sign_in(), which authenticates credentials using Django's built-in functions and returns serialized user data based on role. The system enforces authorization through helper functions like authenticated_dater() and authenticated_cupid() that validate user permissions before accessing protected resources. Session management relies on Django's SessionAuthentication and BasicAuthentication framework, while logout functionality clears sessions through the logout_view(). The custom User model extends AbstractUser to include role designation and phone numbers, enabling role-based access control throughout the application where users can only access resources appropriate to their assigned role.
 
 **Class breakdown**
 
@@ -396,10 +396,10 @@ The authentication system manages user registration through the create_user() en
   - Handles role selection and form validation
   - Submits registration data and auto-logs in users
 
-- **NavSuite (Vue Component)**
+- **NavBar (Vue Component)**
   - Provides navigation and logout functionality
   - Manages user session state in the UI
-  - Handles drawer navigation and profile routing
+  - Handles bottom navigation and profile routing
 
 **UML case diagrams**
 
@@ -527,100 +527,60 @@ The gig system handles location-based filtering to prevent cupids from seeing gi
 
 Payments
   Responsibilities
-    The Payments subsystem manages all monetary transactions through the Stripe API. It handles the purchase of Cupid Cash, and ensures that payment requests, confirmations, and balances are processed correctly. It records transactions, verifies successful payments, and updates user currency balances. Its role is limited to processing purchases, interacting with Stripe, and maintaining accurate Cupid Cash allocations for use in funding gigs.
+    The Payments subsystem manages all monetary transactions through the PayPal API. It handles gig payments and cupid payouts, ensuring that payment requests, confirmations, and balances are processed correctly. It processes payments for gig creation and sends immediate payouts to cupids when gigs are claimed. User balances are tracked directly in the Dater and Cupid models. Its role is limited to processing gig payments, interacting with PayPal, and maintaining accurate balance allocations.
 
   Class breakdown
     Backend Classes
 
-      PaymentMethodToken (Django Model)
-      Stores tokenized payment method references from Stripe/PayPal
-      Links users to secure external payment tokens without storing sensitive data
-      Tracks payment method metadata (brand, last4, expiration) for display
-      Manages multiple payment methods per user with primary selection
-      Provides secure payment method validation and verification status
+      Gig (Django Model)
+      Tracks payment-related fields including payment_id and payout_id for PayPal integration
+      Stores payout_status for tracking cupid payment processing
+      Links payment processing to gig lifecycle management
 
-      PaymentIntent (Django Model)
-      Manages payment processing lifecycle from creation to completion
-      Stores Stripe/PayPal payment intent IDs and processing status
-      Tracks payment amounts, currency, and associated gig/transaction
-      Handles payment confirmation, failure, and refund processing
-      Provides audit trail for all payment attempts and outcomes
+      PayPal Service (paypal_service.py)
+      Handles PayPal OAuth token management and API authentication
+      Manages cupid payout processing through PayPal batch payments
+      Processes payment confirmations and error handling
+      Integrates with PayPal sandbox for testing and production environments
 
-      Transaction (Django Model)
-      Maintains comprehensive financial ledger for all user transactions
-      Records debits, credits, transfers, and balance adjustments
-      Links transactions to payment intents, gigs, and external references
-      Provides immutable transaction history for accounting and auditing
-      Supports transaction categorization and reporting requirements
-
-      WalletBalance (Django Model)
-      Tracks user account balances and available funds
-      Manages separate balances for daters and cupids with role validation
-      Handles balance updates with atomic operations and concurrency control
-      Provides balance history and low-balance notification triggers
-      Supports multiple currencies and conversion tracking
-
-      EscrowHold (Django Model)
-      Manages funds held in escrow during active gigs
-      Links held amounts to specific gigs and payment sources
-      Handles automatic release on gig completion or manual intervention
-      Tracks hold duration and provides escrow status reporting
-      Manages dispute resolution and partial release scenarios
-
-      PaymentMethodTokenSerializer (DRF Serializer)
-      Handles secure payment method display and validation
-      Manages tokenization requests to payment providers
-      Validates payment method updates and primary selection
-      Formats payment method data for secure frontend display
-      Handles payment method verification and status updates
-
-      PaymentIntentSerializer (DRF Serializer)
-      Manages payment processing request validation and formatting
-      Handles payment confirmation and status update serialization
-      Validates payment amounts and gig associations
-      Formats payment intent data for frontend tracking
-      Manages error handling and retry logic for failed payments
-
-      TransactionSerializer (DRF Serializer)
-      Handles transaction history serialization and filtering
-      Manages transaction search and reporting data formatting
-      Validates transaction creation and status updates
-      Provides transaction categorization and summary data
-      Handles pagination for large transaction histories
+      Balance Tracking (Dater/Cupid Models)
+      Simple cupid_cash_balance decimal fields on user profile models
+      Direct balance updates without separate transaction ledger
+      Immediate balance adjustments on gig completion and payout
 
     Frontend Components
 
-      CupidCash (Vue Component)
-      Manages dater balance display and Cupid Cash purchasing
-      Provides payment card selection and amount input interface
-      Handles deposit transactions and balance updates
-      Integrates with payment processing for fund additions
+      CreateGig (Vue Component)
+      Integrates PayPal Smart Buttons for gig payment processing
+      Handles PayPal SDK loading and payment flow management
+      Processes payment confirmation before gig creation
+      Manages payment errors and user feedback
+
+      AIGig (Vue Component)
+      Provides PayPal checkout for AI-suggested gigs
+      Handles dynamic payment calculation and processing
+      Integrates with emergency gig creation flow
 
     Helper Functions
 
-      dater_transfer() / cupid_transfer() (API Views)
-      Handle balance transfers and payment processing
-      Manage transaction validation and balance updates
-      Process payment confirmations and error handling
+      paypal_config() (API View)
+      Provides PayPal configuration for frontend SDK initialization
+      Returns client ID and environment settings
+      Manages PayPal integration configuration
 
-      get_dater_balance() / get_cupid_balance() (API Views)
-      Retrieve current user balance information
-      Validate user permissions for balance access
-      Format balance data for frontend display
-
-      save_card() / save_bank_account() (API Views) - DEPRECATED
-      Store payment method information - high security risk
-      To be replaced with tokenized payment method storage
-      Currently handle raw payment data validation
+      send_payout_to_cupid() (PayPal Service)
+      Processes immediate cupid payouts when gigs are claimed
+      Handles PayPal batch payment creation and tracking
+      Manages payout status and error handling
 
   UML case diagrams
 
  ![payments](images/payments_uml.png)
 
   Design choices/alternatives
-    The payment system currently stores raw payment card data directly in the database for rapid MVP development, though this creates significant PCI compliance risks that require immediate migration to Stripe/PayPal tokenization before production deployment. Balance tracking uses simple decimal fields on user profiles rather than a separate transaction ledger to minimize complexity, though this approach limits audit capabilities and transaction history. Payment processing is handled synchronously in API views rather than using background jobs to provide immediate user feedback, accepting potential timeout risks for better user experience. The system uses separate dater and cupid balance fields rather than a unified wallet system to maintain clear separation between user types and prevent accidental cross-role transactions. Payment provider selection prioritizes Stripe over PayPal due to superior developer experience and webhook reliability, though both remain viable options for user choice and payment method diversity.
+    The payment system uses PayPal Smart Buttons for secure payment processing without storing sensitive payment data, eliminating PCI compliance risks through PayPal's hosted payment flow. Balance tracking uses simple decimal fields on user profiles rather than a separate transaction ledger to minimize complexity, though this approach limits audit capabilities and transaction history. Payment processing is handled synchronously in API views rather than using background jobs to provide immediate user feedback, accepting potential timeout risks for better user experience. The system uses separate dater and cupid balance fields rather than a unified wallet system to maintain clear separation between user types and prevent accidental cross-role transactions. PayPal was chosen as the primary payment provider for its comprehensive payout system that enables immediate cupid payments and simplified integration for MVP development.
   Edge cases
-    The payment system handles balance validation to prevent overdrafts, validates payment card formats, and manages transaction atomicity to prevent double-charging. It enforces user permissions ensuring users can only access their own payment information and balances. The system handles payment processing failures with appropriate error responses and maintains transaction logs for audit purposes. Critical security gaps include raw payment data storage requiring immediate tokenization, missing PCI compliance controls, lack of payment method verification, and no fraud detection mechanisms.
+    The payment system handles balance validation to prevent overdrafts, validates PayPal payment confirmations, and manages transaction atomicity to prevent double-charging. It enforces user permissions ensuring users can only access their own balance information. The system handles PayPal payment processing failures with appropriate error responses and maintains basic payout tracking through PayPal batch IDs. Security is handled through PayPal's hosted payment flow, eliminating direct payment data storage. Current limitations include lack of detailed transaction history, no refund processing system, and dependency on PayPal for all fraud detection and payment verification.
 
 
 Notifications
@@ -630,37 +590,40 @@ Notifications
   Class breakdown
     Backend Classes
 
-      Notification 
-      Would store notification queue with delivery status tracking
-      Would manage recipient information and delivery preferences
-      Would track delivery attempts and failure handling
+      No persistent Notification model exists
+      Notifications are handled through direct email delivery
+      No queuing or delivery status tracking implemented
 
     Helper Functions
 
-      notify() (API View)
-      Processes notification requests and formats messages
-      Handles routing to appropriate delivery channels (SMS/email)
-      Manages notification validation and delivery confirmation
+      send_email() (Helper Function)
+      Sends immediate email notifications using SendGrid
+      Handles HTML email formatting with Cupid Code branding
+      Processes notification delivery for gig events
 
-      Twilio Integration Functions
-      get_twilio_authenticated_sender_email() - Retrieves sender email configuration
-      get_twilio_authenticated_sender_phone_number() - Gets SMS sender number
-      get_twilio_authenticated_reserve_phone_number() - Manages backup phone numbers
-      Handle Twilio API authentication and message delivery
+      get_notifications() (API View)
+      Provides real-time notification polling for frontend
+      Returns in-app notifications based on recent gig events
+      Handles timeout-based notification checking
+
+      SendGrid Integration
+      Direct SendGrid API integration for email delivery
+      HTML email templates with branded formatting
+      Immediate delivery without retry mechanisms
 
     Frontend Components
 
-      Notification Display (Integrated in NavSuite)
-      Shows in-app notifications and alerts to users
-      Manages notification state and user acknowledgment
-      Provides notification history and status updates
+      Notification Display (Integrated in navigation components)
+      Shows in-app notifications through polling mechanism
+      Basic notification display without persistence
+      Limited notification history tracking
 
   UML case diagrams
 
   ![notifications](images/notifications_uml.png)
 
   Design choices/alternatives
-    The notification system uses Twilio as the primary provider for SMS and email delivery rather than implementing multiple providers to reduce integration complexity for MVP, though this creates vendor lock-in risks. Notifications are sent synchronously from API views rather than using a background queue system to ensure immediate delivery feedback, accepting potential performance impacts for simpler error handling. The system lacks persistent notification storage, instead relying on immediate delivery or failure, which limits retry capabilities and notification history but reduces database complexity. Template management is handled through simple string formatting rather than a sophisticated template engine to minimize dependencies and maintain rapid development pace. In-app notifications are integrated directly into the NavSuite component rather than using a dedicated notification service to leverage existing UI patterns and reduce frontend complexity, though this limits notification customization and advanced features like notification categories or priority levels.
+    The notification system uses SendGrid as the primary provider for email delivery rather than implementing multiple providers to reduce integration complexity for MVP, though this creates vendor lock-in risks. Notifications are sent synchronously from API views rather than using a background queue system to ensure immediate delivery feedback, accepting potential performance impacts for simpler error handling. The system lacks persistent notification storage, instead relying on immediate delivery or failure, which limits retry capabilities and notification history but reduces database complexity. Template management is handled through HTML string formatting in the send_email helper function to provide branded email notifications. In-app notifications are integrated directly into navigation components through a polling mechanism rather than using a dedicated notification service to leverage existing UI patterns and reduce frontend complexity, though this limits notification customization and advanced features like notification categories or priority levels.
   Edge cases
     The notification system handles delivery failures with retry mechanisms, validates recipient contact information, and manages notification preferences per user. It processes notification templates and formatting for different delivery channels and handles rate limiting to prevent spam. The system validates notification content and manages delivery timing for optimal user experience. Current gaps include missing notification persistence, no delivery confirmation tracking, limited template management, and no unsubscribe handling for external notifications.
 
@@ -683,7 +646,7 @@ Admin/Manager Dashboard
       get_daters() / get_cupids() - Retrieve user lists for management interface
       get_dater_count() / get_cupid_count() - Provide user count statistics
       get_active_daters() / get_active_cupids() - Track active user metrics
-      get_gig_rate() / get_gig_count() - Calculate gig performance statistics
+      get_gig_count() - Calculate total gig statistics
       get_gig_drop_rate() / get_gig_complete_rate() - Analyze gig completion metrics
       suspend() / unsuspend() - Manage user account status and access control
       delete_user() - Handle account deletion with proper data cleanup

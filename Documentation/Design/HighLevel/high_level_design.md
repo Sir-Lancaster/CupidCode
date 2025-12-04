@@ -197,10 +197,10 @@ graph TD
 The frontend is responsible for rendering the user interface and ensuring a smooth, responsive experience across devices. It manages client-side routing, maintains global application state (e.g., authentication, session data, preferences), and enforces accessibility standards such as ARIA roles and keyboard navigation. It communicates with the backend via APIs and, where necessary, establishes WebSocket connections for real-time features like chat or live notifications.  
 
 - **Technologies/Versions**  
-Vue 3 (Composition API) provides a modular approach to building reactive components, while Vite handles efficient bundling and hot-module reloading for development. Vue Router manages client-side navigation, and Socket.io or native WebSocket clients support real-time updates.  
+Vue 3.4.20 (Composition API) provides a modular approach to building reactive components, while Vite 7.2.2 handles efficient bundling and hot-module reloading for development. Vue Router 4.3.0 manages client-side navigation using hash-based routing. Real-time features are handled through polling mechanisms rather than WebSocket connections.  
 
 - **Internal Interfaces**  
-Common abstractions include an `apiClient` module for standardized HTTP requests, an `authStore` to track authentication state, a `notificationService` to manage system alerts, and reusable UI components to enforce consistency across the application.  
+Common abstractions include a `makeRequest` utility module for standardized HTTP requests, `auth.js` utilities to track authentication state, role-specific Vue component directories (DaterVues, CupidVues, ManagerVues), and reusable UI components (Banner, NavBar, Popup, Heart) to enforce consistency across the application.  
 
 
 
@@ -210,10 +210,10 @@ Common abstractions include an `apiClient` module for standardized HTTP requests
 The backend exposes a RESTful API that supports all client-facing features. It manages authentication and enforces role-based access for different user types (Dater, Cupid, Manager). It implements business logic such as matchmaking, chat storage, and media uploads. It also handles background jobs such as notification dispatch, analytics aggregation, and payment confirmation through asynchronous workers.  
 
 - **Technologies/Versions**  
-Django 5.x provides a secure and scalable foundation, while Django REST Framework (DRF) simplifies the creation of API endpoints. 
+Django 5.0.2+ provides a secure and scalable foundation, with REST API endpoints created using `@api_view` decorators and Django's built-in serialization. Django REST Framework 3.14.0+ is included but used selectively for specific functionality. 
 
 - **Internal Interfaces**  
-The backend is structured around `serializers` for data validation and formatting, `services/*` modules to encapsulate domain logic, `signals` for event-driven triggers, and `tasks.py` for asynchronous job execution.  
+The backend is structured around Django models for data persistence, `serializers.py` for data validation and formatting, `helpers.py` for utility functions, and dedicated service modules like `paypal_service.py` for external integrations. Background job processing is planned but not yet implemented.  
 
 
 
@@ -223,10 +223,10 @@ The backend is structured around `serializers` for data validation and formattin
 The database persists all critical application data, including users, profiles, matches, chat messages, financial transactions, and notification logs. It provides transactional integrity, supports relational queries, and ensures long-term data durability.  
 
 - **Technologies/Versions**  
-SQLite is used during development for its simplicity and lightweight setup. 
+SQLite is currently used for both development and the current deployment for its simplicity and lightweight setup.
 
 - **Internal Interfaces**  
-Django models serve as the primary abstraction for interacting with the database. Repository/service layers may be introduced to separate business logic from persistence logic.  
+Django models serve as the primary abstraction for interacting with the database, with models defined for User, Dater, Cupid, Gig, Quest, Message, and Feedback entities. Repository/service layers may be introduced to separate business logic from persistence logic.  
 
 
 
@@ -236,10 +236,10 @@ Django models serve as the primary abstraction for interacting with the database
 The AI service supports advanced features such as natural language chat responses, moderation of inappropriate content, and optional voice transcription. It can also rank or filter suggestions based on user context, providing a more personalized experience.  
 
 - **Technologies/Versions**  
-Integration with external large language models (OpenAI, Anthropic, etc.) powers text-based AI features. For speech-to-text, services like Whisper or Pyttsx3 equivalents can be used.  
+Integration with OpenAI API (version 2.6.1+) is configured for text-based AI features. Speech-to-text capabilities using websocket is implemented.
 
 - **Internal Interfaces**  
-Clients communicate with the AI service through REST or streaming endpoints such as `/ai/chat` and `/ai/transcribe`. A dedicated API wrapper ensures consistent request formatting and error handling.  
+AI functionality is integrated into existing API endpoints rather than separate services. The frontend includes audio capture capabilities with websocket, and the backend includes OpenAI client setup for processing chat requests when fully implemented.  
 
 
 
@@ -249,23 +249,23 @@ Clients communicate with the AI service through REST or streaming endpoints such
 This component manages the full lifecycle of user payments, including subscriptions, one-time transactions, and credits. It ensures that transactions are recorded securely, validates payment status' via webhook callbacks, and generates receipts or invoices for users.  
 
 - **Technologies/Versions**  
-Stripe Checkout and PayPal Smart Buttons are used for payment processing. Both provide PCI-compliant hosted flows to reduce security risk.  
+PayPal Smart Buttons (@paypal/paypal-js version 9.0.1) are implemented for payment processing, providing PCI-compliant hosted flows. 
 
 - **Internal Interfaces**  
-Webhook processors validate payment events, a payment service module orchestrates subscriptions and credit logic, and a receipt generator prepares transactional records for users.  
+The `paypal_service.py` module handles PayPal OAuth token management and payout processing. PayPal payment events are processed through the existing gig workflow, with payout functionality implemented for Cupid earnings. Receipt generation and subscription logic are planned for future implementation.  
 
 
 
 ### Notifications (Email / SMS / Push)
 
 - **Responsibilities**  
-Notifications provide timely communication to users outside the app, such as verification emails, password resets, match alerts, or payment confirmations. Channels include email, SMS, and push notifications.  
+Notifications provide timely communication to users outside the app, such as payment confirmations and gig confirmations. Channels include email and push notifications.  
 
 - **Technologies/Versions**  
-Twilio handles SMS and voice, while providers such as SendGrid or Firebase may handle email and push delivery. A message queue (e.g., Celery) ensures reliable, asynchronous delivery.  
+SendGrid (version 6.11.0+) is configured for email delivery. Twilio and sendgrid is used for this.
 
 - **Internal Interfaces**  
-Core modules include a `notification_queue` for queuing outbound messages, a template renderer for creating consistent messages, and delivery gateways for dispatching to providers.  
+In-app notifications are handled through the Vue frontend with polling mechanisms. The backend includes notification models and API endpoints. External notification providers will be integrated through dedicated service modules when implemented.  
 
 
 

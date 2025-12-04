@@ -156,47 +156,47 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
 1. **Value**
   - Provide messaging functionality (text, chat) for users to interact with each other. **(M)**
-  - Allow users to discover and connect with new people. **(M)**
   - Send push notifications to increase engagement and retention. **(M)**
   - Provide personalized recommendations to create a tailored user experience. **(S)**
   - Offer an intuitive and easy-to-use interface to reduce user frustration. **(S)**
   - Maximize user satisfaction and retention through engaging features. **(S)**
-  - Include measures to detect and eliminate spam accounts. **(S)**
-  - Provide location-based matching to connect users with other nearby users. **(S)**
+  - Include measures to detect and eliminate spam accounts. **(S)** 
+  - Provide location-based matching to connect users with other nearby users. **(S)** 
   - Support married users as an adjacent audience (without changing core goals). **(S)**
+  - Allow users to discover and connect with new people. **(C)** 
   - Support multiple languages to enable global accessibility. **(C)**
   - Provide text-to-speech functionality to support visually impaired users. **(C)**
   - Include subscriptions and in-app purchases as monetization options. **(W)**
 
 2. **Compliance**
-  - Restrict access to users aged 18 years and older. **(M)**
   - Protect user data against unauthorized access and leakage. **(M)**
-  - Include a published privacy policy explaining data use. **(M)**
   - Provide users the ability to delete their accounts permanently. **(M)**
-  - Verify email addresses and phone numbers during account creation. **(S)**
-  - Log login attempts for security auditing. **(S)**
-  - Provide opt-out options for marketing communications in compliance with anti-spam laws. **(S)**
-  - Include terms of service that prohibit harmful content. **(S)**
+  - Verify email addresses and phone numbers during account creation. **(S)** 
+  - Log login attempts for security auditing. **(S)** 
   - Protect user location data to prevent misuse or stalking. **(S)**
+  - Provide opt-out options for marketing communications in compliance with anti-spam laws. **(C)** 
+  - Include terms of service that prohibit harmful content. **(C)** 
+    - Restrict access to users aged 18 years and older. **(C)**
+  - Include a published privacy policy explaining data use. **(C)** 
   - Include accessibility options (e.g., braille) for visually impaired users. **(W)**
   
 3. **Reporting**
   - Generate daily active user reports to measure engagement. **(S)**
-  - Generate safety reports on flagged users to monitor risks. **(S)**
-  - Track and report customer support tickets to identify common issues. **(S)**
-  - Provide a help ticket management system for bug tracking and resolution. **(S)**
-  - Generate growth reports on new signups per month. **(S)**
+  - Generate safety reports on flagged users to monitor risks. **(S)** 
+  - Track and report customer support tickets to identify common issues. **(S)** 
+  - Provide a help ticket management system for bug tracking and resolution. **(S)** 
+  - Generate growth reports on new signups per month. **(S)** 
   - Provide retention curve reports to evaluate long-term engagement. **(C)**
   - Provide demographic reports on the user base. **(C)**
   - Log feature usage reports to prioritize specific feature improvements. **(C)**
 
 4. **Stakeholders**
   - Maintain well-documented code to enable efficient bug fixes. **(M)**
-  - Support a monetization method to maximize profitability. **(M)**
-  - Support inclusive access to diverse user groups. **(S)**
-  - Generate risk reports to address compliance and safety concerns. **(S)**
+  - Support a monetization method to maximize profitability. **(M)** 
+  - Support inclusive access to diverse user groups. **(S)** 
+  - Generate risk reports to address compliance and safety concerns. **(S)** 
   - Provide cost analysis reports to optimize infrastructure spending. **(S)**
-  - Calculate and report customer lifetime value metrics. **(S)**
+  - Calculate and report customer lifetime value metrics. **(S)** 
   - Support subscription billing (tiers for singles/married users). **(W)**
   - Provide revenue dashboards to track financial performance in real time. **(C)**
   - Identify and report top-performing features that drive engagement. **(C)**
