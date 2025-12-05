@@ -24,7 +24,7 @@ Covers:
 - Backend (Django + DRF) endpoints, serializers, services, and signals.
 - Data layer (SQLite dev → Azure PostgreSQL prod), schemas, indexes, migrations.
 - Async jobs (Celery + Redis) for notifications, AI tasks, and long‑running work.
-- Integrations (Stripe/PayPal tokenized payments, email/SMS providers).
+- Integrations (PayPal tokenized payments, email/SMS providers).
 - Config/ops (env config, secrets, observability, deployment assumptions on Azure).
 
 Out of scope: microservices decomposition, native mobile apps, full analytics dashboards.
@@ -883,6 +883,7 @@ The current state uses SQLite for the database containers and Django models popu
 ### 4.2 Target Model (MVP)
 #### Entity Relationship Diagram
 ![ERD](./images/cupidERD_LLD.png)
+ERD is out of date, see below for differences.
 **Keep/rename**
 - User: 
   - built-in auth
@@ -890,7 +891,6 @@ The current state uses SQLite for the database containers and Django models popu
   - phone_number
   - add created_at
   - updated_at
-  - consider soft_delete flag
 - DaterProfile (rename Dater):
   - budget
   - communication_preference
@@ -908,9 +908,7 @@ The current state uses SQLite for the database containers and Django models popu
   - dater_id
   - status
   - budget
-  - time window
   - location
-  - details JSON
   - counters
   - remove inline cupid FK after assignment split
 - Date:
@@ -936,13 +934,9 @@ The current state uses SQLite for the database containers and Django models popu
   - claimed_at
   - completed_at
   - canceled_at
-  - cancellation_reason
 - AISession: 
   - owner_id
   - started_at
-  - ended_at
-  - context JSON
-  - retention_label
 - AIMessage: 
   - session_id
   - role (user|ai|system)
@@ -951,31 +945,8 @@ The current state uses SQLite for the database containers and Django models popu
   - index (session_id, created_at)
 - PaymentMethodToken:
   - user_id
-  - provider (stripe|paypal)
+  - provider (paypal)
   - provider_token
-  - brand
-  - last4
-  - exp_month
-  - exp_year
-  - unique (user_id, provider, provider_token)
-- PaymentIntent: 
-  - user_id
-  - provider
-  - intent_id
-  - amount
-  - currency
-  - status
-  - created_at
-  - updated_at
-  - metadata JSON
-- Transaction: 
-  - user_id
-  - amount
-  - currency
-  - type (debit|credit)
-  - source (payment|payout|adjustment)
-  - external_id
-  - created_at
 - Notification: 
   - user_id
   - channel (email|sms|inapp)
@@ -1021,7 +992,7 @@ The current state uses SQLite for the database containers and Django models popu
 - Notification: (status, created_at), (user_id, created_at)
 - PaymentIntent/Transaction: (user_id, created_at), (external_id)
 
-### 4.6 Migration Plan (SQLite → Azure Postgres)
+### 4.6 Migration Plan (SQLite → Azure Postgres) --**Did not migrate to postgress**
 - Step 1: 
   - Add migrations for new tables (GigAssignment, AISession, AIMessage, PaymentMethodToken, PaymentIntent, Transaction, Notification, AuditLog)
   - created_at/updated_at
@@ -1031,7 +1002,7 @@ The current state uses SQLite for the database containers and Django models popu
     - AISession/AIMessage by grouping Message rows per owner chronologically
 - Step 3: 
   - Remove PaymentCard/BankAccount code paths
-  - integrate Stripe/PayPal
+  - integrate PayPal
   - export and securely purge
   - DROP tables
 - Step 4: 

@@ -122,15 +122,15 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
 
 1. **Performance**
-  - Deploy app to the cloud using Azure.
+  - Deploy app to the cloud using Azure. **(M)**
   - Connect to the AI API for the listen and chat features. **(C)**
-  - Record change history for shared features (who edited joint preferences or calendar sync) to provide an audit trail. **(C)**
+  - Record change history for shared features (who edited joint preferences or calendar sync) to provide an audit trail. **(W)**
 
 2. **Security**
   - When auto filling the user information, the users' address is still encrypted rendering the information useless. We need to fix that. **(M)**
-  - Ensure that card data is properly encrypted in the database. **(M)**
+  - Remove payment information from the database. **(M)**
   - change the encryption of addresses on the calendar and gigs pages. **(M)**
-  - Link cards to a payment processor to allow for seamless adding of cash to a users account. **(S)** 
+  - Remove the buisness logic from cupid cash and convert to a more secure payment option. **(S)** 
   - Enforce role‑based data segregation for couples so spouse‑only artifacts (surprise gifts, private notes) remain hidden until revealed. **(C)**
   - Provide per‑partner privacy and consent controls for shared features (who can see/edit plans, gifts, and timeline). **(C)**
   
@@ -139,14 +139,14 @@ Key: **M** = Must, **S** = Should, **C** = Could, **W** = Won’t
   - Clarify instructions for running software to reduce confusion. **(M)**
   - Include software dependency information and installation instructions in the documentation. **(S)**
   - Improve contrast for readability. **(M)**
-  - Ensure compatability with screen readers. **(M)**
-  - Comply with general accessibility practives **(S)**
+  - Ensure compatability with screen readers. **(S)**
+  - Comply with general accessibility practices **(S)**
 
 4. **Rebranding**
   - Re-generate the images for the app **(M)**
   - Change the color schemes **(M)**
-  - Dynamically allocate space depending on the screen size of the user. **(S)**
-  - Improve consistency in the app. for example the navigation menu is nested in a hamburger menu when a user is logged in, but not when you are not logged in. **(C)**
+  - Dynamically allocate space depending on the screen size of the user to comply with a mobile first design. **(M)**
+  - Improve consistency in the app. for example the navigation menu is nested in a hamburger menu when a user is logged in, but not when you are not logged in. **(M)**
   - Change the layout of the pages, center the buttons, change the shapes to be more inline with the theme of the application. **(C)**
 
 

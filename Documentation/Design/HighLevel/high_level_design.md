@@ -24,9 +24,9 @@ Provide a concise high‑level technical design for the current Cupid Code platf
 Covers:  
 - System context and current vs planned capabilities (AI assist, Gigs, payments, notifications).  
 - Architectural style (web client + Django REST backend) and core component boundaries.  
-- Roles and data domains (Dater, Cupid, Manager/Admin, Couple/Shared).  
+- Roles and data domains (Dater, Cupid, Manager/Admin).  
 - High‑level data handling (profiles, Gigs, feedback, authentication, future payments, AI session artifacts).  
-- Integration points (future: Stripe, PayPal, weather, messaging, location).  
+- Integration points (future: PayPal, messaging, location, OpenAI).  
 Excludes: low‑level class diagrams, detailed endpoint specs, test plans, deployment runbooks (to be documented separately). References: Requirements Specification (requirements.md) for authoritative functional, nonfunctional, business, and user requirements.
 
 **Audience**  
@@ -38,30 +38,23 @@ Excludes: low‑level class diagrams, detailed endpoint specs, test plans, deplo
 **Goals Alignment (Selected Musts)**  
 - Real‑time AI feedback (listen + chat).  
 - Multi‑role web access (desktop + mobile browsers).  
-- External notifications (email/SMS planned).  
-- Secure data handling & age gating.  
-- Future payment rails (Stripe/PayPal) for funding and Cupid payouts.  
-- Maintain extensibility for couple features and auditability.
-
-**Non‑Goals (Current Release)**  
-- Native mobile apps.  
-- Full subscription tiering or microtransactions (explicit Won’t).  
-- Full multilingual & advanced analytics dashboards (later phases).  
+- Notifications (email/Push planned).  
+- Secure data handling.  
+- Future payment rails (PayPal) for funding and Cupid payouts.  
 
 ## 2. System Overview
 **System Description**  
 Cupid Code is a role‑based web application that assists users (primarily socially anxious or inexperienced Daters) with AI‑driven, context‑aware coaching and on‑demand human “Cupid” Gig interventions. The platform delivers:  
 - Dater experience: AI chat + (future) passive listening for live guidance; scheduling and Gig request flows.  
-- Cupid experience: Manage Gigs, respond to interventions, (future) earnings and availability.  
+- Cupid experience: Manage Gigs, respond to interventions, earnings and availability.  
 - Manager/Admin: User oversight, future compliance/reporting, operational dashboards.  
-- Couple extension (Should/Could): Shared calendar, joint preferences, gift/timeline concepts.  
 Current stack:  
 - Frontend: Vue 3 (Vite) SPA (router, components under src/, role‑specific views).  
-- Backend: Django + Django REST style views (api app) with SQLite (to migrate to managed cloud DB).  
+- Backend: Django REST style views (api app) with SQLite (to migrate to managed cloud DB).  
 - Auth: Username/password (working), role persisted in backend models.  
 - AI: Placeholder endpoints; microphone capture pipeline present; logic for real guidance still minimal.  
 - Storage: Local DB for users, Gigs, feedback scaffolding (see server/api/models.py).  
-- Tests: Selenium UI scripts for login and role flows.  
+- Tests: Playwright UI scripts for login, Gig creation, Payments, and role flows.  
 
 **Legacy System Overview**  
 Inherited (working or partial):  
@@ -73,7 +66,6 @@ Partial / incomplete (to be delivered):
 - Funds pipeline (balances, deposits via Stripe/PayPal, payouts).  
 - Real‑time notifications (web + external email/SMS).  
 - AI reasoning + personalized memory (user preference persistence & adaptive coaching).  
-- Cupid availability / scheduling logic validation.  
 - Feedback loops (post‑gig rating, AI reflection).  
 - Security hardening (encryption fixes, PII handling, audit trails).  
 
@@ -85,21 +77,20 @@ Partial / incomplete (to be delivered):
 - Deployment to Azure (containerized or managed app service).  
 
 **Key Constraints / Assumptions**  
-- Must remain web-first; performance acceptable for real‑time guidance within latency budgets (<1–2s AI round trip after backend integration).  
+- Must remain mobile-first; performance acceptable for real‑time guidance within latency budgets (<1–2sec AI round trip after backend integration).  
 - Incremental migration from SQLite to Azure Postgres/MySQL once payment + audit features start (avoids migration pain later).  
 - Privacy: Microphone streaming only opt‑in per session; no permanent raw audio retention (derived features only).  
 
 **High-Level Data Domains**  
 - Identity & Roles (User, DaterProfile, CupidProfile, Manager/Admin).  
 - Scheduling & Gigs (Gig requests, status, Cupid assignment, intervention notes).  
-- AI Interaction (chat transcripts, advice events, memory embeddings—planned).  
-- Financial (wallet, transactions, payouts—planned).  
+- AI Interaction (chat transcripts, advice events, memory embeddings).  
+- Financial (Paypal checkout payment flow).  
 - Feedback & Ratings (post‑gig + AI evaluation—planned).  
 - Notifications (in-app + external dispatch queue—planned).  
 
 **External / Future Integrations**  
-- Payments: Stripe, PayPal (Must).  
-- Weather API (Could) for contextual planning.  
+- Payments: PayPal (Must).  
 - Location services (Could) for Cupid tracking.  
 - Dating app API linking (Could).  
 - Email/SMS provider (Twilio / SendGrid) for push-out notifications (Must for notifications objective).  
@@ -110,7 +101,7 @@ Partial / incomplete (to be delivered):
 - Reliability: Graceful degradation when AI or payment providers unavailable.  
 
 **Architecture Diagram (Placeholder)**  
-(Will depict: Browser SPA (Vue) → REST/JSON API (Django) → Data Layer (DB + future cache) → External Services (AI API, Stripe, PayPal, Email/SMS, Weather). Will be added in Section 11.)
+(Will depict: Browser SPA (Vue) → REST/JSON API (Django) → Data Layer (DB + future cache) → External Services (AI API, PayPal, Email/SMS). Will be added in Section 11.)
 
 **Success Criteria for This Phase**  
 - End-to-end flow: Dater logs in → requests AI help → receives contextual response referencing stored preferences.  
@@ -979,10 +970,10 @@ Current schema (SQLite) implements merged role+profile patterns (Dater, Cupid) a
 | Message            | Yes         | Mixed user + AI chat entries (from_ai flag) | Split into AISession + AIMessage (session metadata, tokens) |
 | Date               | Yes         | Scheduled date event (planning) | Keep; may relate to future couple/shared features |
 | Feedback           | Yes         | Star rating + message for a Gig (owner→target) | Add XOR validation (only one target type later) |
-| PaymentCard        | Yes (Unsafe) | Stores raw card PAN + CVV (PCI scope) | REMOVE: Replace with PaymentMethodToken (Stripe) |
+| PaymentCard        | Yes (Unsafe) | Stores raw card PAN + CVV (PCI scope) | REMOVE: Replace with PayPal SDK |
 | BankAccount        | Yes (Unsafe) | Stores raw routing/account numbers | REMOVE: External payout provider token only |
 | Subscription       | No          | Future recurring access | Add after payment rails established |
-| Transaction        | No          | Ledger / wallet accounting | Add with payments (Stripe webhooks) |
+| Transaction        | No          | Ledger / wallet accounting | Add with payments (PayPal webhooks) |
 | Payment (Intent)   | No          | Track provider intent/status | Add before enabling real payments |
 | Notification       | No          | Queue of outbound messages | Add (email/SMS + in‑app) |
 | AuditLog           | No          | Immutable security/business events | Add (append‑only) |
@@ -1000,7 +991,7 @@ User
 
 Dater  
 - PK: user (OneToOne).  
-- Key Fields: budget, communication_preference, multiple narrative TextFields (description, strengths, weaknesses, interests, past, nerd_type, relationship_goals), ai_degree, cupid_cash_balance, location, rating_sum/rating_count, is_suspended, profile_picture.  
+- Key Fields: budget, communication_preference, multiple narrative TextFields (description, strengths, weaknesses, interests, past, nerd_type, relationship_goals), ai_degree, location, rating_sum/rating_count, is_suspended, profile_picture.  
 - Observations: Many large free‑text fields (potential PII/behavioral); no structured enums; separate rating_sum/count used for aggregation.
 
 Cupid  
@@ -1036,7 +1027,7 @@ BankAccount (To Remove)
 ### 10.4 Required Refactors & Tickets
 | Priority | Action | Rationale |
 |----------|--------|-----------|
-| Critical | Remove PaymentCard & BankAccount before prod; migrate to external tokenization (Stripe) | Eliminate PCI scope & breach risk |
+| Critical | Remove PaymentCard & BankAccount before prod; migrate to external tokenization (PayPal) | Eliminate PCI scope & breach risk |
 | High | Introduce AISession & AIMessage; migrate existing Message rows | Enables retention limits & analytics |
 | High | Add created_at/updated_at (auto timestamps) to core entities | Auditing & troubleshooting |
 | High | Replace gig.cupid nullable with gigAssignment (Gig FK + Cupid FK + timestamps) | Normalizes lifecycle events |
@@ -1044,7 +1035,6 @@ BankAccount (To Remove)
 | Medium | Add soft delete or active flags (User, Dater, Cupid) | Regulatory deletes |
 | Medium | Add Feedback constraints (rating 1–5, unique (owner,Gig) ) | Data integrity |
 | Medium | Add indexes (gig.status, Message.owner + id) | Query performance |
-| Low | Merge Quest into Gig JSON field or formalize separate use cases | Reduce joins |
 | Low | Add AuditLog table | Security visibility |
 | Low | Introduce FeatureFlag table | Safe gradual rollout |
 
@@ -1056,7 +1046,7 @@ BankAccount (To Remove)
 | CupidProfile              | Cupid         | Rename + availability expansion |
 | gigAssignment             | (Inline cupid FK on Gig) | Create new table; move timestamps |
 | AISession/AIMessage       | Message       | Split & migrate |
-| Payment/Transaction       | (Absent)      | Add with Stripe integration |
+| Payment/Transaction       | (Absent)      | Add with PayPal integration |
 | Notification              | (Absent)      | Add queue table + outbox pattern |
 | AuditLog                  | (Absent)      | Add append-only table |
 
@@ -1116,7 +1106,7 @@ Phase A (Pre-security hardening):
 Phase B (Security Remediation):
 - Create new PaymentMethodToken model (provider, user FK, last4, brand, exp_month/year, provider_token).  
 - Migrate (export + securely delete) then DROP PaymentCard & BankAccount tables.  
-- Commit architecture doc update referencing Stripe vaulting.
+- Commit architecture doc update referencing PayPal checkout.
 
 Phase C (AI Session Separation):
 - Add AISession + AIMessage tables.
