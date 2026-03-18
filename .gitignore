@@ -27,3 +27,6 @@ npm-debug.log
 
 # Ignore HLD checklist
 /Documentation/Design/HighLevel/high_level_design_checklist.md
+
+# Yml file because it has secrets
+.gitlab-ci.yml
